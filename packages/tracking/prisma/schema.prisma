@@ -35,12 +35,14 @@ model Expense {
 }
 
 model MonthlyLimit{
-  id      Bytes   @id  @db.Binary(16)
-  month   Int
-  year    Int
-  limit   Float
-  userId  String
-  user    User    @relation(fields: [userId], references:[userId])
+  id          Bytes   @id  @db.Binary(16)
+  month       Int
+  year        Int
+  limit       Float
+  created     DateTime    @default(now())
+  updated     DateTime    @updatedAt
+  userId      String
+  user        User    @relation(fields: [userId], references:[userId])
 
   @@index([userId], name: "monthly_limit_user_id_index")
   @@unique([userId,month,year], name: "user_month_year_unique")

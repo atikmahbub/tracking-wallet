@@ -15,7 +15,7 @@ export class ExpenseModel extends NewExpense {
     amount: number,
     description: string,
     date: UnixTimeStampString,
-    public update: UnixTimeStampString,
+    public updated: UnixTimeStampString,
     public created: UnixTimeStampString
   ) {
     super(date, amount, description);
