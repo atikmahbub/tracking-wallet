@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // Target modern JavaScript
+    "module": "commonjs", // CommonJS module resolution for Node.js
+    "strict": true, // Enable strict type-checking options
+    "esModuleInterop": true, // Allow import/export interop
+    "skipLibCheck": true, // Skip checking types in node_modules for faster builds
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+    "composite": true, // Enable project references
+    "declaration": true, // Emit declaration files for each package
+    "sourceMap": true, // Include source maps for easier debugging
+    "moduleResolution": "node", // Resolve modules as Node.js does
+    "rootDir": ".", // Root directory is the root of the monorepo
+    "baseUrl": ".", // Base directory for resolving non-relative module names
+    "paths": {
+      "@shared/*": ["packages/shared/src/*"],
+      "@tracking/*": ["packages/tracking/src/*"]
+    }
+  },
+  "include": [], // Not used in the root tsconfig, but required in individual packages
+  "exclude": ["node_modules", "dist"], // Exclude unnecessary directories
+  "references": [
+    { "path": "packages/shared" }, // Reference the shared package
+    { "path": "packages/tracking" } // Reference the expenseCalculator package
+  ]
+}

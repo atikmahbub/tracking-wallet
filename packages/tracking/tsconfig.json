@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json", // Extend the root tsconfig
+  "compilerOptions": {
+    "outDir": "./dist", // Where the compiled files go
+    "rootDir": "./src", // Root directory for source files
+    "composite": true, // Enable project references
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "paths": {
+      "@tracking/*": ["*"],
+      "@shared/*": ["../../shared/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "references": [{ "path": "../shared" }]
+}

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "module": "commonjs",
+    "target": "ESNext",
+    "declaration": true, // Generate .d.ts files for other projects to reference
+    "declarationMap": true, // Generates .d.ts.map files
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["./*"] // Maps '@shared' to shared src
+    },
+    "composite": true // Allow this project to be referenced
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

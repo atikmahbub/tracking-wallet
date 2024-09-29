@@ -1,0 +1,29 @@
+{
+  "name": "tracking-wallet",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/tracking",
+    "packages/trackingPortal",
+    "packages/shared"
+  ],
+  "scripts": {
+    "clean": "rimraf packages/*/dist packages/*/tsconfig.tsbuildinfo",
+    "clean:node": "rimraf node_modules packages/*/node_modules",
+    "build:backend": "yarn workspace tracking run build",
+    "build:shared": "yarn workspace shared run build",
+    "build:frontend": "yarn workspace tracking-portal run build",
+    "build:all": "yarn build:shared && yarn build:backend",
+    "compile": "yarn clean && yarn build:all",
+    "dev:backend": "yarn workspace tracking run dev",
+    "dev:frontend": "yarn workspace tracking-portal run start",
+    "start": "yarn dev:backend & yarn dev:frontend"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "4.9.5"
+  },
+  "resolutions": {
+    "ts-brand": "^0.2.0"
+  }
+}
