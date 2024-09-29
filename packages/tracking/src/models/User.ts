@@ -5,7 +5,7 @@ export class NewUser {
     public name: string,
     public email: string,
     public userId: UserId,
-    public profile_picture: URLString
+    public profilePicture: URLString
   ) {}
 }
 
@@ -14,10 +14,10 @@ export class UserModel extends NewUser {
     userId: UserId,
     name: string,
     email: string,
-    profile_picture: URLString,
+    profilePicture: URLString,
     public created: UnixTimeStampString,
     public updated: UnixTimeStampString
   ) {
-    super(name, email, userId, profile_picture);
+    super(name, email, userId, profilePicture);
   }
 }
