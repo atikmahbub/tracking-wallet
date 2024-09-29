@@ -8,12 +8,12 @@ generator client {
 }
 
 model User {
-  userId    String   @id @map("id")
-  name      String   @db.VarChar(256) @map("full_name")
-  email     String   @unique @db.VarChar(256)
-  profilePicture String @map("profile_picture")
-  created DateTime @default(now())
-  updated DateTime @updatedAt
+  userId            String   @id @map("id")
+  name              String   @db.VarChar(256) @map("full_name")
+  email             String   @unique @db.VarChar(256)
+  profilePicture    String   @map("profile_picture")
+  created DateTime  @default(now())
+  updated DateTime  @updatedAt
 
   @@index([email], name: "user_email_index")
 }
