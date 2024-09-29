@@ -1,5 +1,3 @@
-### **README.md**
-
 # TrackWallet Project
 
 ## Project Overview
