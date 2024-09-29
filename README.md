@@ -91,9 +91,6 @@ Make sure you create the necessary **`.env`** files for both backend and fronten
 ```plaintext
 DATABASE_URL="mysql://user:password@localhost:3306/dbname"
 PORT=5050
-AUTH0_DOMAIN="your-auth0-domain"
-AUTH0_CLIENT_ID="your-client-id"
-AUTH0_CLIENT_SECRET="your-client-secret"
 ```
 
 #### Frontend (`packages/trackingPortal/.env`)
