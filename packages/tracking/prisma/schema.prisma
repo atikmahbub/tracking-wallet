@@ -24,7 +24,7 @@ model User {
 model Expense {
   id          Bytes       @id   @db.Binary(16)
   amount      Float
-  description String      @db.VarChar(256)
+  description String?     @db.VarChar(256)
   date        DateTime 
   created     DateTime    @default(now())
   updated     DateTime    @updatedAt

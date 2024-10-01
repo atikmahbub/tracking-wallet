@@ -16,6 +16,13 @@ class ExpenseRouter {
       this.expenseController.addExpense.bind(this.expenseController)
     );
 
+    router.get(
+      "/expenses/:userId",
+      this.expenseController.getExpenseByUserIdAndMonth.bind(
+        this.expenseController
+      )
+    );
+
     return router;
   }
 }

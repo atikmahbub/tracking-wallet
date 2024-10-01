@@ -1,8 +1,6 @@
 import { UnixTimeStampString, UserId } from "@shared/primitives";
 
-export interface IAddExpenseParams {
+export interface IGetUserExpenses {
   userId: UserId;
-  amount: number;
-  description: string | null;
   date: UnixTimeStampString;
 }

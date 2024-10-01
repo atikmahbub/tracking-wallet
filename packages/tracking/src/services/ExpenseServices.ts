@@ -4,6 +4,7 @@ import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
 import { IAddExpenseParams } from "@shared/params";
+import { UserId } from "@shared/primitives";
 
 class ExpenseService {
   private prisma: PrismaClient;
@@ -30,6 +31,33 @@ class ExpenseService {
       return this.presentationService.toExpenseModel(newExpense);
     } catch (error) {
       throw new Error("Error creating expense");
+    }
+  }
+
+  async getExpenseByUserIdAndMonth(
+    userId: UserId,
+    startDate: Date,
+    endDate: Date
+  ): Promise<ExpenseModel[]> {
+    try {
+      const expenses = await this.prisma.expense.findMany({
+        where: {
+          userId: userId,
+          date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        orderBy: {
+          created: "desc",
+        },
+      });
+
+      return expenses.map((expense) =>
+        this.presentationService.toExpenseModel(expense)
+      );
+    } catch (error) {
+      throw new Error("Error in getting expenses");
     }
   }
 }

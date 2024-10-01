@@ -4,7 +4,7 @@ export class NewExpense {
   constructor(
     public date: UnixTimeStampString,
     public amount: number,
-    public description: string
+    public description: string | null
   ) {}
 }
 
@@ -13,7 +13,7 @@ export class ExpenseModel extends NewExpense {
     public id: ExpenseId,
     public userId: UserId,
     amount: number,
-    description: string,
+    description: string | null,
     date: UnixTimeStampString,
     public updated: UnixTimeStampString,
     public created: UnixTimeStampString

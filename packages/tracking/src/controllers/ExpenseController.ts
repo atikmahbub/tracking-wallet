@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import ExpenseService from "@tracking/services/ExpenseServices";
-import { ExpenseModel } from "@tracking/models/Expense";
 import { IAddExpenseParams } from "@shared/params";
 import { UserId, makeUnixTimestampString } from "@shared/primitives";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 class ExpenseController {
   private expenseService: ExpenseService;
@@ -15,9 +15,9 @@ class ExpenseController {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<ExpenseModel | void> {
+  ): Promise<void> {
     try {
-      const { userId, amount, description, date } = req.params;
+      const { userId, amount, description, date } = req.body;
       const params: IAddExpenseParams = {
         userId: UserId(userId),
         amount: Number(amount),
@@ -26,7 +26,35 @@ class ExpenseController {
       };
       const newExpense = this.expenseService.addExpense(params);
       res.status(201).json(newExpense);
-      return newExpense;
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getExpenseByUserIdAndMonth(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const { date } = req.body;
+
+      if (!date) {
+        res.status(400).json({ error: "Date is required in the request body" });
+        return;
+      }
+
+      const extractedDate = new Date(parseInt(date) * 1000);
+      const startDate = startOfMonth(extractedDate);
+      const endDate = endOfMonth(extractedDate);
+
+      const expenses = await this.expenseService.getExpenseByUserIdAndMonth(
+        UserId(userId),
+        startDate,
+        endDate
+      );
+      res.status(200).json(expenses);
     } catch (error) {
       next(error);
     }
