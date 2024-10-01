@@ -1,7 +1,14 @@
-import { UserId, Month, Year, UnixTimeStampString } from "@shared/primitives";
+import {
+  UserId,
+  Month,
+  Year,
+  UnixTimeStampString,
+  MonthlyLimitId,
+} from "@shared/primitives";
 
 export class NewMonthlyLimit {
   constructor(
+    public id: MonthlyLimitId,
     public userId: UserId,
     public month: Month,
     public year: Year,
@@ -9,8 +16,9 @@ export class NewMonthlyLimit {
   ) {}
 }
 
-export class MonthlyLimit extends NewMonthlyLimit {
+export class MonthlyLimitModel extends NewMonthlyLimit {
   constructor(
+    id: MonthlyLimitId,
     userId: UserId,
     month: Month,
     year: Year,
@@ -18,6 +26,6 @@ export class MonthlyLimit extends NewMonthlyLimit {
     public updated: UnixTimeStampString,
     public created: UnixTimeStampString
   ) {
-    super(userId, month, year, limit);
+    super(id, userId, month, year, limit);
   }
 }

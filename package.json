@@ -20,10 +20,14 @@
     "start": "yarn dev:backend & yarn dev:frontend"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "rimraf": "^6.0.1",
     "typescript": "4.9.5"
   },
   "resolutions": {
     "ts-brand": "^0.2.0"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
   }
 }

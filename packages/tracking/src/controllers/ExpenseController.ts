@@ -3,6 +3,8 @@ import ExpenseService from "@tracking/services/ExpenseServices";
 import { IAddExpenseParams } from "@shared/params";
 import { UserId, makeUnixTimestampString } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
+import { MissingFieldError } from "@tracking/errors";
 
 class ExpenseController {
   private expenseService: ExpenseService;
@@ -17,7 +19,13 @@ class ExpenseController {
     next: NextFunction
   ): Promise<void> {
     try {
+      AuthenticationUtils.assureUserHasUserId(req, res, next);
       const { userId, amount, description, date } = req.body;
+
+      if (!amount || !date) {
+        throw new MissingFieldError("Amount, Date are required");
+      }
+
       const params: IAddExpenseParams = {
         userId: UserId(userId),
         amount: Number(amount),
@@ -37,12 +45,12 @@ class ExpenseController {
     next: NextFunction
   ): Promise<void> {
     try {
+      AuthenticationUtils.assureUserHasUserId(req, res, next);
       const { userId } = req.params;
       const { date } = req.body;
 
       if (!date) {
-        res.status(400).json({ error: "Date is required in the request body" });
-        return;
+        throw new MissingFieldError("Date are required");
       }
 
       const extractedDate = new Date(parseInt(date) * 1000);

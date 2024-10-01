@@ -5,6 +5,7 @@ import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
 import { IAddExpenseParams } from "@shared/params";
 import { UserId } from "@shared/primitives";
+import { DatabaseError } from "@tracking/errors";
 
 class ExpenseService {
   private prisma: PrismaClient;
@@ -30,7 +31,7 @@ class ExpenseService {
       });
       return this.presentationService.toExpenseModel(newExpense);
     } catch (error) {
-      throw new Error("Error creating expense");
+      throw new DatabaseError("Error creating expense");
     }
   }
 
@@ -57,7 +58,7 @@ class ExpenseService {
         this.presentationService.toExpenseModel(expense)
       );
     } catch (error) {
-      throw new Error("Error in getting expenses");
+      throw new DatabaseError("Error in getting expenses");
     }
   }
 }
