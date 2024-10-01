@@ -6,9 +6,12 @@ import ExpenseServices from "@tracking/services/ExpenseServices";
 import ExpenseRoutes from "@tracking/routes/ExpenseRoutes";
 import { PrismaClient } from "@prisma/client";
 import { errorHandler } from "@tracking/middlewares/errorHandeler";
-import MonthlyLimitService from "./services/MonthlyLimitService";
-import MonthlyLimitController from "./controllers/MonthlyLimitController";
-import MonthlyLimitRoutes from "./routes/MonthlyLimitRoutes";
+import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
+import MonthlyLimitController from "@tracking/controllers/MonthlyLimitController";
+import MonthlyLimitRoutes from "@tracking/routes/MonthlyLimitRoutes";
+import UserService from "@tracking/services/UserService";
+import UserRoutes from "@tracking/routes/UserRouter";
+import UserController from "@tracking/controllers/UserController";
 
 dotenv.config();
 const app: Application = express();
@@ -25,8 +28,13 @@ const monthlyLimitService = new MonthlyLimitService(prisma);
 const monthlyLimitController = new MonthlyLimitController(monthlyLimitService);
 const monthlyLimitRoutes = new MonthlyLimitRoutes(monthlyLimitController);
 
+const userService = new UserService(prisma);
+const userController = new UserController(userService);
+const userRoutes = new UserRoutes(userController);
+
 app.use("/api/v0", expenseRoutes.registerExpenseRoutes());
 app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
+app.use("/api/v0", userRoutes.registerUserRouter());
 
 app.use(errorHandler);
 

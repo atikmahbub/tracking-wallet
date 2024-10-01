@@ -1,5 +1,5 @@
 import { ExpenseModel } from "@tracking/models/Expense";
-import { Expense, MonthlyLimit } from "@prisma/client";
+import { Expense, MonthlyLimit, User } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
   makeUnixTimestampString,
@@ -8,8 +8,10 @@ import {
   Month,
   Year,
   MonthlyLimitId,
+  URLString,
 } from "@shared/primitives";
 import { MonthlyLimitModel } from "@tracking/models/MonthlyLimit";
+import { UserModel } from "@tracking/models/User";
 
 export class PresentationService {
   public toExpenseModel(expense: Expense): ExpenseModel {
@@ -33,6 +35,17 @@ export class PresentationService {
       monthlyLimit.limit,
       makeUnixTimestampString(monthlyLimit.updated.getTime()),
       makeUnixTimestampString(monthlyLimit.created.getTime())
+    );
+  }
+
+  public toUserModel(user: User): UserModel {
+    return new UserModel(
+      UserId(user.userId),
+      user.name,
+      user.email,
+      URLString(user.profilePicture),
+      makeUnixTimestampString(user.updated.getTime()),
+      makeUnixTimestampString(user.created.getTime())
     );
   }
 }

@@ -12,7 +12,11 @@ class MonthlyLimitController {
     this.monthlyLimitService = monthlyLimitService;
   }
 
-  async addMonthlyLimit(req: Request, res: Response, next: NextFunction) {
+  async addMonthlyLimit(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       AuthenticationUtils.assureUserHasUserId(req, res, next);
       const { userId, limit, month, year } = req.body;
@@ -40,7 +44,7 @@ class MonthlyLimitController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) {
+  ): Promise<void> {
     try {
       const { userId } = req.params;
       const { month, year } = req.body;
