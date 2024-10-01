@@ -18,7 +18,7 @@ class MonthlyLimitController {
     next: NextFunction
   ): Promise<void> {
     try {
-      AuthenticationUtils.assureUserHasUserId(req, res, next);
+      AuthenticationUtils.assureUserHasUserId(req);
       const { userId, limit, month, year } = req.body;
 
       if (!limit || !month || !year) {
@@ -46,6 +46,7 @@ class MonthlyLimitController {
     next: NextFunction
   ): Promise<void> {
     try {
+      AuthenticationUtils.assureUserHasUserId(req);
       const { userId } = req.params;
       const { month, year } = req.body;
 

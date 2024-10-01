@@ -17,7 +17,7 @@ class UserController {
     next: NextFunction
   ): Promise<void> {
     try {
-      AuthenticationUtils.assureUserHasUserId(req, res, next);
+      AuthenticationUtils.assureUserHasUserId(req);
       const { userId, name, email, profilePicture } = req.body;
 
       if (!name || !email || !profilePicture) {
@@ -44,7 +44,7 @@ class UserController {
     next: NextFunction
   ): Promise<void> {
     try {
-      AuthenticationUtils.assureUserHasUserId(req, res, next);
+      AuthenticationUtils.assureUserHasUserId(req);
 
       const { userId } = req.params;
 

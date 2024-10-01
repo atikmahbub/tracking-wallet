@@ -11,7 +11,10 @@ class UserRoutes {
   public registerUserRouter(): Router {
     const router = Router();
 
-    router.post("/user", this.userController.addUser.bind(this.userController));
+    router.post(
+      "/user/add",
+      this.userController.addUser.bind(this.userController)
+    );
     router.get(
       "/user/:userId",
       this.userController.getUserByUserId.bind(this.userController)

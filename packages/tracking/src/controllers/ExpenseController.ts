@@ -19,7 +19,7 @@ class ExpenseController {
     next: NextFunction
   ): Promise<void> {
     try {
-      AuthenticationUtils.assureUserHasUserId(req, res, next);
+      AuthenticationUtils.assureUserHasUserId(req);
       const { userId, amount, description, date } = req.body;
 
       if (!amount || !date) {
@@ -45,7 +45,7 @@ class ExpenseController {
     next: NextFunction
   ): Promise<void> {
     try {
-      AuthenticationUtils.assureUserHasUserId(req, res, next);
+      AuthenticationUtils.assureUserHasUserId(req);
       const { userId } = req.params;
       const { date } = req.body;
 

@@ -5,13 +5,14 @@ import ExpenseController from "@tracking/controllers/ExpenseController";
 import ExpenseServices from "@tracking/services/ExpenseServices";
 import ExpenseRoutes from "@tracking/routes/ExpenseRoutes";
 import { PrismaClient } from "@prisma/client";
-import { errorHandler } from "@tracking/middlewares/errorHandeler";
+import { errorHandler } from "@tracking/middlewares/errorHandler";
 import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
 import MonthlyLimitController from "@tracking/controllers/MonthlyLimitController";
 import MonthlyLimitRoutes from "@tracking/routes/MonthlyLimitRoutes";
 import UserService from "@tracking/services/UserService";
 import UserRoutes from "@tracking/routes/UserRouter";
 import UserController from "@tracking/controllers/UserController";
+import { authenticateToken } from "./middlewares/authenticateToken";
 
 dotenv.config();
 const app: Application = express();
@@ -19,6 +20,7 @@ const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
+// app.use(authenticateToken);
 
 const expenseService = new ExpenseServices(prisma);
 const expenseController = new ExpenseController(expenseService);
