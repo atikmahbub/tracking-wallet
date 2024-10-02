@@ -25,7 +25,7 @@ class UserController {
           "Name, Email, Profile Picture are required field"
         );
       }
-      const newUser = this.userService.addUser({
+      const newUser = await this.userService.addUser({
         userId: userId,
         name: name,
         email: email,

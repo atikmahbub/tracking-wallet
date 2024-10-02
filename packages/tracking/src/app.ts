@@ -12,7 +12,7 @@ import MonthlyLimitRoutes from "@tracking/routes/MonthlyLimitRoutes";
 import UserService from "@tracking/services/UserService";
 import UserRoutes from "@tracking/routes/UserRouter";
 import UserController from "@tracking/controllers/UserController";
-import { authenticateToken } from "./middlewares/authenticateToken";
+import { authenticateToken } from "@tracking/middlewares/authenticateToken";
 
 dotenv.config();
 const app: Application = express();
