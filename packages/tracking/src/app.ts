@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express, { Application } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import ExpenseController from "@tracking/controllers/ExpenseController";
 import ExpenseServices from "@tracking/services/ExpenseServices";
 import ExpenseRoutes from "@tracking/routes/ExpenseRoutes";
@@ -14,12 +16,12 @@ import UserRoutes from "@tracking/routes/UserRouter";
 import UserController from "@tracking/controllers/UserController";
 import { authenticateToken } from "@tracking/middlewares/authenticateToken";
 
-dotenv.config();
 const app: Application = express();
 const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
+
 app.use(authenticateToken);
 
 const expenseService = new ExpenseServices(prisma);
