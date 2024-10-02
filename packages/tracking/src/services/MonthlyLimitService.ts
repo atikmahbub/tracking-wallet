@@ -24,11 +24,12 @@ class MonthlyLimitService {
           userId: userId,
           month: month,
           year: year,
-          limit: limit,
+          limit: Number(limit),
         },
       });
       return this.presentationService.toMonthLimitModel(newMonthlyLimit);
     } catch (error) {
+      console.log(error);
       throw new DatabaseError("error in creating monthly limit in db");
     }
   }

@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
-// app.use(authenticateToken);
+app.use(authenticateToken);
 
 const expenseService = new ExpenseServices(prisma);
 const expenseController = new ExpenseController(expenseService);

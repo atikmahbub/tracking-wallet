@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import ExpenseService from "@tracking/services/ExpenseServices";
 import { IAddExpenseParams } from "@shared/params";
-import { UserId, makeUnixTimestampString } from "@shared/primitives";
+import { UserId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
@@ -30,10 +30,12 @@ class ExpenseController {
         userId: UserId(userId),
         amount: Number(amount),
         description: description,
-        date: makeUnixTimestampString(Number(date)),
+        date: date,
       };
-      const newExpense = this.expenseService.addExpense(params);
+
+      const newExpense = await this.expenseService.addExpense(params);
       res.status(201).json(newExpense);
+      return;
     } catch (error) {
       next(error);
     }

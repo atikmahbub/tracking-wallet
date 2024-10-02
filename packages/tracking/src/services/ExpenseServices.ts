@@ -4,7 +4,7 @@ import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
 import { IAddExpenseParams } from "@shared/params";
-import { UserId } from "@shared/primitives";
+import { makeUnixTimestampToISOString, UserId } from "@shared/primitives";
 import { DatabaseError } from "@tracking/errors";
 
 class ExpenseService {
@@ -25,7 +25,7 @@ class ExpenseService {
           id: uuidBuffer.toBuffer(v4()),
           userId: userId,
           amount: amount,
-          date: date,
+          date: makeUnixTimestampToISOString(Number(date)),
           description: description,
         },
       });
