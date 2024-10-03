@@ -25,6 +25,13 @@ class MonthlyLimitRoutes {
       )
     );
 
+    router.put(
+      "/monthly-limit/:id",
+      this.monthlyLimitController.updateMonthlyLimit.bind(
+        this.monthlyLimitController
+      )
+    );
+
     return router;
   }
 }

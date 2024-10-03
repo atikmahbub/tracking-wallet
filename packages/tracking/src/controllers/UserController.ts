@@ -54,6 +54,28 @@ class UserController {
       next(error);
     }
   }
+
+  async updateUser(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { userId } = req.params;
+      const { name, profilePicture } = req.body;
+
+      const updatedUser = await this.userService.updateUser({
+        userId: UserId(userId),
+        name: name,
+        profilePicture: profilePicture,
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default UserController;

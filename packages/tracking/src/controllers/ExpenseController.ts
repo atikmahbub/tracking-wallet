@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import ExpenseService from "@tracking/services/ExpenseServices";
 import { IAddExpenseParams } from "@shared/params";
-import { UserId } from "@shared/primitives";
+import { ExpenseId, UserId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
@@ -65,6 +65,32 @@ class ExpenseController {
         endDate
       );
       res.status(200).json(expenses);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateExpense(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { amount, date, description } = req.body;
+
+      if (!id) {
+        throw new MissingFieldError("Id is required!");
+      }
+
+      const updatedExpense = await this.expenseService.updateExpense({
+        id: ExpenseId(id),
+        amount: Number(amount),
+        date: date,
+        description: description,
+      });
+
+      res.status(200).json(updatedExpense);
     } catch (error) {
       next(error);
     }

@@ -19,6 +19,10 @@ class UserRoutes {
       "/user/:userId",
       this.userController.getUserByUserId.bind(this.userController)
     );
+    router.put(
+      "/user/:userId",
+      this.userController.updateUser.bind(this.userController)
+    );
 
     return router;
   }

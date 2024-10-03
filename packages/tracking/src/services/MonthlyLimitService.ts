@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { IAddMonthlyLimit, IGetMonthlyLimitParams } from "@shared/params";
+import {
+  IAddMonthlyLimit,
+  IGetMonthlyLimitParams,
+  IUpdateMonthlyLimitParams,
+} from "@shared/params";
 import { MonthlyLimitModel } from "@tracking/models/MonthlyLimit";
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
@@ -57,6 +61,29 @@ class MonthlyLimitService {
       return this.presentationService.toMonthLimitModel(monthLimit);
     } catch (error) {
       throw new DatabaseError("error in getting data for monthly limit");
+    }
+  }
+
+  async updateMonthlyLimit(
+    params: IUpdateMonthlyLimitParams
+  ): Promise<MonthlyLimitModel> {
+    try {
+      const { id, month, year, limit } = params;
+
+      const updatedLimit = await this.prisma.monthlyLimit.update({
+        where: {
+          id: uuidBuffer.toBuffer(id),
+        },
+        data: {
+          month: month,
+          year: year,
+          limit: limit,
+        },
+      });
+
+      return this.presentationService.toMonthLimitModel(updatedLimit);
+    } catch (error) {
+      throw new DatabaseError("error in updating the monthly limit");
     }
   }
 }

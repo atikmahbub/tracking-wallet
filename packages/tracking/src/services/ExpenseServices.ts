@@ -3,7 +3,7 @@ import { ExpenseModel } from "@tracking/models/Expense";
 import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
-import { IAddExpenseParams } from "@shared/params";
+import { IAddExpenseParams, IUpdateExpenseParams } from "@shared/params";
 import { makeUnixTimestampToISOString, UserId } from "@shared/primitives";
 import { DatabaseError } from "@tracking/errors";
 
@@ -59,6 +59,28 @@ class ExpenseService {
       );
     } catch (error) {
       throw new DatabaseError("Error in getting expenses");
+    }
+  }
+
+  async updateExpense(params: IUpdateExpenseParams): Promise<ExpenseModel> {
+    try {
+      const { id, amount, date, description } = params;
+
+      const updatedExpense = await this.prisma.expense.update({
+        where: {
+          id: uuidBuffer.toBuffer(id),
+        },
+        data: {
+          amount: amount,
+          date: date ? makeUnixTimestampToISOString(Number(date)) : undefined,
+          description: description,
+        },
+      });
+
+      return this.presentationService.toExpenseModel(updatedExpense);
+    } catch (error) {
+      console.log("2323", error);
+      throw new DatabaseError("error in updating the expense");
     }
   }
 }

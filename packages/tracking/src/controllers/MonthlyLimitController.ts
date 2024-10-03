@@ -1,5 +1,5 @@
 import { IAddMonthlyLimit, IGetMonthlyLimitParams } from "@shared/params";
-import { UserId } from "@shared/primitives";
+import { MonthlyLimitId, UserId } from "@shared/primitives";
 import { MissingFieldError } from "@tracking/errors";
 import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
@@ -64,6 +64,32 @@ class MonthlyLimitController {
       );
 
       res.status(200).json(monthLimit);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateMonthlyLimit(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { limit, month, year } = req.body;
+
+      if (!id) {
+        throw new MissingFieldError("Id is required!");
+      }
+
+      const updatedLimit = await this.monthlyLimitService.updateMonthlyLimit({
+        id: MonthlyLimitId(id),
+        limit: limit,
+        month: month,
+        year: year,
+      });
+
+      res.status(200).json(updatedLimit);
     } catch (error) {
       next(error);
     }

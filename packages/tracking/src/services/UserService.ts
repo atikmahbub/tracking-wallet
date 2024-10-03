@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { IAddUserParams } from "@shared/params";
+import { IAddUserParams, IUpdateUserParams } from "@shared/params";
 import { UserId } from "@shared/primitives";
 import { DatabaseError } from "@tracking/errors";
 import { UserModel } from "@tracking/models/User";
@@ -47,6 +47,26 @@ class UserService {
       return this.presentationService.toUserModel(user);
     } catch (error) {
       throw new DatabaseError("error in getting user from database");
+    }
+  }
+
+  async updateUser(params: IUpdateUserParams): Promise<UserModel> {
+    try {
+      const { userId, name, profilePicture } = params;
+
+      const updatedUser = await this.prisma.user.update({
+        where: {
+          userId: userId,
+        },
+        data: {
+          name: name,
+          profilePicture: profilePicture,
+        },
+      });
+
+      return this.presentationService.toUserModel(updatedUser);
+    } catch (error) {
+      throw new DatabaseError("error in updating the user");
     }
   }
 }

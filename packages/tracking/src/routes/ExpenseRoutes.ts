@@ -23,6 +23,11 @@ class ExpenseRouter {
       )
     );
 
+    router.put(
+      "/expense/:id",
+      this.expenseController.updateExpense.bind(this.expenseController)
+    );
+
     return router;
   }
 }
