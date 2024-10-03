@@ -2,11 +2,7 @@
   "extends": "../../tsconfig.json", // Extend the root tsconfig
   "compilerOptions": {
     "jsx": "react-jsx", // or "react" for older React versions
-    "module": "esnext",
-    "target": "es5",
     "lib": ["dom", "esnext"],
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
     "outDir": "./dist", // Where the compiled files go
     "rootDir": "./src", // Root directory for source files
     "composite": true, // Enable project references

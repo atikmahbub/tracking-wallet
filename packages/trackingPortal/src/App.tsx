@@ -1,24 +1,29 @@
-import Routes from "routes";
-import ThemeCustomization from "@trackingPortal/themes";
-import Locales from "@trackingPortal/components/Locales";
-// import RTLLayout from 'components/RTLLayout';
-import ScrollTop from "@trackingPortal/components/ScrollTop";
-import { SnackbarContextProvider } from "@trackingPortal/contexts/SnackbarContext";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useEffect } from "react";
+import { ERoutes } from "@trackingPortal/routes/ERoutes";
+import { useNavigate } from "react-router";
 
-const App = () => (
-  <ThemeCustomization>
-    <SnackbarContextProvider>
-      {/* <RTLLayout> */}
-      <Locales>
-        <ScrollTop>
-          <>
-            <Routes />
-          </>
-        </ScrollTop>
-      </Locales>
-      {/* </RTLLayout> */}
-    </SnackbarContextProvider>
-  </ThemeCustomization>
-);
+import Routes from "@trackingPortal/routes";
+
+const App = () => {
+  const { isAuthenticated } = useAuth0();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    handleRedirect();
+  }, [isAuthenticated]);
+
+  const handleRedirect = () => {
+    if (window.location.pathname === "/" && isAuthenticated) {
+      navigate(ERoutes.Expense);
+    }
+  };
+
+  return (
+    <>
+      <Routes />
+    </>
+  );
+};
 
 export default App;
