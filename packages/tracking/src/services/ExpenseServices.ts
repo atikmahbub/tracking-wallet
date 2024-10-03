@@ -79,7 +79,6 @@ class ExpenseService {
 
       return this.presentationService.toExpenseModel(updatedExpense);
     } catch (error) {
-      console.log("2323", error);
       throw new DatabaseError("error in updating the expense");
     }
   }
