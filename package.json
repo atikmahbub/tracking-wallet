@@ -13,7 +13,7 @@
     "build:backend": "yarn workspace tracking run build",
     "build:shared": "yarn workspace shared run build",
     "build:frontend": "yarn workspace tracking-portal run build",
-    "build:all": "yarn build:shared && yarn build:backend",
+    "build:all": "yarn build:shared && yarn build:backend && yarn build:frontend",
     "compile": "yarn clean && yarn build:all",
     "dev:backend": "yarn workspace tracking run dev",
     "dev:frontend": "yarn workspace tracking-portal run start",

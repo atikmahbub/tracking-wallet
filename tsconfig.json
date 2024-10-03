@@ -11,16 +11,13 @@
     "sourceMap": true, // Include source maps for easier debugging
     "moduleResolution": "node", // Resolve modules as Node.js does
     "rootDir": ".", // Root directory is the root of the monorepo
-    "baseUrl": ".", // Base directory for resolving non-relative module names
-    "paths": {
-      "@shared/*": ["packages/shared/src/*"],
-      "@tracking/*": ["packages/tracking/src/*"]
-    }
+    "baseUrl": "." // Base directory for resolving non-relative module names
   },
   "include": [], // Not used in the root tsconfig, but required in individual packages
   "exclude": ["node_modules", "dist"], // Exclude unnecessary directories
   "references": [
     { "path": "packages/shared" }, // Reference the shared package
-    { "path": "packages/tracking" } // Reference the expenseCalculator package
+    { "path": "packages/tracking" }, // Reference the expenseCalculator package
+    { "path": "packages/trackingPortal" }
   ]
 }
