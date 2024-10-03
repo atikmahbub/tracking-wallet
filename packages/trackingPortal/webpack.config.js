@@ -21,10 +21,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.json$/,
-        use: "json-loader",
-      },
-      {
         test: /\.(js)x?$/,
         exclude: /node_modules/,
         use: "babel-loader",

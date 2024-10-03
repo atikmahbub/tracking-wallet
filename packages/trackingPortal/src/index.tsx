@@ -1,13 +1,16 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "@trackingPortal/components/App";
-import "./styles.css";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+import App from "@trackingPortal/App";
+import { ConfigProvider } from "@trackingPortal/contexts/ConfigContext";
+
+const container = document.getElementById("root");
+const root = createRoot(container!);
+
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <ConfigProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </ConfigProvider>
 );
