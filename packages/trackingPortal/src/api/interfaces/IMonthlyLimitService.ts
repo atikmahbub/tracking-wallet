@@ -4,6 +4,7 @@ import {
   IGetMonthlyLimitParams,
   IUpdateMonthlyLimitParams,
 } from "@shared/params";
+import { MonthlyLimitId } from "@shared/primitives";
 
 export interface IMonthlyLimitService {
   addMonthlyLimit(params: IAddMonthlyLimit): Promise<MonthlyLimitModel>;
@@ -13,4 +14,5 @@ export interface IMonthlyLimitService {
   updateMonthlyLimit(
     params: IUpdateMonthlyLimitParams
   ): Promise<MonthlyLimitModel>;
+  deleteMonthlyLimit(id: MonthlyLimitId): Promise<void>;
 }

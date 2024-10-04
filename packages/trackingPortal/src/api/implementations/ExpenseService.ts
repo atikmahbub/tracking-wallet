@@ -9,6 +9,7 @@ import {
 } from "@shared/params";
 import { extractApiError } from "@trackingPortal/utils/apiUtils";
 import { urlJoin } from "url-join-ts";
+import { ExpenseId } from "@shared/primitives";
 
 export class ExpenseService implements IExpenseService {
   constructor(
@@ -46,6 +47,16 @@ export class ExpenseService implements IExpenseService {
 
     if (response.isOk()) {
       return response.value as ExpenseModel[];
+    }
+    throw extractApiError(response.error);
+  }
+
+  async deleteExpense(id: ExpenseId): Promise<void> {
+    const url = new URL(urlJoin(this.config.baseUrl, "v0", "expense", id));
+    const response = await this.ajaxUtils.delete(url);
+
+    if (response.isOk()) {
+      return response.value as void;
     }
     throw extractApiError(response.error);
   }

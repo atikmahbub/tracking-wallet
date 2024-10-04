@@ -9,6 +9,7 @@ import { TrackingWalletConfig } from "@trackingPortal/api/TrackingWalletConfig";
 import { IMonthlyLimitService } from "@trackingPortal/api/interfaces";
 import { extractApiError } from "@trackingPortal/utils/apiUtils";
 import { urlJoin } from "url-join-ts";
+import { MonthlyLimitId } from "@shared/primitives";
 
 export class MonthlyLimitService implements IMonthlyLimitService {
   constructor(
@@ -52,6 +53,18 @@ export class MonthlyLimitService implements IMonthlyLimitService {
 
     if (response.isOk()) {
       return response.value as MonthlyLimitModel;
+    }
+    throw extractApiError(response.error);
+  }
+
+  async deleteMonthlyLimit(id: MonthlyLimitId): Promise<void> {
+    const url = new URL(
+      urlJoin(this.config.baseUrl, "v0", "monthly-limit", id)
+    );
+    const response = await this.ajaxUtils.delete(url);
+
+    if (response.isOk()) {
+      return response.value as void;
     }
     throw extractApiError(response.error);
   }
