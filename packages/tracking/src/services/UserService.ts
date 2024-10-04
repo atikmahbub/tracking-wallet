@@ -18,16 +18,24 @@ class UserService {
     try {
       const { userId, name, email, profilePicture } = params;
 
-      const newUser = await this.prisma.user.create({
-        data: {
+      const existingUser = await this.prisma.user.findUnique({
+        where: {
           userId: userId,
-          name: name,
-          email: email,
-          profilePicture: profilePicture,
         },
       });
 
-      return this.presentationService.toUserModel(newUser);
+      if (!existingUser) {
+        const newUser = await this.prisma.user.create({
+          data: {
+            userId: userId,
+            name: name,
+            email: email,
+            profilePicture: profilePicture,
+          },
+        });
+        return this.presentationService.toUserModel(newUser);
+      }
+      return this.presentationService.toUserModel(existingUser);
     } catch (error) {
       throw new DatabaseError("error in creating user in database");
     }
