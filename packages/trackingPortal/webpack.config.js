@@ -8,6 +8,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const configFilePath = require.resolve("./tsconfig.json");
 const webpack = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.tsx", // Entry point for your React app
@@ -68,6 +69,11 @@ module.exports = {
         use: [
           {
             loader: "file-loader", // Handle image assets
+            options: {
+              name: "[path][name].[ext]", // Preserve file name and extension
+              outputPath: "assets/images/", // Output directory for the images
+              publicPath: "assets/images/", // Public path in the app
+            },
           },
         ],
       },
@@ -80,6 +86,12 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./public/index.html", // Path to HTML template
+      favicon: "./public/favicon/favicon.ico",
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "./public/site.webmanifest", to: "site.webmanifest" }, // Copy manifest file
+      ],
     }),
     new webpack.DefinePlugin({
       "process.env": JSON.stringify(process.env), // Define environment variables

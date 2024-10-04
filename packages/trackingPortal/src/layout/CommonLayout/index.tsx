@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 
 import { styled } from "@mui/material/styles";
@@ -6,7 +6,8 @@ import LinearProgress, {
   LinearProgressProps,
 } from "@mui/material/LinearProgress";
 
-const Header = lazy(() => import("./Header"));
+import Header from "@trackingPortal/layout/CommonLayout/Header";
+import { Box } from "@mui/material";
 
 // ==============================|| Loader ||============================== //
 
@@ -29,16 +30,23 @@ const Loader = () => (
   </LoaderWrapper>
 );
 
-const CommonLayout = ({ layout = "blank" }: { layout?: string }) => (
-  <>
-    {(layout === "landing" || layout === "simple") && (
-      <Suspense fallback={<Loader />}>
-        <Header layout={layout} />
-        <Outlet />
-      </Suspense>
-    )}
-    {layout === "blank" && <Outlet />}
-  </>
+const CommonLayout = () => (
+  <Box
+    component="main"
+    sx={{
+      px: { xs: 2, sm: 2 },
+      width: "100%",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+    }}
+  >
+    <Header />
+    <Suspense fallback={<Loader />}>
+      <Outlet />
+    </Suspense>
+  </Box>
 );
 
 export default CommonLayout;
