@@ -1,7 +1,10 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { UserModel } from "@shared/models/User";
+import { IAddUserParams } from "@shared/params";
 import { makeUnixTimestampString, URLString, UserId } from "@shared/primitives";
-import React, { SetStateAction, useContext, useState } from "react";
+import { ApiGateway } from "@trackingPortal/api/implementations";
+import { IApiGateWay } from "@trackingPortal/api/interfaces";
+import React, { SetStateAction, useContext, useEffect, useState } from "react";
 
 interface NewUserModel extends UserModel {
   default: boolean;
@@ -10,7 +13,8 @@ interface NewUserModel extends UserModel {
 interface IProviderValues {
   user: NewUserModel;
   setUser: React.Dispatch<SetStateAction<NewUserModel>>;
-  getAccessTokenAndAddUser: () => void;
+  getAccessToken: () => void;
+  apiGateway: IApiGateWay;
 }
 
 interface IStoreProps {
@@ -29,13 +33,47 @@ const defaultUser: NewUserModel = {
   default: true,
 };
 
+const apiGateway = new ApiGateway();
+
 const StoreProvider: React.FC<IStoreProps> = ({ children }) => {
   const [user, setUser] = useState<NewUserModel>(defaultUser);
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, user: auth0User } = useAuth0();
+  const [hasToken, setHasToken] = useState<boolean>(false);
 
-  const getAccessTokenAndAddUser = async () => {
-    const token = await getAccessTokenSilently();
+  const addUserToDb = async () => {
     try {
+      if (
+        !auth0User?.name ||
+        !auth0User?.email ||
+        !auth0User.picture ||
+        !auth0User.sub
+      )
+        return;
+      const params: IAddUserParams = {
+        userId: UserId(auth0User.sub),
+        name: auth0User.name,
+        profilePicture: URLString(auth0User.picture),
+        email: auth0User.email,
+      };
+      const user = await apiGateway.userService.addUser(params);
+      setUser({
+        ...user,
+        default: false,
+      });
+    } catch (error) {
+      console.log("23");
+    }
+  };
+
+  useEffect(() => {
+    hasToken && addUserToDb();
+  }, [auth0User, hasToken]);
+
+  const getAccessToken = async () => {
+    try {
+      const token = await getAccessTokenSilently();
+      apiGateway.ajaxUtils.setAccessToken(token);
+      setHasToken(true);
     } catch (error) {
       console.log("error in getting token", error);
     }
@@ -44,7 +82,8 @@ const StoreProvider: React.FC<IStoreProps> = ({ children }) => {
   const initialValues: IProviderValues = {
     user,
     setUser,
-    getAccessTokenAndAddUser,
+    getAccessToken,
+    apiGateway,
   };
 
   return (

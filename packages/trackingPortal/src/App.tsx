@@ -9,13 +9,21 @@ import {
   UNAUTHORIZED_SEARCH_PARAMS,
   URL_ERROR_PARAM,
 } from "@trackingPortal/constants/constants";
+import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 
 const App: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
+  const { getAccessToken } = useStoreContext();
   const isUnAuthorized =
     searchParams.get(URL_ERROR_PARAM) === UNAUTHORIZED_SEARCH_PARAMS;
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      getAccessToken();
+    }
+  }, [getAccessToken, isAuthenticated, isLoading]);
 
   useEffect(() => {
     if (isAuthenticated) {

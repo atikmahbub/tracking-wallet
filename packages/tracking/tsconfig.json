@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json", // Extend the root tsconfig
   "compilerOptions": {
+    "module": "CommonJS",
     "outDir": "./dist", // Where the compiled files go
     "rootDir": "./src", // Root directory for source files
     "composite": true, // Enable project references
@@ -11,7 +12,7 @@
       "@shared/*": ["../../shared/src/*"]
     }
   },
-  "include": ["src/**/*", "../shared/src/**/*.d.ts", "../shared/src/models"],
+  "include": ["src/**/*", "../shared/src/**/*.d.ts"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "require": ["tsconfig-paths/register"]

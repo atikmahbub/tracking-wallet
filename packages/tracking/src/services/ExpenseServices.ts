@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { ExpenseModel } from "@shared/models/Expense";
+import { ExpenseModel } from "@shared/models";
 import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
