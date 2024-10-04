@@ -3,13 +3,13 @@ import { UserModel } from "@shared/models/User";
 import { makeUnixTimestampString, URLString, UserId } from "@shared/primitives";
 import React, { SetStateAction, useContext, useState } from "react";
 
-interface IUserModel extends UserModel {
+interface NewUserModel extends UserModel {
   default: boolean;
 }
 
 interface IProviderValues {
-  user: UserModel;
-  setUser: React.Dispatch<SetStateAction<IUserModel>>;
+  user: NewUserModel;
+  setUser: React.Dispatch<SetStateAction<NewUserModel>>;
   getAccessTokenAndAddUser: () => void;
 }
 
@@ -19,7 +19,7 @@ interface IStoreProps {
 
 const StoreContext = React.createContext<IProviderValues>(undefined!);
 
-const defaultUser: IUserModel = {
+const defaultUser: NewUserModel = {
   name: "Admin",
   email: "admin@gmail.com",
   userId: "admin" as UserId,
@@ -30,7 +30,7 @@ const defaultUser: IUserModel = {
 };
 
 const StoreProvider: React.FC<IStoreProps> = ({ children }) => {
-  const [user, setUser] = useState<IUserModel>(defaultUser);
+  const [user, setUser] = useState<NewUserModel>(defaultUser);
   const { getAccessTokenSilently } = useAuth0();
 
   const getAccessTokenAndAddUser = async () => {
