@@ -95,6 +95,25 @@ class ExpenseController {
       next(error);
     }
   }
+
+  async deleteExpense(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        throw new MissingFieldError("id is required");
+      }
+
+      await this.expenseService.deleteExpense(ExpenseId(id));
+      res.status(200).json();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default ExpenseController;

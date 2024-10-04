@@ -19,9 +19,12 @@ const MainLayout: React.FC = () => {
           position: "relative",
         }}
       >
-        <Suspense fallback={<Loader />}>
-          <Outlet />
-        </Suspense>
+        <Grid2 size={12}>Header</Grid2>
+        <Grid2 size={12}>
+          <Suspense fallback={<Loader />}>
+            <Outlet />
+          </Suspense>
+        </Grid2>
       </Grid2>
     </Box>
   );

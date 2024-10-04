@@ -28,6 +28,11 @@ class ExpenseRouter {
       this.expenseController.updateExpense.bind(this.expenseController)
     );
 
+    router.delete(
+      "/expense/:id",
+      this.expenseController.deleteExpense.bind(this.expenseController)
+    );
+
     return router;
   }
 }

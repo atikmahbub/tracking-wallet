@@ -9,6 +9,7 @@ import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { PresentationService } from "@tracking/utils/presentationService";
 import { DatabaseError } from "@tracking/errors";
+import { MonthlyLimitId } from "@shared/primitives";
 
 class MonthlyLimitService {
   private prisma: PrismaClient;
@@ -84,6 +85,18 @@ class MonthlyLimitService {
       return this.presentationService.toMonthLimitModel(updatedLimit);
     } catch (error) {
       throw new DatabaseError("error in updating the monthly limit");
+    }
+  }
+
+  async deleteMonthlyLimit(id: MonthlyLimitId): Promise<void> {
+    try {
+      await this.prisma.monthlyLimit.delete({
+        where: {
+          id: uuidBuffer.toBuffer(id),
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("error in deleting  monthly limit");
     }
   }
 }

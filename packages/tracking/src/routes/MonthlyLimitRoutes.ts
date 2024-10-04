@@ -32,6 +32,13 @@ class MonthlyLimitRoutes {
       )
     );
 
+    router.delete(
+      "/monthly-limit/:id",
+      this.monthlyLimitController.deleteMonthlyLimit.bind(
+        this.monthlyLimitController
+      )
+    );
+
     return router;
   }
 }

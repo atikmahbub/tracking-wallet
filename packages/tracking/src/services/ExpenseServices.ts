@@ -4,7 +4,11 @@ import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
 import { IAddExpenseParams, IUpdateExpenseParams } from "@shared/params";
-import { makeUnixTimestampToISOString, UserId } from "@shared/primitives";
+import {
+  ExpenseId,
+  makeUnixTimestampToISOString,
+  UserId,
+} from "@shared/primitives";
 import { DatabaseError } from "@tracking/errors";
 
 class ExpenseService {
@@ -80,6 +84,18 @@ class ExpenseService {
       return this.presentationService.toExpenseModel(updatedExpense);
     } catch (error) {
       throw new DatabaseError("error in updating the expense");
+    }
+  }
+
+  async deleteExpense(id: ExpenseId): Promise<void> {
+    try {
+      await this.prisma.expense.delete({
+        where: {
+          id: uuidBuffer.toBuffer(id),
+        },
+      });
+    } catch (error) {
+      throw new DatabaseError("error in deleting the expense");
     }
   }
 }

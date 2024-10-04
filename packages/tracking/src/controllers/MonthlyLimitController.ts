@@ -94,6 +94,23 @@ class MonthlyLimitController {
       next(error);
     }
   }
+
+  async deleteMonthlyLimit(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        throw new MissingFieldError("id is required!");
+      }
+      await this.monthlyLimitService.deleteMonthlyLimit(MonthlyLimitId(id));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default MonthlyLimitController;
