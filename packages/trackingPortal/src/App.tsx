@@ -1,5 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
+import React, { Fragment, useEffect } from "react";
 import { ERoutes } from "@trackingPortal/routes/ERoutes";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -10,7 +10,7 @@ import {
   URL_ERROR_PARAM,
 } from "@trackingPortal/constants/constants";
 
-const App = () => {
+const App: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
@@ -34,13 +34,14 @@ const App = () => {
   }
 
   if (isUnAuthorized) {
-    return navigate(ERoutes.Login);
+    navigate(ERoutes.Login);
+    return;
   }
 
   return (
-    <>
+    <Fragment>
       <Routes />
-    </>
+    </Fragment>
   );
 };
 
