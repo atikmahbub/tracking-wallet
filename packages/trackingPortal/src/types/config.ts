@@ -1,3 +1,8 @@
+export enum AppThemeMode {
+  DARK = "dark",
+  LIGHT = "light",
+}
+
 export type ThemeDirection = "ltr" | "rtl";
 export type ThemeMode = "light" | "dark";
 export type FontFamily =
