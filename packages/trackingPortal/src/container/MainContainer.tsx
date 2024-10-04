@@ -5,19 +5,22 @@ import ScrollTop from "@trackingPortal/components/ScrollTop";
 import { SnackbarContextProvider } from "@trackingPortal/contexts/SnackbarContext";
 import Auth0ProviderWithHistory from "@trackingPortal/auth/Auth0ProviderWithHistory";
 import App from "@trackingPortal/App";
+import StoreProvider from "@trackingPortal/contexts/StoreProvider";
 
 const MainContainer = () => {
   return (
     <Auth0ProviderWithHistory>
-      <ThemeCustomization>
-        <SnackbarContextProvider>
-          <Locales>
-            <ScrollTop>
-              <App />
-            </ScrollTop>
-          </Locales>
-        </SnackbarContextProvider>
-      </ThemeCustomization>
+      <StoreProvider>
+        <ThemeCustomization>
+          <SnackbarContextProvider>
+            <Locales>
+              <ScrollTop>
+                <App />
+              </ScrollTop>
+            </Locales>
+          </SnackbarContextProvider>
+        </ThemeCustomization>
+      </StoreProvider>
     </Auth0ProviderWithHistory>
   );
 };

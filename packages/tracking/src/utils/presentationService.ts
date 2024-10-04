@@ -1,4 +1,4 @@
-import { ExpenseModel } from "@tracking/models/Expense";
+import { ExpenseModel } from "@shared/models/Expense";
 import { Expense, MonthlyLimit, User } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
@@ -10,8 +10,8 @@ import {
   MonthlyLimitId,
   URLString,
 } from "@shared/primitives";
-import { MonthlyLimitModel } from "@tracking/models/MonthlyLimit";
-import { UserModel } from "@tracking/models/User";
+import { MonthlyLimitModel } from "@shared/models/MonthlyLimit";
+import { UserModel } from "@shared/models/User";
 
 export class PresentationService {
   public toExpenseModel(expense: Expense): ExpenseModel {

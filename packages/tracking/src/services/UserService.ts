@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { IAddUserParams, IUpdateUserParams } from "@shared/params";
 import { UserId } from "@shared/primitives";
 import { DatabaseError } from "@tracking/errors";
-import { UserModel } from "@tracking/models/User";
+import { UserModel } from "@shared/models/User";
 import { PresentationService } from "@tracking/utils/presentationService";
 
 class UserService {

@@ -4,7 +4,7 @@ import {
   IGetMonthlyLimitParams,
   IUpdateMonthlyLimitParams,
 } from "@shared/params";
-import { MonthlyLimitModel } from "@tracking/models/MonthlyLimit";
+import { MonthlyLimitModel } from "@shared/models/MonthlyLimit";
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { PresentationService } from "@tracking/utils/presentationService";

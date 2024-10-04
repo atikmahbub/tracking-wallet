@@ -11,7 +11,7 @@
       "@shared/*": ["../../shared/src/*"]
     }
   },
-  "include": ["src/**/*", "../shared/src/**/*.d.ts"],
+  "include": ["src/**/*", "../shared/src/**/*.d.ts", "../shared/src/models"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
