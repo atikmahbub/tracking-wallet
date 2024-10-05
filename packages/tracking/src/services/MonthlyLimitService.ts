@@ -84,6 +84,7 @@ class MonthlyLimitService {
 
       return this.presentationService.toMonthLimitModel(updatedLimit);
     } catch (error) {
+      console.log("error", error);
       throw new DatabaseError("error in updating the monthly limit");
     }
   }

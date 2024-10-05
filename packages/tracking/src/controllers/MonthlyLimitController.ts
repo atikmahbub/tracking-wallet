@@ -1,5 +1,5 @@
 import { IAddMonthlyLimit, IGetMonthlyLimitParams } from "@shared/params";
-import { MonthlyLimitId, UserId } from "@shared/primitives";
+import { Month, MonthlyLimitId, UserId, Year } from "@shared/primitives";
 import { MissingFieldError } from "@tracking/errors";
 import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
@@ -48,7 +48,8 @@ class MonthlyLimitController {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
       const { userId } = req.params;
-      const { month, year } = req.body;
+      const month = req.query.month;
+      const year = req.query.year;
 
       if (!month || !year) {
         throw new MissingFieldError("Month, Year are required");
@@ -56,8 +57,8 @@ class MonthlyLimitController {
 
       const params: IGetMonthlyLimitParams = {
         userId: UserId(userId),
-        month: month,
-        year: year,
+        month: Number(month) as Month,
+        year: Number(year) as Year,
       };
       const monthLimit = await this.monthlyLimitService.getMonthlyLimitByUserId(
         params
@@ -84,7 +85,7 @@ class MonthlyLimitController {
 
       const updatedLimit = await this.monthlyLimitService.updateMonthlyLimit({
         id: MonthlyLimitId(id),
-        limit: limit,
+        limit: Number(limit),
         month: month,
         year: year,
       });

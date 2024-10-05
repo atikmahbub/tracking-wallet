@@ -96,7 +96,8 @@ const ExpenseTabPanel = () => {
             <Box display="flex" gap={2} alignItems="center">
               <Typography variant="h5">Total Spend:</Typography>
               <Typography variant="h6">
-                {convertToKilo(totalExpense)} {`(${expensePercentage}%)`}
+                {convertToKilo(totalExpense)}{" "}
+                {monthLimit?.limit ? `(${expensePercentage}%)` : ""}
               </Typography>
             </Box>
             <Box display="flex" gap={2} alignItems="center">
