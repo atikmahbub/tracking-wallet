@@ -3,7 +3,7 @@ import MainLayout from "layout/MainLayout";
 import Loadable from "components/Loadable";
 
 // Lazy-load the Expense component
-const Expense = Loadable(lazy(() => import("@trackingPortal/pages/Expense")));
+const HomePage = Loadable(lazy(() => import("@trackingPortal/pages/HomePage")));
 
 const MainRoutes = {
   path: "/",
@@ -11,7 +11,7 @@ const MainRoutes = {
   children: [
     {
       path: "expense",
-      element: <Expense />,
+      element: <HomePage />,
     },
   ],
 };

@@ -94,7 +94,7 @@ const Palette = (mode: ThemeMode, presetColor: PresetColor) => {
           : paletteColor.grey[200],
       background: {
         paper: mode === "dark" ? paletteColor.grey[100] : paletteColor.grey[0],
-        default: mode === "light" ? "#F0F8FF" : "#23272E",
+        default: mode === "light" ? "#F0F8FF" : "#0F1215",
       },
     },
   });
