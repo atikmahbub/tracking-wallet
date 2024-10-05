@@ -49,13 +49,13 @@ class ExpenseController {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
       const { userId } = req.params;
-      const { date } = req.body;
+      const date = req.query.date;
 
       if (!date) {
         throw new MissingFieldError("Date are required");
       }
 
-      const extractedDate = new Date(parseInt(date) * 1000);
+      const extractedDate = new Date(parseInt(date.toString()) * 1000);
       const startDate = startOfMonth(extractedDate);
       const endDate = endOfMonth(extractedDate);
 

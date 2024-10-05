@@ -4,7 +4,7 @@ import MuiTabs, { TabPanel } from "@trackingPortal/components/Tabs";
 import React, { useState } from "react";
 
 import { tabItems, ETabStep } from "@trackingPortal/pages/HomePage";
-import ExpenseTabPanel from "@trackingPortal/pages/HomePage/HomeTabs/ExpenseTabPanel";
+import ExpenseTabPanel from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 
 const HomePage = () => {
   const { user } = useAuth0();
