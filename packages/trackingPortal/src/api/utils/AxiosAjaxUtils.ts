@@ -39,13 +39,14 @@ export class AxiosAjaxUtils implements IAxiosAjaxUtils {
     };
   }
 
-  // GET request
   public async get<T>(
     url: URL,
+    params?: object, // Added params as an optional parameter
     headers?: object
   ): Promise<IAxiosAjaxResponse<T>> {
     const config: AxiosRequestConfig = {
       headers: this.buildHeaders(headers),
+      params, // Add params to the Axios request config
     };
     try {
       const response = await axios.get<T>(url.toString(), config);

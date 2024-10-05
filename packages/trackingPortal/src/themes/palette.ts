@@ -41,7 +41,7 @@ const Palette = (mode: ThemeMode, presetColor: PresetColor) => {
     greyPrimary = [
       "#000000",
       "#141414",
-      "#1e1e1e",
+      "#23272E",
       "#595959",
       "#8c8c8c",
       "#bfbfbf",

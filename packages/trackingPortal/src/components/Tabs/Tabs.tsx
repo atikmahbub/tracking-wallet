@@ -36,7 +36,7 @@ const MuiTabs: React.FC<IMuiTabs> = ({ value, tabItems, ...rest }) => {
             bgcolor: (theme) =>
               theme.palette.mode === "light"
                 ? theme.palette.primary[100]
-                : theme.palette.background.paper,
+                : "#1e1e1e",
             borderRadius: "30px",
             ":hover": {
               borderBottom: "none",
@@ -50,8 +50,8 @@ const MuiTabs: React.FC<IMuiTabs> = ({ value, tabItems, ...rest }) => {
           },
         }}
       >
-        {tabItems.map((tab) => (
-          <Tab label={tab} />
+        {tabItems.map((tab, index) => (
+          <Tab label={tab} key={index} />
         ))}
       </Tabs>
     </Box>

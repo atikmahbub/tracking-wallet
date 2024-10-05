@@ -4,6 +4,7 @@ import MuiTabs, { TabPanel } from "@trackingPortal/components/Tabs";
 import React, { useState } from "react";
 
 import { tabItems, ETabStep } from "@trackingPortal/pages/HomePage";
+import ExpenseTabPanel from "@trackingPortal/pages/HomePage/HomeTabs/ExpenseTabPanel";
 
 const HomePage = () => {
   const { user } = useAuth0();
@@ -17,6 +18,11 @@ const HomePage = () => {
           onChange={(e, newValue: ETabStep) => setValue(newValue)}
           tabItems={tabItems}
         />
+      </Grid2>
+      <Grid2 size={12} mt={5}>
+        <TabPanel value={value} index={ETabStep.Expense}>
+          <ExpenseTabPanel />
+        </TabPanel>
       </Grid2>
     </Grid2>
   );

@@ -35,7 +35,8 @@ export class MonthlyLimitService implements IMonthlyLimitService {
     const url = new URL(
       urlJoin(this.config.baseUrl, "v0", "monthly-limit", params.userId)
     );
-    const response = await this.ajaxUtils.get(url);
+
+    const response = await this.ajaxUtils.get(url, { ...params });
 
     if (response.isOk()) {
       return response.value as MonthlyLimitModel;

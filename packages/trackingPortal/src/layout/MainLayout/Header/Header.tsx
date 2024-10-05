@@ -51,7 +51,7 @@ export default function Header() {
               sx={{
                 width: 50,
                 height: 50,
-                bgcolor: isDarkMode ? "unset" : theme.palette.primary.light,
+                bgcolor: isDarkMode ? "#fff" : theme.palette.primary.light,
               }}
             />
           </IconButton>
