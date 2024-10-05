@@ -1,13 +1,12 @@
-import { Button, Grid2 as Grid } from "@mui/material";
+import { Grid2 as Grid } from "@mui/material";
 import MainCard from "@trackingPortal/components/MainCard";
-import React, { useEffect, useMemo, useState } from "react";
-import { Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
 import Loader from "@trackingPortal/components/Loader";
-import { PlusOutlined } from "@ant-design/icons";
 import Summary from "@trackingPortal/pages/HomePage/ExpenseTabPanel/Summary";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { ExpenseModel } from "@shared/models/Expense";
 import { makeUnixTimestampString } from "@shared/primitives";
+import AddExpense from "@trackingPortal/pages/HomePage/ExpenseTabPanel/AddExpense";
 
 const ExpenseTabPanel = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -45,31 +44,7 @@ const ExpenseTabPanel = () => {
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
         <MainCard title="Expense's">
-          <Grid container spacing={3}>
-            <Grid size={12} display="flex" justifyContent="flex-end">
-              <Button
-                startIcon={<PlusOutlined />}
-                variant="text"
-                sx={{
-                  fontWeight: 700,
-                  color: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.primary.darker
-                      : theme.palette.primary.main,
-                }}
-              >
-                Add One
-              </Button>
-            </Grid>
-            <Grid size={12}>
-              <Formik
-                initialValues={{ amount: "", description: "" }}
-                onSubmit={() => {}}
-              >
-                {() => <Form></Form>}
-              </Formik>
-            </Grid>
-          </Grid>
+          <AddExpense />
         </MainCard>
       </Grid>
     </Grid>

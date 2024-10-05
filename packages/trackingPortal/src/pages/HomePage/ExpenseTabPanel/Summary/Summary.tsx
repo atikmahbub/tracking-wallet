@@ -9,6 +9,7 @@ import { format, getMonth, getYear } from "date-fns";
 import { MonthlyLimitModel } from "@shared/models/MonthlyLimit";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { Month, Year } from "@shared/primitives";
+import { EMonthlyLimitFields } from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 
 interface ISummary {
   totalExpense: number;
@@ -111,14 +112,14 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
         <Collapse in={openLimit}>
           <Formik
             enableReinitialize={true}
-            initialValues={{ limit: monthLimit?.limit }}
+            initialValues={{ [EMonthlyLimitFields.LIMIT]: monthLimit?.limit }}
             onSubmit={handleSaveMonthlyLimit}
           >
             {({ isSubmitting, values }) => (
               <Form>
                 <Box mt={1}>
                   <TextFieldWithTitle
-                    name="limit"
+                    name={EMonthlyLimitFields.LIMIT}
                     value={values.limit}
                     title="Limit for this month"
                     noWordLimit
