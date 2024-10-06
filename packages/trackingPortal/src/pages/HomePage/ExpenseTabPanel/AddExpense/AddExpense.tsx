@@ -15,11 +15,14 @@ import { Formik, Form, FieldArray } from "formik";
 import React, { Fragment } from "react";
 import {
   EAddExpenseFields,
-  defaultQuestion,
   CreateExpenseSchema,
+  defaultQuestion,
 } from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
-import { IAddExpense } from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseTabPanel.interfaces";
+import {
+  IAddExpense,
+  INewExpense,
+} from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseTabPanel.interfaces";
 import LoadingButton from "@trackingPortal/components/@extended/LoadingButton";
 import { ExpenseModel } from "@shared/models/Expense";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
@@ -27,11 +30,20 @@ import { IAddExpenseParams } from "@shared/params";
 import { makeUnixTimestampString } from "@shared/primitives";
 import { convertKiloToNumber } from "@trackingPortal/utils/numberUtils";
 import { toast } from "react-hot-toast";
+import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
+import dayjs, { Dayjs } from "dayjs";
+
 interface IAddExpenseProps {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  getUserExpenses: () => void;
+  filterMonth: Dayjs;
 }
 
-const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
+const AddExpense: React.FC<IAddExpenseProps> = ({
+  setLoading,
+  getUserExpenses,
+  filterMonth,
+}) => {
   const { apiGateway, user } = useStoreContext();
 
   const handleAddExpense = async (values: IAddExpense, { resetForm }) => {
@@ -43,7 +55,9 @@ const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
         const params: IAddExpenseParams = {
           userId: user.userId,
           amount: convertKiloToNumber(expense.amount),
-          date: makeUnixTimestampString(Number(new Date(expense.date))),
+          date: makeUnixTimestampString(
+            Number(new Date(expense.date.toDate()))
+          ),
           description: expense.description,
         };
 
@@ -56,6 +70,7 @@ const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
         (await Promise.all(addExpensePromiseList));
       toast.success("Successfully Added!");
       resetForm();
+      await getUserExpenses();
     } catch (error) {
       console.log("error", error);
       toast.error("Something went wrong!");
@@ -93,7 +108,12 @@ const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
                                 ? theme.palette.primary.darker
                                 : theme.palette.primary.main,
                           }}
-                          onClick={() => push(defaultQuestion)}
+                          onClick={() =>
+                            push({
+                              ...defaultQuestion,
+                              date: dayjs(filterMonth, "yyyy-MM-dd"),
+                            })
+                          }
                         >
                           Add Expense
                         </Button>
@@ -108,11 +128,9 @@ const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
                               spacing={2}
                             >
                               <Grid size={{ xs: 12, md: 4 }}>
-                                <TextFieldWithTitle
+                                <DatePickerFieldWithTitle
                                   name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DATE}`}
                                   title="Date"
-                                  noWordLimit
-                                  type="date"
                                 />
                               </Grid>
                               <Grid size={{ xs: 12, md: 4 }}>
@@ -127,6 +145,12 @@ const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
                                   name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.AMOUNT}`}
                                   title="Amount"
                                   noWordLimit
+                                  slotProps={{
+                                    htmlInput: {
+                                      inputMode: "numeric",
+                                      autoComplete: "off",
+                                    },
+                                  }}
                                 />
                               </Grid>
                               <Box
@@ -140,7 +164,12 @@ const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
                                 }}
                               >
                                 <IconButton
-                                  onClick={() => push(defaultQuestion)}
+                                  onClick={() =>
+                                    push({
+                                      ...defaultQuestion,
+                                      date: dayjs(filterMonth, "yyyy-MM-dd"),
+                                    })
+                                  }
                                   size="small"
                                 >
                                   <PlusCircleOutlined />

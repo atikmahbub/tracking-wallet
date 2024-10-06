@@ -48,7 +48,7 @@ const MainLayout: React.FC = () => {
             </IconButton>
           </Box>
         </Grid2>
-        <Grid2 size={12}>
+        <Grid2 size={12} pb={10}>
           <Suspense fallback={<Loader />}>
             <Outlet />
           </Suspense>

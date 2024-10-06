@@ -5,19 +5,24 @@ import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import { convertToKilo } from "@trackingPortal/utils/numberUtils";
 import { Formik, Form } from "formik";
 import React, { SetStateAction, useEffect, useMemo, useState } from "react";
-import { format, getMonth, getYear } from "date-fns";
 import { MonthlyLimitModel } from "@shared/models/MonthlyLimit";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { Month, Year } from "@shared/primitives";
 import { EMonthlyLimitFields } from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 import { toast } from "react-hot-toast";
+import dayjs, { Dayjs } from "dayjs";
 
 interface ISummary {
   totalExpense: number;
   setLoading: React.Dispatch<SetStateAction<boolean>>;
+  filterMonth: Dayjs;
 }
 
-const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
+const Summary: React.FC<ISummary> = ({
+  setLoading,
+  totalExpense,
+  filterMonth,
+}) => {
   const [openLimit, setOpenLimit] = useState<boolean>(false);
   const { apiGateway, user } = useStoreContext();
   const [monthLimit, setMonthLimit] = useState<MonthlyLimitModel>();
@@ -26,7 +31,7 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
     if (user.userId && !user.default) {
       getMonthlyLimit();
     }
-  }, [user]);
+  }, [user, filterMonth]);
 
   const getMonthlyLimit = async () => {
     try {
@@ -34,8 +39,8 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
       const monthlyLimit =
         await apiGateway.monthlyLimitService.getMonthlyLimitByUserId({
           userId: user.userId,
-          month: (getMonth(new Date()) + 1) as Month,
-          year: getYear(new Date()) as Year,
+          month: (filterMonth.month() + 1) as Month,
+          year: filterMonth.year() as Year,
         });
       setMonthLimit(monthlyLimit);
     } catch (error) {
@@ -53,19 +58,18 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
           id: monthLimit.id,
           limit: values.limit,
         });
-        await getMonthlyLimit();
         toast.success("Limit updated successfully!");
       } else {
         await apiGateway.monthlyLimitService.addMonthlyLimit({
           userId: user.userId,
           limit: values.limit,
-          month: (getMonth(new Date()) + 1) as Month,
-          year: getYear(new Date()) as Year,
+          month: (filterMonth.month() + 1) as Month,
+          year: filterMonth.year() as Year,
         });
         toast.success("Limit added successfully!");
       }
-
       setOpenLimit(false);
+      await getMonthlyLimit();
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong!");
@@ -85,7 +89,7 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
         <Box display="flex" gap={1} alignItems="center">
           <Typography variant="h5">Month:</Typography>
           <Typography variant="h6">
-            {format(new Date(), "MMMM, yyyy")}
+            {dayjs(new Date(filterMonth.toDate())).format("MMMM YYYY")}
           </Typography>
         </Box>
         <Box display="flex" gap={1} alignItems="center">
@@ -98,7 +102,7 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
         <Box display="flex" gap={1} alignItems="center">
           <Typography variant="h5">Limit:</Typography>
           <Typography variant="h6">
-            {convertToKilo(monthLimit?.limit ?? 0) ?? "N/A"}
+            {convertToKilo(monthLimit?.limit || 0) ?? "N/A"}
           </Typography>
           <Button
             variant="text"
@@ -117,7 +121,9 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
         <Collapse in={openLimit}>
           <Formik
             enableReinitialize={true}
-            initialValues={{ [EMonthlyLimitFields.LIMIT]: monthLimit?.limit }}
+            initialValues={{
+              [EMonthlyLimitFields.LIMIT]: monthLimit?.limit ?? "",
+            }}
             onSubmit={handleSaveMonthlyLimit}
           >
             {({ isSubmitting, values }) => (

@@ -1,5 +1,5 @@
 import { INewExpense } from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseTabPanel.interfaces";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import * as Yup from "yup";
 
 export enum EMonthlyLimitFields {
@@ -16,7 +16,7 @@ export enum EAddExpenseFields {
 export const defaultQuestion: INewExpense = {
   [EAddExpenseFields.AMOUNT]: "",
   [EAddExpenseFields.DESCRIPTION]: "",
-  [EAddExpenseFields.DATE]: format(new Date(), "yyyy-MM-dd"),
+  [EAddExpenseFields.DATE]: dayjs(new Date(), "yyyy-MM-dd"),
 };
 
 export const CreateExpenseSchema = Yup.object({
