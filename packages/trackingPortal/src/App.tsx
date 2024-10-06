@@ -15,7 +15,7 @@ const App: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
-  const { getAccessToken } = useStoreContext();
+  const { getAccessToken, appLoading } = useStoreContext();
   const isUnAuthorized =
     searchParams.get(URL_ERROR_PARAM) === UNAUTHORIZED_SEARCH_PARAMS;
 
@@ -37,7 +37,7 @@ const App: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || appLoading) {
     return <Loader />;
   }
 

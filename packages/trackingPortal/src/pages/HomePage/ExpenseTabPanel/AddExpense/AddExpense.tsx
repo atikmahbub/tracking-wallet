@@ -16,21 +16,64 @@ import React, { Fragment } from "react";
 import {
   EAddExpenseFields,
   defaultQuestion,
+  CreateExpenseSchema,
 } from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import { IAddExpense } from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseTabPanel.interfaces";
 import LoadingButton from "@trackingPortal/components/@extended/LoadingButton";
+import { ExpenseModel } from "@shared/models/Expense";
+import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
+import { IAddExpenseParams } from "@shared/params";
+import { makeUnixTimestampString } from "@shared/primitives";
+import { convertKiloToNumber } from "@trackingPortal/utils/numberUtils";
+import { toast } from "react-hot-toast";
+interface IAddExpenseProps {
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-const AddExpense: React.FC = () => {
+const AddExpense: React.FC<IAddExpenseProps> = ({ setLoading }) => {
+  const { apiGateway, user } = useStoreContext();
+
+  const handleAddExpense = async (values: IAddExpense, { resetForm }) => {
+    if (user.default) return;
+    try {
+      setLoading(true);
+      const addExpensePromiseList: Promise<ExpenseModel>[] = [];
+      values.expense_list.map((expense) => {
+        const params: IAddExpenseParams = {
+          userId: user.userId,
+          amount: convertKiloToNumber(expense.amount),
+          date: makeUnixTimestampString(Number(new Date(expense.date))),
+          description: expense.description,
+        };
+
+        addExpensePromiseList.push(
+          apiGateway.expenseService.addExpense(params)
+        );
+      });
+
+      !!addExpensePromiseList.length &&
+        (await Promise.all(addExpensePromiseList));
+      toast.success("Successfully Added!");
+      resetForm();
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Formik
       enableReinitialize
       initialValues={{
         [EAddExpenseFields.EXPENSE_LIST]: [],
       }}
-      onSubmit={() => {}}
+      onSubmit={handleAddExpense}
+      validationSchema={CreateExpenseSchema}
     >
-      {({ values, resetForm }) => {
+      {({ values, resetForm, isSubmitting }) => {
         return (
           <Form>
             <Grid container spacing={3}>
@@ -84,7 +127,6 @@ const AddExpense: React.FC = () => {
                                   name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.AMOUNT}`}
                                   title="Amount"
                                   noWordLimit
-                                  type="number"
                                 />
                               </Grid>
                               <Box
@@ -132,7 +174,11 @@ const AddExpense: React.FC = () => {
                           <Button variant="text" onClick={() => resetForm()}>
                             Cancel
                           </Button>
-                          <LoadingButton variant="contained" type="submit">
+                          <LoadingButton
+                            variant="contained"
+                            type="submit"
+                            loading={isSubmitting}
+                          >
                             Save
                           </LoadingButton>
                         </Box>

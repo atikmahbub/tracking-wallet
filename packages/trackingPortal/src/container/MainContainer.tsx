@@ -2,7 +2,6 @@ import React from "react";
 import ThemeCustomization from "@trackingPortal/themes";
 import Locales from "@trackingPortal/components/Locales";
 import ScrollTop from "@trackingPortal/components/ScrollTop";
-import { SnackbarContextProvider } from "@trackingPortal/contexts/SnackbarContext";
 import Auth0ProviderWithHistory from "@trackingPortal/auth/Auth0ProviderWithHistory";
 import App from "@trackingPortal/App";
 import StoreProvider from "@trackingPortal/contexts/StoreProvider";
@@ -12,13 +11,11 @@ const MainContainer = () => {
     <Auth0ProviderWithHistory>
       <StoreProvider>
         <ThemeCustomization>
-          <SnackbarContextProvider>
-            <Locales>
-              <ScrollTop>
-                <App />
-              </ScrollTop>
-            </Locales>
-          </SnackbarContextProvider>
+          <Locales>
+            <ScrollTop>
+              <App />
+            </ScrollTop>
+          </Locales>
         </ThemeCustomization>
       </StoreProvider>
     </Auth0ProviderWithHistory>

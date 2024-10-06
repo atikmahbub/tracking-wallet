@@ -5,6 +5,7 @@ import { makeUnixTimestampString, URLString, UserId } from "@shared/primitives";
 import { ApiGateway } from "@trackingPortal/api/implementations";
 import { IApiGateWay } from "@trackingPortal/api/interfaces";
 import React, { SetStateAction, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 interface NewUserModel extends UserModel {
   default: boolean;
@@ -15,6 +16,7 @@ interface IProviderValues {
   setUser: React.Dispatch<SetStateAction<NewUserModel>>;
   getAccessToken: () => void;
   apiGateway: IApiGateWay;
+  appLoading: boolean;
 }
 
 interface IStoreProps {
@@ -39,9 +41,11 @@ const StoreProvider: React.FC<IStoreProps> = ({ children }) => {
   const [user, setUser] = useState<NewUserModel>(defaultUser);
   const { getAccessTokenSilently, user: auth0User } = useAuth0();
   const [hasToken, setHasToken] = useState<boolean>(false);
+  const [appLoading, setAppLoading] = useState<boolean>(false);
 
   const addUserToDb = async () => {
     try {
+      setAppLoading(true);
       if (
         !auth0User?.name ||
         !auth0User?.email ||
@@ -61,7 +65,10 @@ const StoreProvider: React.FC<IStoreProps> = ({ children }) => {
         default: false,
       });
     } catch (error) {
-      console.log("23");
+      console.log("error", error);
+      toast.error("Something went wrong while getting the user!");
+    } finally {
+      setAppLoading(false);
     }
   };
 
@@ -84,6 +91,7 @@ const StoreProvider: React.FC<IStoreProps> = ({ children }) => {
     setUser,
     getAccessToken,
     apiGateway,
+    appLoading,
   };
 
   return (

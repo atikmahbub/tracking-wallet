@@ -44,7 +44,7 @@ const ExpenseTabPanel = () => {
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
         <MainCard title="Expense's">
-          <AddExpense />
+          <AddExpense setLoading={setLoading} />
         </MainCard>
       </Grid>
     </Grid>

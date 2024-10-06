@@ -53,9 +53,9 @@ const TextFieldWithTitle: React.FC<TextFieldWithTitleProps> = ({
         }: FieldProps) => {
           const isTouched = getIn(touched, name);
           const error =
-            (validateOnChange || touched[name]) &&
-            typeof errors[name] === "string"
-              ? errors[name]
+            (validateOnChange || getIn(touched, name)) &&
+            typeof getIn(errors, name) === "string"
+              ? getIn(errors, name)
               : null;
 
           return (

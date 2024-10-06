@@ -10,6 +10,7 @@ import { MonthlyLimitModel } from "@shared/models/MonthlyLimit";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { Month, Year } from "@shared/primitives";
 import { EMonthlyLimitFields } from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
+import { toast } from "react-hot-toast";
 
 interface ISummary {
   totalExpense: number;
@@ -53,6 +54,7 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
           limit: values.limit,
         });
         await getMonthlyLimit();
+        toast.success("Limit updated successfully!");
       } else {
         await apiGateway.monthlyLimitService.addMonthlyLimit({
           userId: user.userId,
@@ -60,10 +62,13 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
           month: (getMonth(new Date()) + 1) as Month,
           year: getYear(new Date()) as Year,
         });
+        toast.success("Limit added successfully!");
       }
+
       setOpenLimit(false);
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong!");
     } finally {
       setLoading(false);
     }
@@ -87,7 +92,7 @@ const Summary: React.FC<ISummary> = ({ setLoading, totalExpense }) => {
           <Typography variant="h5">Total Spend:</Typography>
           <Typography variant="h6">
             {convertToKilo(totalExpense)}{" "}
-            {monthLimit?.limit ? `(${expensePercentage}%)` : ""}
+            {monthLimit?.limit ? `(${expensePercentage.toFixed(2)}%)` : ""}
           </Typography>
         </Box>
         <Box display="flex" gap={1} alignItems="center">
