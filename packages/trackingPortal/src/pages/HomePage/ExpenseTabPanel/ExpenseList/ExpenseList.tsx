@@ -1,5 +1,5 @@
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Box, Button, Grid2 as Grid } from "@mui/material";
+import { Box, Button, Grid2 as Grid, IconButton } from "@mui/material";
 import { ExpenseModel } from "@shared/models/Expense";
 import {
   ExpenseId,
@@ -138,14 +138,18 @@ const ExpenseList: React.FC<IExpenseList> = ({
                     collapsibleOpenIndex={openRowIndex}
                     onCollapseToggle={setOpenRowIndex}
                     actionIcons={(row) => [
-                      <EditOutlined
+                      <IconButton
                         onClick={() => {
                           handleActionClick(row, "edit");
                         }}
-                      />,
-                      <DeleteOutlined
+                      >
+                        <EditOutlined />
+                      </IconButton>,
+                      <IconButton
                         onClick={() => handleActionClick(row, "delete")}
-                      />,
+                      >
+                        <DeleteOutlined />
+                      </IconButton>,
                     ]}
                     collapsibleContent={(row, index) => {
                       return (

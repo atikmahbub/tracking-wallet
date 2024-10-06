@@ -42,6 +42,10 @@ export const CreateExpenseSchema = Yup.object({
             return false; // Invalid if it doesn't match the format or is negative
           }
         ),
+      [EAddExpenseFields.DESCRIPTION]: Yup.string().max(
+        128,
+        "Max 256 character allowed"
+      ),
     })
   ),
 });

@@ -118,7 +118,6 @@ const DataTable: React.FC<DataTableProps> = ({
                     >
                       <Box sx={{ margin: 1 }}>
                         {collapsibleContent(row, index)}{" "}
-                        {/* Pass both row and index */}
                       </Box>
                     </Collapse>
                   </TableCell>
