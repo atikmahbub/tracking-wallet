@@ -47,3 +47,18 @@ model MonthlyLimit{
   @@index([userId], name: "monthly_limit_user_id_index")
   @@unique([userId,month,year], name: "user_month_year_unique")
 }
+
+enum LoanType {
+  GIVEN
+  TAKEN
+}
+
+model Loan{
+  id        Bytes     @id     @db.Binary(16)
+  loanType  LoanType
+  name      String            @db.VarChar(128)
+  amount    Float
+  deadLine  DateTime?
+  created   DateTime              @default(now())
+  updated   DateTime              @updatedAt
+}
