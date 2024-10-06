@@ -94,10 +94,16 @@ const Summary: React.FC<ISummary> = ({
         </Box>
         <Box display="flex" gap={1} alignItems="center">
           <Typography variant="h5">Total Spend:</Typography>
-          <Typography variant="h6">
-            {convertToKilo(totalExpense)}{" "}
-            {monthLimit?.limit ? `(${expensePercentage.toFixed(2)}%)` : ""}
-          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Typography variant="h6">{convertToKilo(totalExpense)} </Typography>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              color={expensePercentage > 100 ? "error" : "unset"}
+            >
+              {monthLimit?.limit ? `(${expensePercentage.toFixed(2)}%)` : ""}
+            </Typography>
+          </Stack>
         </Box>
         <Box display="flex" gap={1} alignItems="center">
           <Typography variant="h5">Limit:</Typography>
