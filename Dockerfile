@@ -7,9 +7,6 @@ WORKDIR /app
 # Copy the root package.json and yarn.lock first (for caching)
 COPY package.json yarn.lock ./
 
-# Install dependencies for the whole monorepo using Yarn workspaces
-RUN yarn install --frozen-lockfile
-
 # Copy the rest of the application files
 COPY . .
 
