@@ -7,18 +7,22 @@ WORKDIR /app
 # Copy the root package.json and yarn.lock first (for caching)
 COPY package.json yarn.lock ./
 
+# Copy the root tsconfig.json to ensure TypeScript can find it
+COPY tsconfig.json ./
+
 # Copy the rest of the monorepo files, including packages folder
 COPY packages ./packages
-
-COPY tsconfig.json ./
 
 # Install all dependencies using Yarn Workspaces
 RUN yarn install --frozen-lockfile --production=false
 
-# Generate Prisma Client in case you're using Prisma
+# Generate Prisma Client
 RUN yarn workspace tracking run prisma generate
 
-# Build the shared and tracking workspaces using their respective tsconfig.json files
+# Run Prisma migrations
+RUN yarn workspace tracking run prisma migrate deploy
+
+# Build the shared and tracking workspaces
 RUN yarn workspace shared run build
 RUN yarn workspace tracking run build
 
