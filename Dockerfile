@@ -10,6 +10,8 @@ COPY package.json yarn.lock ./
 # Copy the rest of the monorepo files, including packages folder
 COPY packages ./packages
 
+COPY tsconfig.json ./
+
 # Install all dependencies using Yarn Workspaces
 RUN yarn install --frozen-lockfile --production=false
 
