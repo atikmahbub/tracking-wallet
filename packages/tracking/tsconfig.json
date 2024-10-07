@@ -9,7 +9,7 @@
     "baseUrl": "./src",
     "paths": {
       "@tracking/*": ["*"],
-      "@shared/*": ["../../shared/src/*"]
+      "@shared/*": ["../../shared/dist/*"]
     }
   },
   "include": ["src/**/*", "../shared/src/**/*.d.ts"],

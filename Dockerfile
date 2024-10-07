@@ -1,11 +1,17 @@
 # Use a Node.js LTS image as the base
 FROM node:18-alpine
 
+# Install Yarn globally
+RUN npm install -g yarn
+
 # Set the working directory in the container
 WORKDIR /app
 
 # Copy the root package.json and yarn.lock first (for caching)
 COPY package.json yarn.lock ./
+
+# Install dependencies
+RUN yarn install
 
 # Copy the rest of the application files
 COPY . .
