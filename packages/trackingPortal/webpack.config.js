@@ -91,10 +91,13 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: "./public/site.webmanifest", to: "site.webmanifest" }, // Copy manifest file
+        { from: "./public/favicon/favicon.ico", to: "favicon.ico" },
+        { from: "./public/logo192.png", to: "logo192.png" },
+        { from: "./public/logo512.png", to: "logo512.png" },
       ],
     }),
     new webpack.DefinePlugin({
-      "process.env": JSON.stringify(process.env), // Define environment variables
+      "process.env": JSON.stringify(process.env),
     }),
   ],
   devServer: {

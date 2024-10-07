@@ -29,6 +29,9 @@
     "react-router": "^6.26.2",
     "react-router-dom": "^6.26.2",
     "url-join-ts": "^1.0.5",
+    "workbox-core": "^7.1.0",
+    "workbox-precaching": "^7.1.0",
+    "workbox-routing": "^7.1.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {

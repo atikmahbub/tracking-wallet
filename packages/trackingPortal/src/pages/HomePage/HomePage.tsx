@@ -7,7 +7,6 @@ import {
   ETabStep,
   TabNameValueMap,
   TabValueNameMap,
-  ETabName,
 } from "@trackingPortal/pages/HomePage";
 import ExpenseTabPanel from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 import LoanTabPanel from "@trackingPortal/pages/HomePage/LoanTabPanel";
@@ -47,6 +46,9 @@ const HomePage = () => {
         </TabPanel>
         <TabPanel value={value} index={ETabStep.Loan}>
           <LoanTabPanel />
+        </TabPanel>
+        <TabPanel value={value} index={ETabStep.Investment}>
+          Coming Soon!
         </TabPanel>
       </Grid2>
     </Grid2>

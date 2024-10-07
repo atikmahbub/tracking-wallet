@@ -17,7 +17,6 @@ const Auth0ProviderWithHistory = ({
   const domain = process.env.REACT_APP_AUTH0_DOMAIN;
   const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
   const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
-  const redirectUri = window.location.origin;
 
   if (!domain || !clientId || !audience) {
     throw new Error("Auth0 domain, clientId, or audience is missing");
@@ -31,6 +30,7 @@ const Auth0ProviderWithHistory = ({
       authorizationParams={{
         redirect_uri: window.location.origin,
         audience: audience,
+        scope: "openid profile email offline_access",
       }}
       useRefreshTokens={true}
       cacheLocation="localstorage"
