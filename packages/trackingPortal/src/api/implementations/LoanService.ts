@@ -24,7 +24,7 @@ export class LoanService implements ILoanService {
   }
 
   async getLoanByUserId(userId: UserId): Promise<LoanModel[]> {
-    const url = new URL(urlJoin(this.config.baseUrl, "v0", "expense", userId));
+    const url = new URL(urlJoin(this.config.baseUrl, "v0", "loan", userId));
     const response = await this.ajaxUtils.get(url);
 
     if (response.isOk()) {

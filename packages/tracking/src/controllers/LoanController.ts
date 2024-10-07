@@ -19,7 +19,7 @@ export class LoanController {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
 
-      const { userId, name, amount, deadLine, loanType } = req.body;
+      const { userId, name, amount, deadLine, loanType, note } = req.body;
 
       if (!name || !amount || !deadLine || !loanType) {
         throw new MissingFieldError("Fields are missing!");
@@ -28,9 +28,10 @@ export class LoanController {
       const newLoan = await this.loanService.addLoan({
         userId: userId,
         name: name,
-        amount: amount,
+        amount: Number(amount),
         deadLine: deadLine,
         loanType: loanType,
+        note: note,
       });
 
       res.status(201).json(newLoan);
@@ -61,15 +62,16 @@ export class LoanController {
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, amount, deadLine } = req.body;
+      const { name, amount, deadLine, note } = req.body;
 
       const updateLoan = await this.loanService.updateLoan({
         id: LoanId(id),
         name: name,
-        amount: amount,
+        amount: Number(amount),
         deadLine: deadLine,
+        note: note,
       });
-      res.status(201).json(updateLoan);
+      res.status(200).json(updateLoan);
     } catch (error) {
       next(error);
     }

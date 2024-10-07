@@ -7,4 +7,5 @@ export interface IAddLoanParams {
   amount: number;
   deadLine: UnixTimeStampString;
   loanType: LoanType;
+  note: string | null;
 }

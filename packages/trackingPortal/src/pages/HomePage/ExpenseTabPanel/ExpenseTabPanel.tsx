@@ -1,14 +1,11 @@
 import { Box, Grid2 as Grid, Typography } from "@mui/material";
 import MainCard from "@trackingPortal/components/MainCard";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Loader from "@trackingPortal/components/Loader";
 import Summary from "@trackingPortal/pages/HomePage/ExpenseTabPanel/Summary";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { ExpenseModel } from "@shared/models/Expense";
-import {
-  makeUnixTimestampString,
-  UnixTimeStampString,
-} from "@shared/primitives";
+import { UnixTimeStampString } from "@shared/primitives";
 import AddExpense from "@trackingPortal/pages/HomePage/ExpenseTabPanel/AddExpense";
 
 import ExpenseList from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseList";

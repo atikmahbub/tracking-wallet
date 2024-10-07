@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Loan` ADD COLUMN `note` VARCHAR(512) NULL;

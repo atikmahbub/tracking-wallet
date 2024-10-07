@@ -60,8 +60,9 @@ model Loan{
   name      String              @db.VarChar(128)
   amount    Float
   deadLine  DateTime?
-  userId      String
-  user        User              @relation(fields: [userId], references:[userId])  
+  note      String?             @db.VarChar(512)
+  userId    String
+  user      User                @relation(fields: [userId], references:[userId])  
   created   DateTime            @default(now())
   updated   DateTime            @updatedAt
 

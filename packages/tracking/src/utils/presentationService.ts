@@ -60,6 +60,7 @@ export class PresentationService {
       UserId(loan.userId),
       loan.name,
       loan.amount,
+      loan.note,
       loan.deadLine ? makeUnixTimestampString(loan.deadLine.getTime()) : null,
       loan.loanType === LoanType.GIVEN
         ? LoanTypeEnum.GIVEN

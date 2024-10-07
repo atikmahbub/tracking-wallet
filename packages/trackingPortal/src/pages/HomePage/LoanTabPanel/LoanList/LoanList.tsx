@@ -1,8 +1,8 @@
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Box, Button, Grid2 as Grid, IconButton } from "@mui/material";
-import { ExpenseModel } from "@shared/models/Expense";
 import {
   ExpenseId,
+  LoanId,
   makeUnixTimestampString,
   makeUnixTimestampToISOString,
 } from "@shared/primitives";
@@ -10,41 +10,44 @@ import MuiTable from "@trackingPortal/components/MuiTable";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import { Formik, Form, FieldArray } from "formik";
 import React, { useState } from "react";
-import {
-  CreateExpenseSchema,
-  EAddExpenseFields,
-} from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
+
 import LoadingButton from "@trackingPortal/components/@extended/LoadingButton";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
-import { IUpdateExpenseParams } from "@shared/params";
+import { IUpdateLoanParams } from "@shared/params";
 import toast from "react-hot-toast";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
 import dayjs from "dayjs";
+import { LoanModel } from "@shared/models";
+import {
+  EAddLoanFields,
+  AddLoanSchema,
+  loanTypeOptions,
+} from "@trackingPortal/pages/HomePage/LoanTabPanel";
+import SelectFieldWithTitle from "@trackingPortal/components/SelectFieldWithTitle";
+import { LoanType } from "@shared/enums";
 
-interface IExpenseList {
+interface ILoanList {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  expenses: ExpenseModel[];
-  getUserExpenses: () => void;
+  loans: LoanModel[];
+  getUserLoans: () => void;
 }
 
 const columns = [
-  { label: "Date", key: "date", align: "left" as const },
-  { label: "Description", key: "description", align: "left" as const },
+  { label: "Soft Deadline", key: "deadLine", align: "left" as const },
+  { label: "Type", key: "type", align: "left" as const },
+  { label: "Name", key: "name", align: "left" as const },
+  { label: "Note", key: "note", align: "left" as const },
   { label: "Amount", key: "amount", align: "right" as const },
 ];
 
-const ExpenseList: React.FC<IExpenseList> = ({
-  setLoading,
-  expenses,
-  getUserExpenses,
-}) => {
+const LoanList: React.FC<ILoanList> = ({ setLoading, loans, getUserLoans }) => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
   const [editingRowId, setEditingRowId] = useState<ExpenseId | null>(null);
   const { apiGateway, user } = useStoreContext();
 
   const handleActionClick = (row, action) => {
     if (action === "delete") {
-      row.id && handleDeleteExpense(row.id);
+      row.id && handleDeleteLoan(row.id);
     }
     if (action === "edit") {
       setOpenRowIndex((prevIndex) => {
@@ -54,11 +57,11 @@ const ExpenseList: React.FC<IExpenseList> = ({
     }
   };
 
-  const handleDeleteExpense = async (rowId) => {
+  const handleDeleteLoan = async (rowId) => {
     try {
       setLoading(true);
-      await apiGateway.expenseService.deleteExpense(rowId);
-      await getUserExpenses();
+      await apiGateway.loanServices.deleteLoan(rowId);
+      await getUserLoans();
       toast.success("Deleted Successfully!");
     } catch (error) {
       console.log("error", error);
@@ -67,25 +70,27 @@ const ExpenseList: React.FC<IExpenseList> = ({
     }
   };
 
-  const handleUpdateExpense = async (values, { resetForm }) => {
+  const handleUpdateLoan = async (values, { resetForm }) => {
     if (user.default) return;
+
     try {
       setLoading(true);
-      const openRowIndexId = openRowIndex !== null && expenses[openRowIndex].id; //* just to ensure the clicked row id as sometimes editingRowId is null for unknown reason
-      const updatedExpenseValues = values[EAddExpenseFields.EXPENSE_LIST].find(
+      const openRowIndexId = openRowIndex !== null && loans[openRowIndex].id; //* just to ensure the clicked row id as sometimes editingRowId is null for unknown reason
+      const updatedLoanValues = values[EAddLoanFields.LOAN_LIST].find(
         (expense) => expense.id === (editingRowId || openRowIndexId)
       );
 
-      const params: IUpdateExpenseParams = {
-        id: updatedExpenseValues.id as ExpenseId,
-        amount: updatedExpenseValues.amount,
-        date: makeUnixTimestampString(
-          Number(new Date(updatedExpenseValues.date))
+      const params: IUpdateLoanParams = {
+        id: updatedLoanValues.id as LoanId,
+        amount: updatedLoanValues.amount,
+        deadLine: makeUnixTimestampString(
+          Number(new Date(updatedLoanValues.deadLine))
         ),
-        description: updatedExpenseValues.description,
+        note: updatedLoanValues.note,
+        name: updatedLoanValues.name,
       };
-      await apiGateway.expenseService.updateExpense(params);
-      await getUserExpenses();
+      await apiGateway.loanServices.updateLoan(params);
+      await getUserLoans();
       await resetForm();
       handleCancel();
       toast.success("Updated Successfully!");
@@ -104,34 +109,40 @@ const ExpenseList: React.FC<IExpenseList> = ({
     <Box mt={4}>
       <Formik
         enableReinitialize
-        onSubmit={handleUpdateExpense}
+        onSubmit={handleUpdateLoan}
         initialValues={{
-          [EAddExpenseFields.EXPENSE_LIST]: expenses.map((item) => ({
+          [EAddLoanFields.LOAN_LIST]: loans?.map((item) => ({
             id: item.id,
-            [EAddExpenseFields.AMOUNT]: item.amount,
-            [EAddExpenseFields.DATE]: dayjs(
-              makeUnixTimestampToISOString(Number(item.date))
+            [EAddLoanFields.AMOUNT]: item.amount,
+            [EAddLoanFields.DEADLINE]: dayjs(
+              makeUnixTimestampToISOString(Number(item.deadLine))
             ).format("YYYY-MM-DD"),
-            [EAddExpenseFields.DESCRIPTION]: item.description,
+            [EAddLoanFields.NOTE]: item.note,
+            [EAddLoanFields.NAME]: item.name,
           })),
         }}
-        validationSchema={CreateExpenseSchema}
+        validationSchema={AddLoanSchema}
       >
         {({ resetForm, isSubmitting }) => {
           return (
             <Form>
               <FieldArray
-                name={EAddExpenseFields.EXPENSE_LIST}
+                name={EAddLoanFields.LOAN_LIST}
                 render={() => (
                   <MuiTable
                     columns={columns}
-                    data={expenses.map((item) => ({
+                    data={(loans || []).map((item) => ({
                       id: item.id,
-                      date: dayjs(
-                        makeUnixTimestampToISOString(Number(item.date))
-                      ).format("MMMM D, YYYY"),
-                      description: item.description,
+                      deadLine: item.deadLine
+                        ? dayjs(
+                            makeUnixTimestampToISOString(Number(item.deadLine))
+                          ).format("MMMM D, YYYY")
+                        : "N/A",
+                      note: item.note || "No note available",
                       amount: item.amount,
+                      name: item.name,
+                      type:
+                        item.loanType === LoanType.GIVEN ? "Given" : "Taken", // Mapping loanType to user-friendly labels
                     }))}
                     showRowNumber
                     collapsible={true}
@@ -155,30 +166,41 @@ const ExpenseList: React.FC<IExpenseList> = ({
                       return (
                         <Box pt={4} pb={4}>
                           <Grid container key={row.id} spacing={2}>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                              <DatePickerFieldWithTitle
-                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DATE}`}
-                                title="Date"
+                            <Grid size={{ xs: 12, md: 6 }}>
+                              <SelectFieldWithTitle
+                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.LOAN_TYPE}`}
+                                title="Loan Type"
+                                options={loanTypeOptions}
+                                defaultValue={LoanType.GIVEN}
                               />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <TextFieldWithTitle
-                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DESCRIPTION}`}
-                                title="Purpose"
+                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.NAME}`}
+                                title="Name"
                                 noWordLimit
                               />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <TextFieldWithTitle
-                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.AMOUNT}`}
+                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.AMOUNT}`}
                                 title="Amount"
                                 noWordLimit
-                                slotProps={{
-                                  htmlInput: {
-                                    inputMode: "numeric",
-                                    autoComplete: "off",
-                                  },
-                                }}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                              <DatePickerFieldWithTitle
+                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.DEADLINE}`}
+                                title="Soft Deadline"
+                              />
+                            </Grid>
+                            <Grid size={12}>
+                              <TextFieldWithTitle
+                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.NOTE}`}
+                                title="Add Note"
+                                multiline
+                                minRows={3}
+                                wordLength={512}
                               />
                             </Grid>
                             <Grid
@@ -221,4 +243,4 @@ const ExpenseList: React.FC<IExpenseList> = ({
   );
 };
 
-export default ExpenseList;
+export default LoanList;
