@@ -12,7 +12,7 @@ import LoanList from "@trackingPortal/pages/HomePage/LoanTabPanel/LoanList/LoanL
 
 const LoanTabPanel = () => {
   const { apiGateway, user } = useStoreContext();
-  const [loans, setLoans] = useState<LoanModel[]>();
+  const [loans, setLoans] = useState<LoanModel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {

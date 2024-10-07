@@ -48,6 +48,9 @@ export class LoanService {
         where: {
           userId: userId,
         },
+        orderBy: {
+          created: "desc",
+        },
       });
 
       return userLoans.map((userLoan) =>

@@ -50,15 +50,6 @@ const SelectFieldWithTitle: React.FC<SelectFieldWithTitleProps> = ({
               value={value}
               error={!!getIn(touched, name) && !!getIn(errors, name)}
               helperText={<>{getIn(touched, name) && getIn(errors, name)}</>}
-              sx={{
-                "& .MuiSelect-outlined": {
-                  display: "flex",
-                  alignItems: "center",
-                },
-                "& .MuiInputBase-input.Mui-disabled": {
-                  WebkitTextFillColor: "black",
-                },
-              }}
               onChange={(event) => {
                 setFieldValue(name, event.target.value);
                 onChangeCB && onChangeCB();
@@ -71,9 +62,6 @@ const SelectFieldWithTitle: React.FC<SelectFieldWithTitleProps> = ({
                 },
                 displayEmpty: true,
                 IconComponent: KeyboardArrowDownOutlinedIcon,
-                style: {
-                  backgroundColor: "#fff",
-                },
               }}
             >
               {options.map((option, index) => (

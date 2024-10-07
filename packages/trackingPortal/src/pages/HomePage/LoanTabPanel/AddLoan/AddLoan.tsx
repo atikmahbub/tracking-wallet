@@ -24,7 +24,6 @@ import { LoanModel } from "@shared/models";
 import { IAddLoanParams } from "@shared/params";
 import { convertKiloToNumber } from "@trackingPortal/utils/numberUtils";
 import { makeUnixTimestampString } from "@shared/primitives";
-import dayjs from "dayjs";
 
 interface IAddLoanProps {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -45,7 +44,7 @@ const AddLoan: React.FC<IAddLoanProps> = ({ setLoading, getUserLoans }) => {
           name: loan.name,
           amount: convertKiloToNumber(loan.amount),
           deadLine: makeUnixTimestampString(
-            Number(new Date(loan.deadline.toDate()))
+            Number(new Date(loan.deadLine.toDate()))
           ),
           loanType: loan.loan_type,
           note: loan.note,

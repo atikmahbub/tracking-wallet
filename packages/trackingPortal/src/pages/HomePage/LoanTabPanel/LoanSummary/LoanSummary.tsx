@@ -14,7 +14,7 @@ const LoanSummary: React.FC<ILoanSummary> = ({ totalBorrowed, totalGiven }) => {
       <Stack spacing={2}>
         <Box display="flex" gap={1} alignItems="center">
           <Typography variant="h5">Total Given:</Typography>
-          <Typography variant="h6">{totalGiven}</Typography>
+          <Typography variant="h6">{convertToKilo(totalGiven)}</Typography>
         </Box>
         <Box display="flex" gap={1} alignItems="center">
           <Typography variant="h5">Total Borrowed:</Typography>
