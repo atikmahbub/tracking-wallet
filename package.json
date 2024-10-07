@@ -2,7 +2,7 @@
   "name": "tracking-wallet",
   "version": "1.0.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "",
   "workspaces": [
     "packages/tracking",
     "packages/trackingPortal",
