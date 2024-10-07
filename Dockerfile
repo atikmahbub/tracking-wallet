@@ -15,7 +15,7 @@ COPY packages ./packages
 RUN yarn install --frozen-lockfile --production=false
 
 # Generate Prisma Client in case you're using Prisma
-RUN yarn workspace @tracking run prisma generate
+RUN yarn workspace tracking run prisma generate
 
 # Build the backend (tracking) and shared packages
 RUN yarn workspace shared run build && yarn workspace tracking run build
