@@ -4,7 +4,7 @@ FROM node:20-alpine
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the root package.json and yarn.lock first (for caching)
+# Copy the root package.json and yarn.lock for caching
 COPY package.json yarn.lock ./
 
 # Copy the root tsconfig.json to ensure TypeScript can find it
@@ -16,11 +16,8 @@ COPY packages ./packages
 # Install all dependencies using Yarn Workspaces
 RUN yarn install --frozen-lockfile --production=false
 
-# Generate Prisma Client
+# Generate Prisma Client (can be done during build)
 RUN yarn workspace tracking run prisma generate
-
-# Run Prisma migrations
-RUN yarn workspace tracking run prisma migrate deploy
 
 # Build the shared and tracking workspaces
 RUN yarn workspace shared run build
@@ -32,5 +29,5 @@ WORKDIR /app/packages/tracking
 # Expose the port on which the backend will run
 EXPOSE 3000
 
-# Start the backend (tracking)
-CMD ["yarn", "start"]
+# Start the backend (tracking), and run migrations before starting the server
+CMD ["sh", "-c", "yarn prisma migrate deploy && yarn start"]
