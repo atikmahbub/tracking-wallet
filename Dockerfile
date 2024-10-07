@@ -1,8 +1,4 @@
-# Use a Node.js LTS image as the base
-FROM node:18-alpine
-
-# Install Yarn globally
-RUN npm install -g yarn
+FROM node:20-alpine
 
 # Set the working directory in the container
 WORKDIR /app
@@ -23,7 +19,7 @@ RUN yarn build:shared && yarn build:backend
 WORKDIR /app/packages/tracking
 
 # Expose the port on which the backend will run
-EXPOSE 3000
+EXPOSE 4000
 
 # Start the backend (tracking)
 CMD ["yarn", "start"]
