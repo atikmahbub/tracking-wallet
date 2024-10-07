@@ -1,5 +1,10 @@
-import { ExpenseModel, UserModel, MonthlyLimitModel } from "@shared/models";
-import { Expense, MonthlyLimit, User } from "@prisma/client";
+import {
+  ExpenseModel,
+  UserModel,
+  MonthlyLimitModel,
+  LoanModel,
+} from "@shared/models";
+import { Expense, Loan, LoanType, MonthlyLimit, User } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
   makeUnixTimestampString,
@@ -9,7 +14,9 @@ import {
   Year,
   MonthlyLimitId,
   URLString,
+  LoanId,
 } from "@shared/primitives";
+import { LoanType as LoanTypeEnum } from "@shared/enums";
 
 export class PresentationService {
   public toExpenseModel(expense: Expense): ExpenseModel {
@@ -44,6 +51,21 @@ export class PresentationService {
       URLString(user.profilePicture),
       makeUnixTimestampString(user.updated.getTime()),
       makeUnixTimestampString(user.created.getTime())
+    );
+  }
+
+  public toLoanModel(loan: Loan): LoanModel {
+    return new LoanModel(
+      LoanId(uuidBuffer.toString(loan.id)),
+      UserId(loan.userId),
+      loan.name,
+      loan.amount,
+      loan.deadLine ? makeUnixTimestampString(loan.deadLine.getTime()) : null,
+      loan.loanType === LoanType.GIVEN
+        ? LoanTypeEnum.GIVEN
+        : LoanTypeEnum.TAKEN,
+      makeUnixTimestampString(loan.updated.getTime()),
+      makeUnixTimestampString(loan.created.getTime())
     );
   }
 }

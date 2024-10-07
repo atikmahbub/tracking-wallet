@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../../.env" });
 
 import express, { Application } from "express";
 import cors from "cors";
@@ -15,6 +15,9 @@ import UserService from "@tracking/services/UserService";
 import UserRoutes from "@tracking/routes/UserRouter";
 import UserController from "@tracking/controllers/UserController";
 import { authenticateToken } from "@tracking/middlewares/authenticateToken";
+import { LoanService } from "@tracking/services/LoanService";
+import { LoanController } from "@tracking/controllers/LoanController";
+import LoanRoutes from "@tracking/routes/LoanRoutes";
 
 const app: Application = express();
 const prisma = new PrismaClient();
@@ -36,9 +39,14 @@ const userService = new UserService(prisma);
 const userController = new UserController(userService);
 const userRoutes = new UserRoutes(userController);
 
+const loanService = new LoanService(prisma);
+const loanController = new LoanController(loanService);
+const loanRoutes = new LoanRoutes(loanController);
+
 app.use("/api/v0", expenseRoutes.registerExpenseRoutes());
 app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
 app.use("/api/v0", userRoutes.registerUserRouter());
+app.use("/api/v0", loanRoutes.registerLoanRoutes());
 
 app.use(errorHandler);
 

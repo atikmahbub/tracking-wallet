@@ -6,3 +6,6 @@ export * from "@shared/params/IAddUserParams";
 export * from "@shared/params/IUpdateUserParams";
 export * from "@shared/params/IUpdateExpenseParams";
 export * from "@shared/params/IUpdateMonthlyLimitParams";
+export * from "@shared/params/IAddExpenseParams";
+export * from "@shared/params/IAddLoanParams";
+export * from "@shared/params/IUpdateLoanParams";

@@ -17,6 +17,7 @@ model User {
 
   expenses          Expense[]       
   monthlyLimits     MonthlyLimit[]
+  loan              Loan[]
 
   @@index([email], name: "user_email_index")
 }
@@ -35,14 +36,14 @@ model Expense {
 }
 
 model MonthlyLimit{
-  id          Bytes   @id  @db.Binary(16)
+  id          Bytes       @id   @db.Binary(16)
   month       Int
   year        Int
   limit       Float
-  created     DateTime    @default(now())
-  updated     DateTime    @updatedAt
+  created     DateTime          @default(now())
+  updated     DateTime          @updatedAt
   userId      String
-  user        User    @relation(fields: [userId], references:[userId])
+  user        User              @relation(fields: [userId], references:[userId])
 
   @@index([userId], name: "monthly_limit_user_id_index")
   @@unique([userId,month,year], name: "user_month_year_unique")
@@ -54,11 +55,15 @@ enum LoanType {
 }
 
 model Loan{
-  id        Bytes     @id     @db.Binary(16)
+  id        Bytes       @id     @db.Binary(16)
   loanType  LoanType
-  name      String            @db.VarChar(128)
+  name      String              @db.VarChar(128)
   amount    Float
   deadLine  DateTime?
-  created   DateTime              @default(now())
-  updated   DateTime              @updatedAt
+  userId      String
+  user        User              @relation(fields: [userId], references:[userId])  
+  created   DateTime            @default(now())
+  updated   DateTime            @updatedAt
+
+  @@index([userId], name: "loan_user_id_index")
 }

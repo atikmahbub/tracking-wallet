@@ -28,6 +28,7 @@ export const authenticateToken = (
 ) => {
   checkJwt(req, res, (err: any) => {
     if (err) {
+      console.log("22", err, process.env);
       return next(new UnAuthorizedError("Token is invalid or missing"));
     }
     next();
