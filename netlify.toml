@@ -1,0 +1,26 @@
+[build]
+  # Set the base directory for the frontend app
+  base = "packages/trackingPortal"
+  # The directory where Netlify will publish the site
+  publish = "packages/trackingPortal/dist"
+  # Command to install all packages and then build them
+  command = "yarn install && yarn build:all"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-monorepo"
+
+[dev]
+  command = "yarn start"
+  framework = "react"
+  targetPort = 3000
+  port = 8888
+
+# Redirect rule to ensure index.html is served for React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
