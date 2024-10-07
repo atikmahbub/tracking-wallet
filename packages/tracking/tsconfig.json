@@ -5,6 +5,7 @@
     "outDir": "./dist", // Where the compiled files go
     "rootDir": "./src", // Root directory for source files
     "composite": true, // Enable project references
+    "esModuleInterop": true,
     "moduleResolution": "node",
     "baseUrl": "./src",
     "paths": {
