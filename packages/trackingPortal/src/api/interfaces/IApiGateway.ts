@@ -2,6 +2,7 @@ import {
   ExpenseService,
   UserService,
   MonthlyLimitService,
+  LoanService,
 } from "@trackingPortal/api/implementations";
 import { TrackingWalletConfig } from "@trackingPortal/api/TrackingWalletConfig";
 import { IAxiosAjaxUtils } from "@trackingPortal/api/utils/IAxiosAjaxUtils";
@@ -12,4 +13,5 @@ export interface IApiGateWay {
   userService: UserService;
   expenseService: ExpenseService;
   monthlyLimitService: MonthlyLimitService;
+  loanServices: LoanService;
 }

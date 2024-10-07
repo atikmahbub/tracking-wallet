@@ -5,6 +5,7 @@ import React, { useState } from "react";
 
 import { tabItems, ETabStep } from "@trackingPortal/pages/HomePage";
 import ExpenseTabPanel from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
+import LoanTabPanel from "@trackingPortal/pages/HomePage/LoanTabPanel";
 
 const HomePage = () => {
   const { user } = useAuth0();
@@ -22,6 +23,9 @@ const HomePage = () => {
       <Grid2 size={12} mt={5}>
         <TabPanel value={value} index={ETabStep.Expense}>
           <ExpenseTabPanel />
+        </TabPanel>
+        <TabPanel value={value} index={ETabStep.Loan}>
+          <LoanTabPanel />
         </TabPanel>
       </Grid2>
     </Grid2>

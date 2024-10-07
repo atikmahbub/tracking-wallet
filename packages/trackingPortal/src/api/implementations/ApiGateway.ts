@@ -1,5 +1,6 @@
 import {
   ExpenseService,
+  LoanService,
   MonthlyLimitService,
   UserService,
 } from "@trackingPortal/api/implementations";
@@ -14,6 +15,7 @@ export class ApiGateway implements IApiGateWay {
   public userService: UserService;
   public expenseService: ExpenseService;
   public monthlyLimitService: MonthlyLimitService;
+  public loanServices: LoanService;
 
   constructor() {
     this.config = new TrackingWalletConfig(
@@ -27,5 +29,6 @@ export class ApiGateway implements IApiGateWay {
       this.config,
       this.ajaxUtils
     );
+    this.loanServices = new LoanService(this.config, this.ajaxUtils);
   }
 }
