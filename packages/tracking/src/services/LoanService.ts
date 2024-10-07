@@ -37,8 +37,6 @@ export class LoanService {
       });
       return this.presentationService.toLoanModel(newLoan);
     } catch (error) {
-      console.log("22", error);
-
       throw new DatabaseError("error in creating the loan");
     }
   }
