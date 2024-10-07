@@ -18,7 +18,7 @@ RUN yarn workspace tracking run prisma generate
 
 # Build the shared and tracking workspaces using their respective tsconfig.json files
 RUN yarn workspace shared run build
-RUN yarn workspace tracking run build --project ./packages/tracking/tsconfig.json
+RUN yarn workspace tracking run build
 
 # Set the working directory to the backend (tracking)
 WORKDIR /app/packages/tracking

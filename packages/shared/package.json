@@ -5,7 +5,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "tsc --project ./tsconfig.json"
+    "build": "tsc"
   },
   "dependencies": {
     "ts-brand": "^0.2.0"
