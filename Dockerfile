@@ -4,13 +4,13 @@ FROM node:18-alpine
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the root package.json and yarn.lock files first (for caching)
+# Copy the root package.json and yarn.lock first (for caching)
 COPY package.json yarn.lock ./
 
-# Install dependencies for the whole monorepo
-RUN yarn install
+# Install dependencies for the whole monorepo using Yarn workspaces
+RUN yarn install --frozen-lockfile
 
-# Copy the rest of the application code
+# Copy the rest of the application files
 COPY . .
 
 # Build the backend (tracking) and shared packages
