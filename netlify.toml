@@ -2,7 +2,7 @@
   # Set the base directory to the root (where the scripts exist)
   base = "/"
   # The directory where Netlify will publish the frontend build
-  publish = "packages/trackingPortal/dist/"
+  publish = "packages/trackingPortal/dist"
   # Command to install all packages and then build them from the root
   command = "yarn install && yarn build:shared && yarn build:frontend"
 
@@ -19,4 +19,3 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  force = true
