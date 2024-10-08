@@ -5,24 +5,46 @@ import Loader from "@trackingPortal/components/Loader";
 import Summary from "@trackingPortal/pages/HomePage/ExpenseTabPanel/Summary";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { ExpenseModel } from "@shared/models/Expense";
-import { UnixTimeStampString } from "@shared/primitives";
+import { Month, UnixTimeStampString, Year } from "@shared/primitives";
 import AddExpense from "@trackingPortal/pages/HomePage/ExpenseTabPanel/AddExpense";
 
 import ExpenseList from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseList";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
+import { MonthlyLimitModel } from "@shared/models";
 
 const ExpenseTabPanel = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [expenses, setExpenses] = useState<ExpenseModel[]>([]);
   const { apiGateway, user } = useStoreContext();
   const [filterMonth, setFilterMonth] = useState<Dayjs>(dayjs(new Date()));
+  const [monthLimit, setMonthLimit] = useState<MonthlyLimitModel>(
+    {} as MonthlyLimitModel
+  );
 
   useEffect(() => {
-    if (!user.default) {
+    if (user.userId && !user.default) {
+      getMonthlyLimit();
       getUserExpenses();
     }
-  }, [user]);
+  }, [user, filterMonth]);
+
+  const getMonthlyLimit = async () => {
+    try {
+      setLoading(true);
+      const monthlyLimit =
+        await apiGateway.monthlyLimitService.getMonthlyLimitByUserId({
+          userId: user.userId,
+          month: (filterMonth.month() + 1) as Month,
+          year: filterMonth.year() as Year,
+        });
+      setMonthLimit(monthlyLimit);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getUserExpenses = async () => {
     try {
@@ -44,17 +66,18 @@ const ExpenseTabPanel = () => {
     return acc;
   }, 0);
 
-  // if (loading) {
-  //   return <Loader />;
-  // }
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 4 }}>
         <Summary
           totalExpense={totalExpense}
-          setLoading={setLoading}
           filterMonth={filterMonth}
+          monthLimit={monthLimit}
+          getMonthlyLimit={getMonthlyLimit}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
@@ -84,7 +107,6 @@ const ExpenseTabPanel = () => {
           />
           {!!expenses.length && !loading ? (
             <ExpenseList
-              setLoading={setLoading}
               expenses={expenses}
               getUserExpenses={getUserExpenses}
             />

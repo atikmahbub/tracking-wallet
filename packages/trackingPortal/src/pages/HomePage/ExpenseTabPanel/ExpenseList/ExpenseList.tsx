@@ -20,9 +20,9 @@ import { IUpdateExpenseParams } from "@shared/params";
 import toast from "react-hot-toast";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
 import dayjs from "dayjs";
+import Loader from "@trackingPortal/components/Loader";
 
 interface IExpenseList {
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   expenses: ExpenseModel[];
   getUserExpenses: () => void;
 }
@@ -33,14 +33,11 @@ const columns = [
   { label: "Amount", key: "amount", align: "right" as const },
 ];
 
-const ExpenseList: React.FC<IExpenseList> = ({
-  setLoading,
-  expenses,
-  getUserExpenses,
-}) => {
+const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
   const [editingRowId, setEditingRowId] = useState<ExpenseId | null>(null);
   const { apiGateway, user } = useStoreContext();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleActionClick = (row, action) => {
     if (action === "delete") {
@@ -99,6 +96,10 @@ const ExpenseList: React.FC<IExpenseList> = ({
   const handleCancel = () => {
     setOpenRowIndex(null);
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <Box mt={4}>

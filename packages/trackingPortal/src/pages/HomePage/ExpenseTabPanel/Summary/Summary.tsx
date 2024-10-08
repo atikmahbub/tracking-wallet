@@ -7,51 +7,31 @@ import {
   convertToKilo,
 } from "@trackingPortal/utils/numberUtils";
 import { Formik, Form } from "formik";
-import React, { SetStateAction, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { MonthlyLimitModel } from "@shared/models/MonthlyLimit";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { Month, Year } from "@shared/primitives";
 import { EMonthlyLimitFields } from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 import { toast } from "react-hot-toast";
 import dayjs, { Dayjs } from "dayjs";
+import Loader from "@trackingPortal/components/Loader";
 
 interface ISummary {
   totalExpense: number;
-  setLoading: React.Dispatch<SetStateAction<boolean>>;
   filterMonth: Dayjs;
+  monthLimit: MonthlyLimitModel;
+  getMonthlyLimit: () => void;
 }
 
 const Summary: React.FC<ISummary> = ({
-  setLoading,
   totalExpense,
   filterMonth,
+  monthLimit,
+  getMonthlyLimit,
 }) => {
   const [openLimit, setOpenLimit] = useState<boolean>(false);
   const { apiGateway, user } = useStoreContext();
-  const [monthLimit, setMonthLimit] = useState<MonthlyLimitModel>();
-
-  useEffect(() => {
-    if (user.userId && !user.default) {
-      getMonthlyLimit();
-    }
-  }, [user, filterMonth]);
-
-  const getMonthlyLimit = async () => {
-    try {
-      setLoading(true);
-      const monthlyLimit =
-        await apiGateway.monthlyLimitService.getMonthlyLimitByUserId({
-          userId: user.userId,
-          month: (filterMonth.month() + 1) as Month,
-          year: filterMonth.year() as Year,
-        });
-      setMonthLimit(monthlyLimit);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSaveMonthlyLimit = async (values) => {
     try {
@@ -85,6 +65,10 @@ const Summary: React.FC<ISummary> = ({
     () => (totalExpense * 100) / (monthLimit?.limit ?? 0),
     [monthLimit, totalExpense]
   );
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <MainCard title="Summary">
