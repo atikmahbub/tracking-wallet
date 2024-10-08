@@ -22,7 +22,7 @@ const ExpenseTabPanel = () => {
     if (!user.default) {
       getUserExpenses();
     }
-  }, [user, filterMonth]);
+  }, [user]);
 
   const getUserExpenses = async () => {
     try {
@@ -44,9 +44,12 @@ const ExpenseTabPanel = () => {
     return acc;
   }, 0);
 
+  // if (loading) {
+  //   return <Loader />;
+  // }
+
   return (
     <Grid container spacing={3}>
-      {loading && <Loader />}
       <Grid size={{ xs: 12, md: 4 }}>
         <Summary
           totalExpense={totalExpense}
@@ -76,16 +79,17 @@ const ExpenseTabPanel = () => {
           }
         >
           <AddExpense
-            setLoading={setLoading}
             getUserExpenses={getUserExpenses}
             filterMonth={filterMonth}
           />
-          {!!expenses.length && !loading && (
+          {!!expenses.length && !loading ? (
             <ExpenseList
               setLoading={setLoading}
               expenses={expenses}
               getUserExpenses={getUserExpenses}
             />
+          ) : (
+            <Typography variant="h6">No data found!</Typography>
           )}
         </MainCard>
       </Grid>

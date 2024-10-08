@@ -12,7 +12,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Formik, Form, FieldArray } from "formik";
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import {
   EAddExpenseFields,
   CreateExpenseSchema,
@@ -32,19 +32,19 @@ import { convertKiloToNumber } from "@trackingPortal/utils/numberUtils";
 import { toast } from "react-hot-toast";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
 import dayjs, { Dayjs } from "dayjs";
+import Loader from "@trackingPortal/components/Loader";
 
 interface IAddExpenseProps {
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   getUserExpenses: () => void;
   filterMonth: Dayjs;
 }
 
 const AddExpense: React.FC<IAddExpenseProps> = ({
-  setLoading,
   getUserExpenses,
   filterMonth,
 }) => {
   const { apiGateway, user } = useStoreContext();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleAddExpense = async (values: IAddExpense, { resetForm }) => {
     if (user.default) return;
@@ -78,6 +78,10 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <Formik

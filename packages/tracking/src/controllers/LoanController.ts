@@ -49,7 +49,7 @@ export class LoanController {
       AuthenticationUtils.assureUserHasUserId(req);
       const { userId } = req.params;
       const userLoans = await this.loanService.getLoanByUserId(UserId(userId));
-      res.status(201).json(userLoans);
+      res.status(200).json(userLoans);
     } catch (error) {
       next(error);
     }

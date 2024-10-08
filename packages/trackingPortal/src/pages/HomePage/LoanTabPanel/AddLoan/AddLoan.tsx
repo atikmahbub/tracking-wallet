@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import { FieldArray, Form, Formik } from "formik";
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import {
   IAddLoan,
   EAddLoanFields,
@@ -31,14 +31,15 @@ import { LoanModel } from "@shared/models";
 import { IAddLoanParams } from "@shared/params";
 import { convertKiloToNumber } from "@trackingPortal/utils/numberUtils";
 import { makeUnixTimestampString } from "@shared/primitives";
+import Loader from "@trackingPortal/components/Loader";
 
 interface IAddLoanProps {
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   getUserLoans: () => void;
 }
 
-const AddLoan: React.FC<IAddLoanProps> = ({ setLoading, getUserLoans }) => {
+const AddLoan: React.FC<IAddLoanProps> = ({ getUserLoans }) => {
   const { apiGateway, user } = useStoreContext();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleAddLoan = async (values: IAddLoan, { resetForm }) => {
     if (user.default) return;
@@ -72,6 +73,9 @@ const AddLoan: React.FC<IAddLoanProps> = ({ setLoading, getUserLoans }) => {
     }
   };
 
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <Formik
       initialValues={{ [EAddLoanFields.LOAN_LIST]: [] }}

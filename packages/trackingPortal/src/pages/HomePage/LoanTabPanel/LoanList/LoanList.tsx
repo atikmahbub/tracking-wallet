@@ -25,9 +25,9 @@ import {
 } from "@trackingPortal/pages/HomePage/LoanTabPanel";
 import SelectFieldWithTitle from "@trackingPortal/components/SelectFieldWithTitle";
 import { LoanType } from "@shared/enums";
+import Loader from "@trackingPortal/components/Loader";
 
 interface ILoanList {
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   loans: LoanModel[];
   getUserLoans: () => void;
 }
@@ -40,10 +40,11 @@ const columns = [
   { label: "Amount", key: "amount", align: "right" as const },
 ];
 
-const LoanList: React.FC<ILoanList> = ({ setLoading, loans, getUserLoans }) => {
+const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
   const [editingRowId, setEditingRowId] = useState<ExpenseId | null>(null);
   const { apiGateway, user } = useStoreContext();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleActionClick = (row, action) => {
     if (action === "delete") {
@@ -104,6 +105,10 @@ const LoanList: React.FC<ILoanList> = ({ setLoading, loans, getUserLoans }) => {
   const handleCancel = () => {
     setOpenRowIndex(null);
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <Box mt={4}>
