@@ -13,7 +13,7 @@ const root = createRoot(container!);
 root.render(
   <ConfigProvider>
     <Toaster position="top-center" />
-    <BrowserRouter>
+    <BrowserRouter basename="/">
       <MainContainer />
     </BrowserRouter>
   </ConfigProvider>
