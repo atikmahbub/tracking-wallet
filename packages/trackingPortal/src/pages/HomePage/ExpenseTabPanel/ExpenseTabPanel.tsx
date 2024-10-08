@@ -26,6 +26,7 @@ const ExpenseTabPanel = () => {
 
   const getUserExpenses = async () => {
     try {
+      setLoading(true);
       const expenses = await apiGateway.expenseService.getExpenseByUser({
         userId: user.userId,
         date: dayjs(filterMonth).unix() as unknown as UnixTimeStampString,
@@ -33,6 +34,8 @@ const ExpenseTabPanel = () => {
       setExpenses(expenses);
     } catch (error) {
       console.log("error", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,14 +80,12 @@ const ExpenseTabPanel = () => {
             getUserExpenses={getUserExpenses}
             filterMonth={filterMonth}
           />
-          {!!expenses.length && !loading ? (
+          {!!expenses.length && !loading && (
             <ExpenseList
               setLoading={setLoading}
               expenses={expenses}
               getUserExpenses={getUserExpenses}
             />
-          ) : (
-            <Typography variant="h6">No Data Found!</Typography>
           )}
         </MainCard>
       </Grid>

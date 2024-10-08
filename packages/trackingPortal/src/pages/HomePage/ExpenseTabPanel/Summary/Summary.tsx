@@ -2,7 +2,10 @@ import { LoadingButton } from "@mui/lab";
 import { Stack, Box, Typography, Button, Collapse } from "@mui/material";
 import MainCard from "@trackingPortal/components/MainCard";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
-import { convertToKilo } from "@trackingPortal/utils/numberUtils";
+import {
+  convertKiloToNumber,
+  convertToKilo,
+} from "@trackingPortal/utils/numberUtils";
 import { Formik, Form } from "formik";
 import React, { SetStateAction, useEffect, useMemo, useState } from "react";
 import { MonthlyLimitModel } from "@shared/models/MonthlyLimit";
@@ -56,13 +59,13 @@ const Summary: React.FC<ISummary> = ({
       if (monthLimit?.id) {
         await apiGateway.monthlyLimitService.updateMonthlyLimit({
           id: monthLimit.id,
-          limit: values.limit,
+          limit: convertKiloToNumber(values.limit),
         });
         toast.success("Limit updated successfully!");
       } else {
         await apiGateway.monthlyLimitService.addMonthlyLimit({
           userId: user.userId,
-          limit: values.limit,
+          limit: convertKiloToNumber(values.limit),
           month: (filterMonth.month() + 1) as Month,
           year: filterMonth.year() as Year,
         });
@@ -140,6 +143,12 @@ const Summary: React.FC<ISummary> = ({
                     value={values.limit}
                     title="Limit for this month"
                     noWordLimit
+                    slotProps={{
+                      htmlInput: {
+                        inputMode: "numeric",
+                        autoComplete: "off",
+                      },
+                    }}
                   />
                   <Box
                     display="flex"

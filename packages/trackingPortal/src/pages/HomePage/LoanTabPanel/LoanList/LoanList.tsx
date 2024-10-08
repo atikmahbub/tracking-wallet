@@ -186,6 +186,12 @@ const LoanList: React.FC<ILoanList> = ({ setLoading, loans, getUserLoans }) => {
                                 name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.AMOUNT}`}
                                 title="Amount"
                                 noWordLimit
+                                slotProps={{
+                                  htmlInput: {
+                                    inputMode: "numeric",
+                                    autoComplete: "off",
+                                  },
+                                }}
                               />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }}>

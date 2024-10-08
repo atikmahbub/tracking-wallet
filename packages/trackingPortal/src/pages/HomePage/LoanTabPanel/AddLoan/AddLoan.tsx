@@ -3,7 +3,14 @@ import {
   PlusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Box, Button, Divider, Grid2 as Grid, IconButton } from "@mui/material";
+import {
+  Box,
+  Button,
+  Collapse,
+  Divider,
+  Grid2 as Grid,
+  IconButton,
+} from "@mui/material";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import { FieldArray, Form, Formik } from "formik";
 import React, { Fragment } from "react";
@@ -96,6 +103,7 @@ const AddLoan: React.FC<IAddLoanProps> = ({ setLoading, getUserLoans }) => {
                           Add One
                         </Button>
                       </Box>
+
                       {values[EAddLoanFields.LOAN_LIST].map((item, index) => {
                         return (
                           <Grid
@@ -124,6 +132,12 @@ const AddLoan: React.FC<IAddLoanProps> = ({ setLoading, getUserLoans }) => {
                                 name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.AMOUNT}`}
                                 title="Amount"
                                 noWordLimit
+                                slotProps={{
+                                  htmlInput: {
+                                    inputMode: "numeric",
+                                    autoComplete: "off",
+                                  },
+                                }}
                               />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }}>
@@ -173,6 +187,7 @@ const AddLoan: React.FC<IAddLoanProps> = ({ setLoading, getUserLoans }) => {
                           </Grid>
                         );
                       })}
+
                       {!!values[EAddLoanFields.LOAN_LIST].length && (
                         <Box
                           display="flex"
