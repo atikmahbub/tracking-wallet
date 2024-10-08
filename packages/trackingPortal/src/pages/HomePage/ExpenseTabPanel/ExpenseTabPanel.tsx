@@ -15,6 +15,7 @@ import { MonthlyLimitModel } from "@shared/models";
 
 const ExpenseTabPanel = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [limitLoading, setLimitLoading] = useState<boolean>(false);
   const [expenses, setExpenses] = useState<ExpenseModel[]>([]);
   const { apiGateway, user } = useStoreContext();
   const [filterMonth, setFilterMonth] = useState<Dayjs>(dayjs(new Date()));
@@ -31,7 +32,7 @@ const ExpenseTabPanel = () => {
 
   const getMonthlyLimit = async () => {
     try {
-      setLoading(true);
+      setLimitLoading(true);
       const monthlyLimit =
         await apiGateway.monthlyLimitService.getMonthlyLimitByUserId({
           userId: user.userId,
@@ -42,7 +43,7 @@ const ExpenseTabPanel = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false);
+      setLimitLoading(false);
     }
   };
 
@@ -66,7 +67,7 @@ const ExpenseTabPanel = () => {
     return acc;
   }, 0);
 
-  if (loading) {
+  if (loading || limitLoading) {
     return <Loader />;
   }
 
@@ -111,7 +112,7 @@ const ExpenseTabPanel = () => {
               getUserExpenses={getUserExpenses}
             />
           ) : (
-            <Typography variant="h6">No data found!</Typography>
+            <Typography variant="h6">No Data Found!</Typography>
           )}
         </MainCard>
       </Grid>
