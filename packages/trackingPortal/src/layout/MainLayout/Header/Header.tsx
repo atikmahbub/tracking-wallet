@@ -98,8 +98,11 @@ export default function Header() {
         transformOrigin={{ horizontal: "left", vertical: "top" }}
         anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
       >
-        <MenuItem onClick={handleClose} sx={{ color: getMenuItemColor }}>
-          <ListItemIcon onClick={() => navigate(ERoutes.Profile)}>
+        <MenuItem
+          onClick={() => navigate(ERoutes.Profile)}
+          sx={{ color: getMenuItemColor }}
+        >
+          <ListItemIcon>
             <AccountCircleIcon
               fontSize="small"
               sx={{ color: getMenuItemColor }}
