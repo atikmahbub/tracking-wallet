@@ -105,7 +105,11 @@ export default function Header() {
           Profile
         </MenuItem>
         <MenuItem
-          onClick={() => withClose(logout)}
+          onClick={() =>
+            withClose(
+              logout({ logoutParams: { returnTo: window.location.origin } })
+            )
+          }
           sx={{ color: getMenuItemColor }}
         >
           <ListItemIcon>
