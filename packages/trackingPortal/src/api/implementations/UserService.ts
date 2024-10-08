@@ -17,7 +17,6 @@ export class UserService implements IUserService {
   async addUser(params: IAddUserParams): Promise<UserModel> {
     const url = new URL(urlJoin(this.config.baseUrl, "v0", "user", "add"));
 
-    console.log("22", url);
     const response = await this.ajaxUtils.post(url, { ...params });
 
     if (response.isOk()) {
