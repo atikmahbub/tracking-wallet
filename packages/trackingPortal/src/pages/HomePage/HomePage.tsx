@@ -32,7 +32,7 @@ const HomePage = () => {
   }, [value]);
 
   return (
-    <Grid2 container spacing={3} mt={10}>
+    <Grid2 container spacing={3} mt={{ xs: 5, md: 10 }}>
       <Grid2 size={12} display="flex" justifyContent="center">
         <MuiTabs
           value={value}
@@ -40,7 +40,7 @@ const HomePage = () => {
           tabItems={tabItems}
         />
       </Grid2>
-      <Grid2 size={12} mt={5}>
+      <Grid2 size={12} mt={{ xs: 1, md: 5 }}>
         <TabPanel value={value} index={ETabStep.Expense}>
           <ExpenseTabPanel />
         </TabPanel>

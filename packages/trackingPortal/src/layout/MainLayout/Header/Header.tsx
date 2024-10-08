@@ -11,12 +11,15 @@ import { useAuth0 } from "@auth0/auth0-react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Typography, Avatar, useTheme } from "@mui/material";
 import { getGreeting } from "@trackingPortal/utils/timeUtils";
+import { useNavigate } from "react-router-dom";
+import { ERoutes } from "@trackingPortal/routes/ERoutes";
 
 export default function Header() {
   const { user } = useStoreContext();
   const { logout } = useAuth0();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
+  const navigate = useNavigate();
 
   const getMenuItemColor = isDarkMode ? "#fff" : theme.palette.primary.dark;
 
@@ -96,7 +99,7 @@ export default function Header() {
         anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
       >
         <MenuItem onClick={handleClose} sx={{ color: getMenuItemColor }}>
-          <ListItemIcon>
+          <ListItemIcon onClick={() => navigate(ERoutes.Profile)}>
             <AccountCircleIcon
               fontSize="small"
               sx={{ color: getMenuItemColor }}

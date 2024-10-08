@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid2 as Grid } from "@mui/material";
+import { Grid2 as Grid, Typography } from "@mui/material";
 import MainCard from "@trackingPortal/components/MainCard";
 import LoanSummary from "@trackingPortal/pages/HomePage/LoanTabPanel/LoanSummary";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
@@ -62,11 +62,15 @@ const LoanTabPanel = () => {
       <Grid size={{ xs: 12, md: 8 }}>
         <MainCard title="Loan History">
           <AddLoan setLoading={setLoading} getUserLoans={getUserLoans} />
-          <LoanList
-            loans={loans}
-            setLoading={setLoading}
-            getUserLoans={getUserLoans}
-          />
+          {!!loans.length && !loading ? (
+            <LoanList
+              loans={loans}
+              setLoading={setLoading}
+              getUserLoans={getUserLoans}
+            />
+          ) : (
+            <Typography variant="h6">No data found</Typography>
+          )}
         </MainCard>
       </Grid>
     </Grid>

@@ -1,9 +1,13 @@
 import { lazy } from "react";
 import MainLayout from "layout/MainLayout";
 import Loadable from "components/Loadable";
+import path from "path";
 
 // Lazy-load the Expense component
 const HomePage = Loadable(lazy(() => import("@trackingPortal/pages/HomePage")));
+const ProfilePage = Loadable(
+  lazy(() => import("@trackingPortal/pages/ProfilePage"))
+);
 
 const MainRoutes = {
   path: "/",
@@ -13,6 +17,7 @@ const MainRoutes = {
       path: "expense",
       element: <HomePage />,
     },
+    { path: "profile", element: <ProfilePage /> },
   ],
 };
 
