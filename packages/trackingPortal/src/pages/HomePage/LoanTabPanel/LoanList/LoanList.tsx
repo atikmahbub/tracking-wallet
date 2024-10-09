@@ -1,7 +1,13 @@
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Box, Button, Grid2 as Grid, IconButton } from "@mui/material";
 import {
-  ExpenseId,
+  Box,
+  Button,
+  Grid2 as Grid,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import {
   LoanId,
   makeUnixTimestampString,
   makeUnixTimestampToISOString,
@@ -9,7 +15,7 @@ import {
 import MuiTable from "@trackingPortal/components/MuiTable";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import { Formik, Form, FieldArray } from "formik";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import LoadingButton from "@trackingPortal/components/@extended/LoadingButton";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
@@ -26,6 +32,7 @@ import {
 import SelectFieldWithTitle from "@trackingPortal/components/SelectFieldWithTitle";
 import { LoanType } from "@shared/enums";
 import Loader from "@trackingPortal/components/Loader";
+import AlertDialog from "@trackingPortal/components/AlertModal";
 
 interface ILoanList {
   loans: LoanModel[];
@@ -42,9 +49,29 @@ const columns = [
 
 const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
-  const [editingRowId, setEditingRowId] = useState<ExpenseId | null>(null);
+  const [editingRowId, setEditingRowId] = useState<LoanId | null>(null);
   const { apiGateway, user } = useStoreContext();
   const [loading, setLoading] = useState<boolean>(false);
+  const theme = useTheme();
+  const isMobileDevice = useMediaQuery(theme.breakpoints.down("sm"));
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const selectedRowIdRef = useRef<LoanId>("" as LoanId);
+
+  const columns = !isMobileDevice
+    ? [
+        { label: "Name", key: "name", align: "left" as const },
+        { label: "Type", key: "type", align: "left" as const },
+        { label: "Note", key: "note", align: "left" as const },
+        { label: "Date", key: "date", align: "left" as const },
+        { label: "Soft Deadline", key: "deadLine", align: "left" as const },
+        { label: "Amount", key: "amount", align: "right" as const },
+      ]
+    : [
+        { label: "Name", key: "name", align: "left" as const },
+        { label: "Type", key: "type", align: "left" as const },
+        { label: "Date", key: "date", align: "left" as const },
+        { label: "Amount", key: "amount", align: "right" as const },
+      ];
 
   const handleActionClick = (row, action) => {
     if (action === "delete") {
@@ -138,6 +165,9 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
                     columns={columns}
                     data={(loans || []).map((item) => ({
                       id: item.id,
+                      date: dayjs(
+                        makeUnixTimestampToISOString(Number(item.created))
+                      ).format("MMMM D, YYYY"),
                       deadLine: item.deadLine
                         ? dayjs(
                             makeUnixTimestampToISOString(Number(item.deadLine))
@@ -149,7 +179,7 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
                       type:
                         item.loanType === LoanType.GIVEN ? "Given" : "Taken", // Mapping loanType to user-friendly labels
                     }))}
-                    showRowNumber
+                    showRowNumber={!isMobileDevice}
                     collapsible={true}
                     collapsibleOpenIndex={openRowIndex}
                     onCollapseToggle={setOpenRowIndex}
@@ -160,11 +190,6 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
                         }}
                       >
                         <EditOutlined />
-                      </IconButton>,
-                      <IconButton
-                        onClick={() => handleActionClick(row, "delete")}
-                      >
-                        <DeleteOutlined />
                       </IconButton>,
                     ]}
                     collapsibleContent={(row, index) => {
@@ -217,27 +242,45 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
                             <Grid
                               size={12}
                               display="flex"
-                              justifyContent="flex-end"
+                              justifyContent="space-between"
                               alignItems="center"
                               gap={2}
                               mt={2}
                             >
                               <Button
-                                variant="text"
+                                variant="outlined"
+                                color="error"
                                 onClick={() => {
-                                  resetForm();
-                                  handleCancel();
+                                  setIsDeleteModalOpen(true);
+                                  selectedRowIdRef.current = row.id;
                                 }}
+                                size="small"
                               >
-                                Cancel
+                                Delete
                               </Button>
-                              <LoadingButton
-                                variant="contained"
-                                type="submit"
-                                loading={isSubmitting}
+                              <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                gap={2}
                               >
-                                Update
-                              </LoadingButton>
+                                <Button
+                                  variant="text"
+                                  onClick={() => {
+                                    resetForm();
+                                    handleCancel();
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <LoadingButton
+                                  variant="contained"
+                                  type="submit"
+                                  loading={isSubmitting}
+                                >
+                                  Update
+                                </LoadingButton>
+                              </Box>
                             </Grid>
                           </Grid>
                         </Box>
@@ -250,6 +293,27 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
           );
         }}
       </Formik>
+      <AlertDialog
+        isOpen={isDeleteModalOpen}
+        handleClose={() => setIsDeleteModalOpen(false)}
+        title="Confirm Deletion"
+        description="Are you sure you want to delete this loan? This action cannot be undone."
+        confirmButtonProps={{
+          buttonLabel: "Delete",
+          color: "error",
+          variant: "contained",
+        }}
+        cancelButtonProps={{
+          buttonLabel: "Cancel",
+          variant: "text",
+        }}
+        onCancelClick={() => setIsDeleteModalOpen(false)}
+        onConfirmClick={() => {
+          if (selectedRowIdRef.current) {
+            handleDeleteLoan(selectedRowIdRef.current);
+          }
+        }}
+      />
     </Box>
   );
 };

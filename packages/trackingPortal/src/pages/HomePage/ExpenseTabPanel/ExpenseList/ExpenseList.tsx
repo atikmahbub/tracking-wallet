@@ -1,5 +1,11 @@
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Box, Button, Grid2 as Grid, IconButton } from "@mui/material";
+import { EditOutlined } from "@ant-design/icons";
+import {
+  Box,
+  Button,
+  Grid2 as Grid,
+  IconButton,
+  useMediaQuery,
+} from "@mui/material";
 import { ExpenseModel } from "@shared/models/Expense";
 import {
   ExpenseId,
@@ -9,7 +15,7 @@ import {
 import MuiTable from "@trackingPortal/components/MuiTable";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import { Formik, Form, FieldArray } from "formik";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   CreateExpenseSchema,
   EAddExpenseFields,
@@ -21,28 +27,25 @@ import toast from "react-hot-toast";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
 import dayjs from "dayjs";
 import Loader from "@trackingPortal/components/Loader";
+import { useTheme } from "@mui/material";
+import AlertDialog from "@trackingPortal/components/AlertModal";
 
 interface IExpenseList {
   expenses: ExpenseModel[];
   getUserExpenses: () => void;
 }
 
-const columns = [
-  { label: "Date", key: "date", align: "left" as const },
-  { label: "Description", key: "description", align: "left" as const },
-  { label: "Amount", key: "amount", align: "right" as const },
-];
-
 const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
   const [editingRowId, setEditingRowId] = useState<ExpenseId | null>(null);
   const { apiGateway, user } = useStoreContext();
   const [loading, setLoading] = useState<boolean>(false);
+  const theme = useTheme();
+  const isMobileDevice = useMediaQuery(theme.breakpoints.down("sm"));
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const selectedRowIdRef = useRef<ExpenseId>("" as ExpenseId);
 
   const handleActionClick = (row, action) => {
-    if (action === "delete") {
-      row.id && handleDeleteExpense(row.id);
-    }
     if (action === "edit") {
       setOpenRowIndex((prevIndex) => {
         return prevIndex === row.id ? null : row.id;
@@ -50,6 +53,18 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
       setEditingRowId(row.id);
     }
   };
+
+  const columns = !isMobileDevice
+    ? [
+        { label: "Date", key: "date", align: "left" as const },
+        { label: "Purpose", key: "description", align: "left" as const },
+        { label: "Amount", key: "amount", align: "right" as const },
+      ]
+    : [
+        { label: "Date", key: "date", align: "left" as const },
+        { label: "Purpose", key: "description", align: "left" as const },
+        { label: "Amount", key: "amount", align: "right" as const },
+      ];
 
   const handleDeleteExpense = async (rowId) => {
     try {
@@ -134,7 +149,7 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
                       description: item.description,
                       amount: item.amount,
                     }))}
-                    showRowNumber
+                    showRowNumber={!isMobileDevice}
                     collapsible={true}
                     collapsibleOpenIndex={openRowIndex}
                     onCollapseToggle={setOpenRowIndex}
@@ -145,11 +160,6 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
                         }}
                       >
                         <EditOutlined />
-                      </IconButton>,
-                      <IconButton
-                        onClick={() => handleActionClick(row, "delete")}
-                      >
-                        <DeleteOutlined />
                       </IconButton>,
                     ]}
                     collapsibleContent={(row, index) => {
@@ -185,27 +195,45 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
                             <Grid
                               size={12}
                               display="flex"
-                              justifyContent="flex-end"
+                              justifyContent="space-between"
                               alignItems="center"
                               gap={2}
                               mt={2}
                             >
                               <Button
-                                variant="text"
+                                variant="outlined"
+                                color="error"
                                 onClick={() => {
-                                  resetForm();
-                                  handleCancel();
+                                  setIsDeleteModalOpen(true);
+                                  selectedRowIdRef.current = row.id;
                                 }}
+                                size="small"
                               >
-                                Cancel
+                                Delete
                               </Button>
-                              <LoadingButton
-                                variant="contained"
-                                type="submit"
-                                loading={isSubmitting}
+                              <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                gap={2}
                               >
-                                Update
-                              </LoadingButton>
+                                <Button
+                                  variant="text"
+                                  onClick={() => {
+                                    resetForm();
+                                    handleCancel();
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <LoadingButton
+                                  variant="contained"
+                                  type="submit"
+                                  loading={isSubmitting}
+                                >
+                                  Update
+                                </LoadingButton>
+                              </Box>
                             </Grid>
                           </Grid>
                         </Box>
@@ -218,6 +246,27 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
           );
         }}
       </Formik>
+      <AlertDialog
+        isOpen={isDeleteModalOpen}
+        handleClose={() => setIsDeleteModalOpen(false)}
+        title="Confirm Deletion"
+        description="Are you sure you want to delete this expense? This action cannot be undone."
+        confirmButtonProps={{
+          buttonLabel: "Delete",
+          color: "error",
+          variant: "contained",
+        }}
+        cancelButtonProps={{
+          buttonLabel: "Cancel",
+          variant: "text",
+        }}
+        onCancelClick={() => setIsDeleteModalOpen(false)}
+        onConfirmClick={() => {
+          if (selectedRowIdRef.current) {
+            handleDeleteExpense(selectedRowIdRef.current);
+          }
+        }}
+      />
     </Box>
   );
 };

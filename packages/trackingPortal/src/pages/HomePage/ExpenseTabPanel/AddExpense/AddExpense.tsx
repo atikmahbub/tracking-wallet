@@ -19,10 +19,7 @@ import {
   defaultQuestion,
 } from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
-import {
-  IAddExpense,
-  INewExpense,
-} from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseTabPanel.interfaces";
+import { IAddExpense } from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseTabPanel.interfaces";
 import LoadingButton from "@trackingPortal/components/@extended/LoadingButton";
 import { ExpenseModel } from "@shared/models/Expense";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
@@ -122,80 +119,79 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
                           Add Expense
                         </Button>
                       </Box>
-                      <Stack spacing={3} mt={5}>
-                        {values[EAddExpenseFields.EXPENSE_LIST].map(
-                          (item, index) => (
-                            <Grid
-                              container
-                              key={index}
-                              position="relative"
-                              spacing={2}
-                            >
-                              <Grid size={{ xs: 12, md: 4 }}>
-                                <DatePickerFieldWithTitle
-                                  name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DATE}`}
-                                  title="Date"
-                                />
-                              </Grid>
-                              <Grid size={{ xs: 12, md: 4 }}>
-                                <TextFieldWithTitle
-                                  name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DESCRIPTION}`}
-                                  title="Purpose"
-                                  noWordLimit
-                                />
-                              </Grid>
-                              <Grid size={{ xs: 12, md: 4 }}>
-                                <TextFieldWithTitle
-                                  name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.AMOUNT}`}
-                                  title="Amount"
-                                  noWordLimit
-                                  slotProps={{
-                                    htmlInput: {
-                                      inputMode: "numeric",
-                                      autoComplete: "off",
-                                    },
-                                  }}
-                                />
-                              </Grid>
-                              <Box
-                                display="flex"
-                                alignItems="center"
-                                gap={1}
-                                sx={{
-                                  position: "absolute",
-                                  right: 0,
-                                  top: -12,
-                                }}
-                              >
-                                <IconButton
-                                  onClick={() =>
-                                    push({
-                                      ...defaultQuestion,
-                                      date: dayjs(filterMonth, "yyyy-MM-dd"),
-                                    })
-                                  }
-                                  size="small"
-                                >
-                                  <PlusCircleOutlined />
-                                </IconButton>
-                                <IconButton
-                                  onClick={() => remove(index)}
-                                  size="small"
-                                >
-                                  <DeleteOutlined />
-                                </IconButton>
-                              </Box>
-                              {index <
-                                values[EAddExpenseFields.EXPENSE_LIST].length -
-                                  1 && (
-                                <Grid size={12}>
-                                  <Divider />
-                                </Grid>
-                              )}
+                      {values[EAddExpenseFields.EXPENSE_LIST].map(
+                        (item, index) => (
+                          <Grid
+                            container
+                            key={index}
+                            position="relative"
+                            spacing={2}
+                            mt={3}
+                          >
+                            <Grid size={{ xs: 12, md: 4 }}>
+                              <DatePickerFieldWithTitle
+                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DATE}`}
+                                title="Date"
+                              />
                             </Grid>
-                          )
-                        )}
-                      </Stack>
+                            <Grid size={{ xs: 12, md: 4 }}>
+                              <TextFieldWithTitle
+                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DESCRIPTION}`}
+                                title="Purpose"
+                                noWordLimit
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 4 }}>
+                              <TextFieldWithTitle
+                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.AMOUNT}`}
+                                title="Amount"
+                                noWordLimit
+                                slotProps={{
+                                  htmlInput: {
+                                    inputMode: "numeric",
+                                    autoComplete: "off",
+                                  },
+                                }}
+                              />
+                            </Grid>
+                            <Box
+                              display="flex"
+                              alignItems="center"
+                              gap={1}
+                              sx={{
+                                position: "absolute",
+                                right: 0,
+                                top: -12,
+                              }}
+                            >
+                              <IconButton
+                                onClick={() =>
+                                  push({
+                                    ...defaultQuestion,
+                                    date: dayjs(filterMonth, "yyyy-MM-dd"),
+                                  })
+                                }
+                                size="small"
+                              >
+                                <PlusCircleOutlined />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => remove(index)}
+                                size="small"
+                              >
+                                <DeleteOutlined />
+                              </IconButton>
+                            </Box>
+                            {index <
+                              values[EAddExpenseFields.EXPENSE_LIST].length -
+                                1 && (
+                              <Grid size={12}>
+                                <Divider />
+                              </Grid>
+                            )}
+                          </Grid>
+                        )
+                      )}
                       {!!values[EAddExpenseFields.EXPENSE_LIST].length && (
                         <Box
                           display="flex"

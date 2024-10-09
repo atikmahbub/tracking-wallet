@@ -25,7 +25,7 @@ const MainLayout: React.FC = () => {
         maxWidth="xl"
         width="100%"
         sx={{
-          px: { xs: 2, sm: 2 },
+          px: { xs: 1.5, sm: 2 },
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",

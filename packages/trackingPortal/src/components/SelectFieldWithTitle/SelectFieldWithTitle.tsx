@@ -32,7 +32,7 @@ const SelectFieldWithTitle: React.FC<SelectFieldWithTitleProps> = ({
   ...rest
 }: SelectFieldWithTitleProps) => {
   return (
-    <Box mb="1rem">
+    <Box>
       <Typography variant="h6" fontWeight={500}>
         {title}
       </Typography>

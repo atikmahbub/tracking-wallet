@@ -116,9 +116,7 @@ const DataTable: React.FC<DataTableProps> = ({
                       timeout="auto"
                       unmountOnExit
                     >
-                      <Box sx={{ margin: 1 }}>
-                        {collapsibleContent(row, index)}{" "}
-                      </Box>
+                      <Box>{collapsibleContent(row, index)} </Box>
                     </Collapse>
                   </TableCell>
                 </TableRow>
