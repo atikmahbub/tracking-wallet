@@ -84,6 +84,7 @@ model Invest {
   note      String                @db.VarChar(512)
   status    EInvestStatus         @default(ACTIVE)
   amount    Float
+  earned    Float?
   startDate DateTime 
   endDate   DateTime?
   userId    String

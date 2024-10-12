@@ -14,6 +14,9 @@ import MonthlyLimitRoutes from "@tracking/routes/MonthlyLimitRoutes";
 import UserService from "@tracking/services/UserService";
 import UserRoutes from "@tracking/routes/UserRouter";
 import UserController from "@tracking/controllers/UserController";
+import InvestService from "@tracking/services/InvestService";
+import InvestController from "@tracking/controllers/InvestController";
+import InvestRoutes from "@tracking/routes/InvestRoutes";
 import { authenticateToken } from "@tracking/middlewares/authenticateToken";
 import { LoanService } from "@tracking/services/LoanService";
 import { LoanController } from "@tracking/controllers/LoanController";
@@ -43,10 +46,15 @@ const loanService = new LoanService(prisma);
 const loanController = new LoanController(loanService);
 const loanRoutes = new LoanRoutes(loanController);
 
+const investService = new InvestService(prisma);
+const investController = new InvestController(investService);
+const investRoutes = new InvestRoutes(investController);
+
 app.use("/api/v0", expenseRoutes.registerExpenseRoutes());
 app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
 app.use("/api/v0", userRoutes.registerUserRouter());
 app.use("/api/v0", loanRoutes.registerLoanRoutes());
+app.use("/api/v0", investRoutes.registerInvestRoutes());
 
 app.use(errorHandler);
 
