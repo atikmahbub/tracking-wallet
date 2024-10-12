@@ -19,6 +19,7 @@ model User {
   expenses          Expense[]       
   monthlyLimits     MonthlyLimit[]
   loan              Loan[]
+  Invest            Invest[]
 
   @@index([email], name: "user_email_index")
 }
@@ -68,4 +69,28 @@ model Loan{
   updated   DateTime            @updatedAt
 
   @@index([userId], name: "loan_user_id_index")
+}
+
+
+enum EInvestStatus {
+  ACTIVE
+  COMPLETED
+}
+
+
+model Invest {
+  id        Bytes          @id    @db.Binary(16)
+  name      String                @db.VarChar(128)
+  note      String                @db.VarChar(512)
+  status    EInvestStatus         @default(ACTIVE)
+  amount    Float
+  startDate DateTime 
+  endDate   DateTime?
+  userId    String
+  user      User                  @relation(fields : [userId], references:[userId])
+  created   DateTime              @default(now())
+  updated   DateTime              @updatedAt
+
+
+   @@index([status, userId], name: "invest_status_userId_index")
 }
