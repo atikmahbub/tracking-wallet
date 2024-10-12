@@ -19,27 +19,26 @@ import React, { useRef, useState } from "react";
 
 import LoadingButton from "@trackingPortal/components/@extended/LoadingButton";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
-import { IUpdateLoanParams } from "@shared/params";
+
 import toast from "react-hot-toast";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
 import dayjs from "dayjs";
-import { LoanModel } from "@shared/models";
 import {
-  EAddLoanFields,
-  AddLoanSchema,
-  loanTypeOptions,
-} from "@trackingPortal/pages/HomePage/LoanTabPanel";
+  EAddInvestFormFields,
+  AddInvestSchema,
+  filterInvestByStatusMenu,
+} from "@trackingPortal/pages/HomePage/InvestTabPanel";
 import SelectFieldWithTitle from "@trackingPortal/components/SelectFieldWithTitle";
-import { LoanType } from "@shared/enums";
+
 import Loader from "@trackingPortal/components/Loader";
 import AlertDialog from "@trackingPortal/components/AlertModal";
 
-interface ILoanList {
-  loans: LoanModel[];
-  getUserLoans: () => void;
+interface IInvestList {
+  investList: any[];
+  getUserInvest: () => void;
 }
 
-const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
+const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
   const [editingRowId, setEditingRowId] = useState<LoanId | null>(null);
   const { apiGateway, user } = useStoreContext();
@@ -52,23 +51,17 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
   const columns = !isMobileDevice
     ? [
         { label: "Name", key: "name", align: "left" as const },
-        { label: "Type", key: "type", align: "left" as const },
-        { label: "Note", key: "note", align: "left" as const },
-        { label: "Date", key: "date", align: "left" as const },
-        { label: "Soft Deadline", key: "deadLine", align: "left" as const },
+        { label: "Status", key: "status", align: "left" as const },
+        { label: "Duration", key: "duration", align: "left" as const },
         { label: "Amount", key: "amount", align: "right" as const },
       ]
     : [
         { label: "Name", key: "name", align: "left" as const },
-        { label: "Type", key: "type", align: "left" as const },
-        { label: "Date", key: "date", align: "left" as const },
+        { label: "Status", key: "status", align: "left" as const },
         { label: "Amount", key: "amount", align: "right" as const },
       ];
 
   const handleActionClick = (row, action) => {
-    if (action === "delete") {
-      row.id && handleDeleteLoan(row.id);
-    }
     if (action === "edit") {
       setOpenRowIndex((prevIndex) => {
         return prevIndex === row.id ? null : row.id;
@@ -77,49 +70,49 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
     }
   };
 
-  const handleDeleteLoan = async (rowId) => {
-    try {
-      setLoading(true);
-      await apiGateway.loanServices.deleteLoan(rowId);
-      await getUserLoans();
-      toast.success("Deleted Successfully!");
-    } catch (error) {
-      console.log("error", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleDeleteLoan = async (rowId) => {
+  //   try {
+  //     setLoading(true);
+  //     await apiGateway.loanServices.deleteLoan(rowId);
+  //     await getUserLoans();
+  //     toast.success("Deleted Successfully!");
+  //   } catch (error) {
+  //     console.log("error", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleUpdateLoan = async (values, { resetForm }) => {
-    if (user.default) return;
+  // const handleUpdateLoan = async (values, { resetForm }) => {
+  //   if (user.default) return;
 
-    try {
-      setLoading(true);
-      const openRowIndexId = openRowIndex !== null && loans[openRowIndex].id; //* just to ensure the clicked row id as sometimes editingRowId is null for unknown reason
-      const updatedLoanValues = values[EAddLoanFields.LOAN_LIST].find(
-        (expense) => expense.id === (editingRowId || openRowIndexId)
-      );
+  //   try {
+  //     setLoading(true);
+  //     const openRowIndexId = openRowIndex !== null && loans[openRowIndex].id; //* just to ensure the clicked row id as sometimes editingRowId is null for unknown reason
+  //     const updatedLoanValues = values[EAddLoanFields.LOAN_LIST].find(
+  //       (expense) => expense.id === (editingRowId || openRowIndexId)
+  //     );
 
-      const params: IUpdateLoanParams = {
-        id: updatedLoanValues.id as LoanId,
-        amount: updatedLoanValues.amount,
-        deadLine: makeUnixTimestampString(
-          Number(new Date(updatedLoanValues.deadLine))
-        ),
-        note: updatedLoanValues.note,
-        name: updatedLoanValues.name,
-      };
-      await apiGateway.loanServices.updateLoan(params);
-      await getUserLoans();
-      await resetForm();
-      handleCancel();
-      toast.success("Updated Successfully!");
-    } catch (error) {
-      console.log("error", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     const params: IUpdateLoanParams = {
+  //       id: updatedLoanValues.id as LoanId,
+  //       amount: updatedLoanValues.amount,
+  //       deadLine: makeUnixTimestampString(
+  //         Number(new Date(updatedLoanValues.deadLine))
+  //       ),
+  //       note: updatedLoanValues.note,
+  //       name: updatedLoanValues.name,
+  //     };
+  //     await apiGateway.loanServices.updateLoan(params);
+  //     await getUserLoans();
+  //     await resetForm();
+  //     handleCancel();
+  //     toast.success("Updated Successfully!");
+  //   } catch (error) {
+  //     console.log("error", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleCancel = () => {
     setOpenRowIndex(null);
@@ -133,43 +126,44 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
     <Box mt={4}>
       <Formik
         enableReinitialize
-        onSubmit={handleUpdateLoan}
+        onSubmit={() => {}}
         initialValues={{
-          [EAddLoanFields.LOAN_LIST]: loans?.map((item) => ({
+          [EAddInvestFormFields.INVEST_LIST]: investList?.map((item) => ({
             id: item.id,
-            [EAddLoanFields.AMOUNT]: item.amount,
-            [EAddLoanFields.DEADLINE]: dayjs(
-              makeUnixTimestampToISOString(Number(item.deadLine))
+            [EAddInvestFormFields.AMOUNT]: item.amount,
+            [EAddInvestFormFields.START_DATE]: dayjs(
+              makeUnixTimestampToISOString(Number(item.startDate))
             ).format("YYYY-MM-DD"),
-            [EAddLoanFields.NOTE]: item.note,
-            [EAddLoanFields.NAME]: item.name,
+            [EAddInvestFormFields.END_DATE]: item.endDate
+              ? dayjs(
+                  makeUnixTimestampToISOString(Number(item.endDate))
+                ).format("YYYY-MM-DD")
+              : dayjs(new Date()).format("YYYY-MM-DD"),
+            [EAddInvestFormFields.NOTE]: item.note,
+            [EAddInvestFormFields.NAME]: item.name,
           })),
         }}
-        validationSchema={AddLoanSchema}
+        validationSchema={AddInvestSchema}
       >
         {({ resetForm, isSubmitting }) => {
           return (
             <Form>
               <FieldArray
-                name={EAddLoanFields.LOAN_LIST}
+                name={EAddInvestFormFields.INVEST_LIST}
                 render={() => (
                   <MuiTable
                     columns={columns}
-                    data={(loans || []).map((item) => ({
+                    data={(investList || []).map((item) => ({
                       id: item.id,
                       date: dayjs(
                         makeUnixTimestampToISOString(Number(item.created))
                       ).format("MMMM D, YYYY"),
-                      deadLine: item.deadLine
-                        ? dayjs(
-                            makeUnixTimestampToISOString(Number(item.deadLine))
-                          ).format("MMMM D, YYYY")
-                        : "N/A",
-                      note: item.note || "No note available",
+                      duration: dayjs(
+                        makeUnixTimestampToISOString(Number(item.deadLine))
+                      ).format("MMMM D, YYYY"),
+                      note: item.note,
                       amount: item.amount,
                       name: item.name,
-                      type:
-                        item.loanType === LoanType.GIVEN ? "Given" : "Taken", // Mapping loanType to user-friendly labels
                     }))}
                     showRowNumber={!isMobileDevice}
                     collapsible={true}
@@ -188,7 +182,7 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
                       return (
                         <Box pt={4} pb={4}>
                           <Grid container key={row.id} spacing={2}>
-                            <Grid size={{ xs: 12, md: 6 }}>
+                            {/* <Grid size={{ xs: 12, md: 6 }}>
                               <SelectFieldWithTitle
                                 name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.LOAN_TYPE}`}
                                 title="Loan Type"
@@ -230,7 +224,7 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
                                 minRows={3}
                                 wordLength={512}
                               />
-                            </Grid>
+                            </Grid> */}
                             <Grid
                               size={12}
                               display="flex"
@@ -301,13 +295,13 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
         }}
         onCancelClick={() => setIsDeleteModalOpen(false)}
         onConfirmClick={() => {
-          if (selectedRowIdRef.current) {
-            handleDeleteLoan(selectedRowIdRef.current);
-          }
+          // if (selectedRowIdRef.current) {
+          //   handleDeleteLoan(selectedRowIdRef.current);
+          // }
         }}
       />
     </Box>
   );
 };
 
-export default LoanList;
+export default InvestList;
