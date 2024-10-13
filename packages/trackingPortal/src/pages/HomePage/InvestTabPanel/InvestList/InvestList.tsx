@@ -32,9 +32,11 @@ import SelectFieldWithTitle from "@trackingPortal/components/SelectFieldWithTitl
 
 import Loader from "@trackingPortal/components/Loader";
 import AlertDialog from "@trackingPortal/components/AlertModal";
+import { InvestModel } from "@shared/models";
+import { EInvestStatus } from "@shared/enums";
 
 interface IInvestList {
-  investList: any[];
+  investList: InvestModel[];
   getUserInvest: () => void;
 }
 
@@ -54,11 +56,13 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
         { label: "Status", key: "status", align: "left" as const },
         { label: "Duration", key: "duration", align: "left" as const },
         { label: "Amount", key: "amount", align: "right" as const },
+        { label: "Profit", key: "profit", align: "right" as const },
       ]
     : [
         { label: "Name", key: "name", align: "left" as const },
         { label: "Status", key: "status", align: "left" as const },
         { label: "Amount", key: "amount", align: "right" as const },
+        { label: "Profit", key: "profit", align: "right" as const },
       ];
 
   const handleActionClick = (row, action) => {
@@ -118,6 +122,13 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
     setOpenRowIndex(null);
   };
 
+  const getProfit = (capital: number, totalEarned: number) => {
+    if (!totalEarned) return "N/A";
+    const profit = totalEarned - capital;
+    const profitPercentage = (profit / capital) * 100;
+    return `${profitPercentage}%`;
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -128,7 +139,7 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
         enableReinitialize
         onSubmit={() => {}}
         initialValues={{
-          [EAddInvestFormFields.INVEST_LIST]: investList?.map((item) => ({
+          [EAddInvestFormFields.INVEST_LIST]: investList.map((item) => ({
             id: item.id,
             [EAddInvestFormFields.AMOUNT]: item.amount,
             [EAddInvestFormFields.START_DATE]: dayjs(
@@ -141,6 +152,7 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
               : dayjs(new Date()).format("YYYY-MM-DD"),
             [EAddInvestFormFields.NOTE]: item.note,
             [EAddInvestFormFields.NAME]: item.name,
+            [EAddInvestFormFields.EARNED]: item.earned,
           })),
         }}
         validationSchema={AddInvestSchema}
@@ -155,15 +167,25 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
                     columns={columns}
                     data={(investList || []).map((item) => ({
                       id: item.id,
-                      date: dayjs(
-                        makeUnixTimestampToISOString(Number(item.created))
-                      ).format("MMMM D, YYYY"),
-                      duration: dayjs(
-                        makeUnixTimestampToISOString(Number(item.deadLine))
-                      ).format("MMMM D, YYYY"),
+                      status:
+                        item.status === EInvestStatus.Active
+                          ? "Active"
+                          : "Completed",
+                      duration: `${dayjs(
+                        makeUnixTimestampToISOString(Number(item.startDate))
+                      ).format("MMMM D, YYYY")} - ${
+                        item.endDate
+                          ? dayjs(
+                              makeUnixTimestampToISOString(
+                                Number(item.startDate)
+                              )
+                            ).format("MMMM D, YYYY")
+                          : "Now"
+                      }`,
                       note: item.note,
                       amount: item.amount,
                       name: item.name,
+                      profit: getProfit(item.amount, item.earned),
                     }))}
                     showRowNumber={!isMobileDevice}
                     collapsible={true}

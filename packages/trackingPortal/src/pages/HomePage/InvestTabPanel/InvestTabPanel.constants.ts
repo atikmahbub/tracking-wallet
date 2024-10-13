@@ -16,6 +16,7 @@ export enum EAddInvestFormFields {
   NOTE = "note",
   PROFIT = "profit",
   INVEST_LIST = "invest_list",
+  EARNED = "earned",
 }
 
 export const defaultInvest: INewInvest = {

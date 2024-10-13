@@ -5,7 +5,7 @@ import {
 } from "@ant-design/icons";
 import { Box, Button, Divider, Grid2 as Grid, IconButton } from "@mui/material";
 import { FieldArray, Form, Formik } from "formik";
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 
 import {
   EAddInvestFormFields,
@@ -16,12 +16,57 @@ import {
 import TextFieldWithTitle from "@trackingPortal/components/TextFieldWithTitle";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle";
 import LoadingButton from "@trackingPortal/components/@extended/LoadingButton";
+import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
+import { InvestModel } from "@shared/models";
+import { IAddInvestParams } from "@shared/params";
+import { convertKiloToNumber } from "@trackingPortal/utils/numberUtils";
+import { makeUnixTimestampString } from "@shared/primitives";
+import toast from "react-hot-toast";
+import Loader from "@trackingPortal/components/Loader";
 
-const AddInvest: React.FC = () => {
-  const handleAddNewInvestment = async (values: IAddInvest) => {
+interface IAddInvestProps {
+  getUserInvest: () => void;
+}
+
+const AddInvest: React.FC<IAddInvestProps> = ({ getUserInvest }) => {
+  const { user, apiGateway } = useStoreContext();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleAddNewInvestment = async (values: IAddInvest, { resetForm }) => {
+    if (user.default) return;
     try {
-    } catch (error) {}
+      setLoading(true);
+      const addInvestPromiseList: Promise<InvestModel>[] = [];
+      values.invest_list.map((invest) => {
+        const params: IAddInvestParams = {
+          userId: user.userId,
+          amount: convertKiloToNumber(invest.amount),
+          startDate: makeUnixTimestampString(
+            Number(new Date(invest.start_date.toDate()))
+          ),
+          note: invest.note,
+          name: invest.name,
+        };
+
+        addInvestPromiseList.push(apiGateway.investService.addInvest(params));
+      });
+
+      !!addInvestPromiseList.length &&
+        (await Promise.all(addInvestPromiseList));
+      toast.success("Successfully Added!");
+      resetForm();
+      await getUserInvest();
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <Formik
@@ -77,6 +122,12 @@ const AddInvest: React.FC = () => {
                                   name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.AMOUNT}`}
                                   title="Amount"
                                   noWordLimit
+                                  slotProps={{
+                                    htmlInput: {
+                                      inputMode: "numeric",
+                                      autoComplete: "off",
+                                    },
+                                  }}
                                 />
                               </Grid>
                               <Grid size={{ xs: 12, md: 6 }}>
