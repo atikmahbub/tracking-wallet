@@ -137,11 +137,11 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
     setOpenRowIndex(null);
   };
 
-  const getProfit = (capital: number, totalEarned: number) => {
+  const getProfit = (capital: number, totalEarned: number | null) => {
     if (!totalEarned) return "N/A";
     const profit = totalEarned - capital;
     const profitPercentage = (profit / capital) * 100;
-    return `${profitPercentage}%`;
+    return `${profitPercentage.toFixed(2)}%`;
   };
 
   if (loading) {

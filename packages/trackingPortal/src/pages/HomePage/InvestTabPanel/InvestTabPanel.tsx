@@ -23,7 +23,6 @@ const InvestTabPanel: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [investList, setInvestList] = useState<any[]>([]);
   const { user, apiGateway } = useStoreContext();
-  const isActive = status === EInvestStatus.Active;
 
   useEffect(() => {
     if (!user.default && user.userId) {
@@ -33,6 +32,7 @@ const InvestTabPanel: React.FC = () => {
 
   const getUserInvest = async () => {
     try {
+      setLoading(true);
       const response = await apiGateway.investService.getInvestByUserId({
         userId: user.userId,
         status: status,
