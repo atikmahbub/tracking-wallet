@@ -90,10 +90,10 @@ class InvestController {
         amount: Number(amount),
         name: name,
         note: note,
-        endDate: endDate,
         startDate: startDate,
+        endDate: endDate,
         status: status,
-        earned: earned,
+        earned: Number(earned),
       };
 
       const updatedInvest = await this.investService.updateInvest(params);

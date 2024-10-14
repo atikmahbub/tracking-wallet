@@ -43,7 +43,7 @@ export class InvestService implements IInvestService {
     const url = new URL(
       urlJoin(this.config.baseUrl, "v0", "invest", params.id)
     );
-    const response = await this.ajaxUtils.get(url, { ...params });
+    const response = await this.ajaxUtils.put(url, { ...params });
 
     if (response.isOk()) {
       return response.value as InvestModel;

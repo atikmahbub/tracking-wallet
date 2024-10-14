@@ -72,6 +72,7 @@ class InvestService {
     try {
       const { id, status, name, amount, startDate, endDate, note, earned } =
         params;
+
       const updatedInvest = await this.prisma.invest.update({
         where: {
           id: uuidBuffer.toBuffer(id),

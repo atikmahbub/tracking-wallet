@@ -1,4 +1,4 @@
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import {
   Box,
   Button,
@@ -8,6 +8,7 @@ import {
   useTheme,
 } from "@mui/material";
 import {
+  InvestId,
   LoanId,
   makeUnixTimestampString,
   makeUnixTimestampToISOString,
@@ -34,6 +35,8 @@ import Loader from "@trackingPortal/components/Loader";
 import AlertDialog from "@trackingPortal/components/AlertModal";
 import { InvestModel } from "@shared/models";
 import { EInvestStatus } from "@shared/enums";
+import { IUpdateInvestParams } from "@shared/params";
+import CheckboxField from "@trackingPortal/components/CheckboxField";
 
 interface IInvestList {
   investList: InvestModel[];
@@ -74,49 +77,61 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
     }
   };
 
-  // const handleDeleteLoan = async (rowId) => {
-  //   try {
-  //     setLoading(true);
-  //     await apiGateway.loanServices.deleteLoan(rowId);
-  //     await getUserLoans();
-  //     toast.success("Deleted Successfully!");
-  //   } catch (error) {
-  //     console.log("error", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleDeleteInvest = async (rowId) => {
+    try {
+      setLoading(true);
+      await apiGateway.investService.deleteInvest(rowId);
+      setIsDeleteModalOpen(false);
+      await getUserInvest();
+      toast.success("Deleted Successfully!");
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // const handleUpdateLoan = async (values, { resetForm }) => {
-  //   if (user.default) return;
+  const handleUpdateLoan = async (values, { resetForm }) => {
+    if (user.default) return;
 
-  //   try {
-  //     setLoading(true);
-  //     const openRowIndexId = openRowIndex !== null && loans[openRowIndex].id; //* just to ensure the clicked row id as sometimes editingRowId is null for unknown reason
-  //     const updatedLoanValues = values[EAddLoanFields.LOAN_LIST].find(
-  //       (expense) => expense.id === (editingRowId || openRowIndexId)
-  //     );
+    try {
+      setLoading(true);
+      const openRowIndexId =
+        openRowIndex !== null && investList[openRowIndex].id; //* just to ensure the clicked row id as sometimes editingRowId is null for unknown reason
+      const updatedInvestValues = values[EAddInvestFormFields.INVEST_LIST].find(
+        (expense) => expense.id === (editingRowId || openRowIndexId)
+      );
 
-  //     const params: IUpdateLoanParams = {
-  //       id: updatedLoanValues.id as LoanId,
-  //       amount: updatedLoanValues.amount,
-  //       deadLine: makeUnixTimestampString(
-  //         Number(new Date(updatedLoanValues.deadLine))
-  //       ),
-  //       note: updatedLoanValues.note,
-  //       name: updatedLoanValues.name,
-  //     };
-  //     await apiGateway.loanServices.updateLoan(params);
-  //     await getUserLoans();
-  //     await resetForm();
-  //     handleCancel();
-  //     toast.success("Updated Successfully!");
-  //   } catch (error) {
-  //     console.log("error", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      const params: IUpdateInvestParams = {
+        id: updatedInvestValues.id as InvestId,
+        amount: updatedInvestValues.amount,
+        endDate:
+          updatedInvestValues.end_date &&
+          makeUnixTimestampString(
+            Number(new Date(updatedInvestValues.end_date))
+          ),
+        startDate: makeUnixTimestampString(
+          Number(new Date(updatedInvestValues.start_date))
+        ),
+        note: updatedInvestValues.note,
+        name: updatedInvestValues.name,
+        earned: updatedInvestValues.earned,
+        status:
+          updatedInvestValues.status === true
+            ? EInvestStatus.Completed
+            : EInvestStatus.Active,
+      };
+      await apiGateway.investService.updateInvest(params);
+      await getUserInvest();
+      await resetForm();
+      handleCancel();
+      toast.success("Updated Successfully!");
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancel = () => {
     setOpenRowIndex(null);
@@ -137,7 +152,7 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
     <Box mt={4}>
       <Formik
         enableReinitialize
-        onSubmit={() => {}}
+        onSubmit={handleUpdateLoan}
         initialValues={{
           [EAddInvestFormFields.INVEST_LIST]: investList.map((item) => ({
             id: item.id,
@@ -149,10 +164,12 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
               ? dayjs(
                   makeUnixTimestampToISOString(Number(item.endDate))
                 ).format("YYYY-MM-DD")
-              : dayjs(new Date()).format("YYYY-MM-DD"),
+              : "",
             [EAddInvestFormFields.NOTE]: item.note,
             [EAddInvestFormFields.NAME]: item.name,
             [EAddInvestFormFields.EARNED]: item.earned,
+            [EAddInvestFormFields.STATUS]:
+              item.status === EInvestStatus.Active ? false : true,
           })),
         }}
         validationSchema={AddInvestSchema}
@@ -204,24 +221,16 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
                       return (
                         <Box pt={4} pb={4}>
                           <Grid container key={row.id} spacing={2}>
-                            {/* <Grid size={{ xs: 12, md: 6 }}>
-                              <SelectFieldWithTitle
-                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.LOAN_TYPE}`}
-                                title="Loan Type"
-                                options={loanTypeOptions}
-                                defaultValue={LoanType.GIVEN}
-                              />
-                            </Grid>
                             <Grid size={{ xs: 12, md: 6 }}>
                               <TextFieldWithTitle
-                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.NAME}`}
+                                name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.NAME}`}
                                 title="Name"
                                 noWordLimit
                               />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }}>
                               <TextFieldWithTitle
-                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.AMOUNT}`}
+                                name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.AMOUNT}`}
                                 title="Amount"
                                 noWordLimit
                                 slotProps={{
@@ -234,19 +243,44 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }}>
                               <DatePickerFieldWithTitle
-                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.DEADLINE}`}
-                                title="Soft Deadline"
+                                name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.START_DATE}`}
+                                title="Start Date"
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                              <DatePickerFieldWithTitle
+                                name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.END_DATE}`}
+                                title="End Date"
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                              <TextFieldWithTitle
+                                name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.EARNED}`}
+                                title="Profit (with capital)"
+                                noWordLimit
+                                slotProps={{
+                                  htmlInput: {
+                                    inputMode: "numeric",
+                                    autoComplete: "off",
+                                  },
+                                }}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                              <TextFieldWithTitle
+                                name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.NOTE}`}
+                                title="Note"
+                                wordLength={512}
+                                multiline
+                                minRows={3}
                               />
                             </Grid>
                             <Grid size={12}>
-                              <TextFieldWithTitle
-                                name={`${EAddLoanFields.LOAN_LIST}.${index}.${EAddLoanFields.NOTE}`}
-                                title="Add Note"
-                                multiline
-                                minRows={3}
-                                wordLength={512}
+                              <CheckboxField
+                                name={`${EAddInvestFormFields.INVEST_LIST}.${index}.${EAddInvestFormFields.STATUS}`}
+                                label="Mark this as completed"
                               />
-                            </Grid> */}
+                            </Grid>
                             <Grid
                               size={12}
                               display="flex"
@@ -305,7 +339,7 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
         isOpen={isDeleteModalOpen}
         handleClose={() => setIsDeleteModalOpen(false)}
         title="Confirm Deletion"
-        description="Are you sure you want to delete this loan? This action cannot be undone."
+        description="Are you sure you want to delete this investment? This action cannot be undone."
         confirmButtonProps={{
           buttonLabel: "Delete",
           color: "error",
@@ -317,9 +351,9 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
         }}
         onCancelClick={() => setIsDeleteModalOpen(false)}
         onConfirmClick={() => {
-          // if (selectedRowIdRef.current) {
-          //   handleDeleteLoan(selectedRowIdRef.current);
-          // }
+          if (selectedRowIdRef.current) {
+            handleDeleteInvest(selectedRowIdRef.current);
+          }
         }}
       />
     </Box>
