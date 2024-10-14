@@ -21,7 +21,7 @@ export class InvestModel extends NewInvest {
     startDate: UnixTimeStampString,
     endDate: UnixTimeStampString | null,
     status: EInvestStatus,
-    public earned: number,
+    public earned: number | null,
     public created: UnixTimeStampString,
     public updated: UnixTimeStampString
   ) {
