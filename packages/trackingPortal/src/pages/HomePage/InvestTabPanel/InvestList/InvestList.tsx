@@ -63,7 +63,6 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
       ]
     : [
         { label: "Name", key: "name", align: "left" as const },
-        { label: "Status", key: "status", align: "left" as const },
         { label: "Amount", key: "amount", align: "right" as const },
         { label: "Profit", key: "profit", align: "right" as const },
       ];
