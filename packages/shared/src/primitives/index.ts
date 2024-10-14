@@ -6,3 +6,4 @@ export * from "@shared/primitives/DateTypes";
 export * from "@shared/primitives/ExpenseId";
 export * from "@shared/primitives/MonthlyLimitId";
 export * from "@shared/primitives/LoanId";
+export * from "@shared/primitives/InvestId";

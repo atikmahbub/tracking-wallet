@@ -11,6 +11,7 @@ import {
 import ExpenseTabPanel from "@trackingPortal/pages/HomePage/ExpenseTabPanel";
 import LoanTabPanel from "@trackingPortal/pages/HomePage/LoanTabPanel";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import InvestTabPanel from "@trackingPortal/pages/HomePage/InvestTabPanel";
 
 const HomePage = () => {
   const [value, setValue] = useState<ETabStep>(ETabStep.Expense);
@@ -48,7 +49,7 @@ const HomePage = () => {
           <LoanTabPanel />
         </TabPanel>
         <TabPanel value={value} index={ETabStep.Investment}>
-          Coming Soon!
+          <InvestTabPanel />
         </TabPanel>
       </Grid2>
     </Grid2>

@@ -9,3 +9,6 @@ export * from "@shared/params/IUpdateMonthlyLimitParams";
 export * from "@shared/params/IAddExpenseParams";
 export * from "@shared/params/IAddLoanParams";
 export * from "@shared/params/IUpdateLoanParams";
+export * from "@shared/params/IAddInvestParams";
+export * from "@shared/params/IUpdateInvestParams";
+export * from "@shared/params/IGetInvestParams";

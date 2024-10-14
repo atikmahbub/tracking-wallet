@@ -3,8 +3,17 @@ import {
   UserModel,
   MonthlyLimitModel,
   LoanModel,
+  InvestModel,
 } from "@shared/models";
-import { Expense, Loan, LoanType, MonthlyLimit, User } from "@prisma/client";
+import {
+  EInvestStatus,
+  Expense,
+  Invest,
+  Loan,
+  LoanType,
+  MonthlyLimit,
+  User,
+} from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
   makeUnixTimestampString,
@@ -15,8 +24,12 @@ import {
   MonthlyLimitId,
   URLString,
   LoanId,
+  InvestId,
 } from "@shared/primitives";
-import { LoanType as LoanTypeEnum } from "@shared/enums";
+import {
+  LoanType as LoanTypeEnum,
+  EInvestStatus as EInvestStatusEnum,
+} from "@shared/enums";
 
 export class PresentationService {
   public toExpenseModel(expense: Expense): ExpenseModel {
@@ -67,6 +80,23 @@ export class PresentationService {
         : LoanTypeEnum.TAKEN,
       makeUnixTimestampString(loan.updated.getTime()),
       makeUnixTimestampString(loan.created.getTime())
+    );
+  }
+
+  public toInvestModel(invest: Invest): InvestModel {
+    return new InvestModel(
+      InvestId(uuidBuffer.toString(invest.id)),
+      invest.name,
+      invest.amount,
+      invest.note,
+      makeUnixTimestampString(invest.startDate.getTime()),
+      invest.endDate ? makeUnixTimestampString(invest.endDate.getTime()) : null,
+      invest.status === EInvestStatus.ACTIVE
+        ? EInvestStatusEnum.Active
+        : EInvestStatusEnum.Completed,
+      invest.earned,
+      makeUnixTimestampString(invest.created.getTime()),
+      makeUnixTimestampString(invest.updated.getTime())
     );
   }
 }
