@@ -1,4 +1,5 @@
 import { Checkbox, FormControlLabel, Stack } from "@mui/material";
+import { AppThemeMode } from "@trackingPortal/types/config";
 import { ErrorMessage, Field, getIn } from "formik";
 import React from "react";
 
@@ -27,7 +28,10 @@ const CheckboxField: React.FC<ICheckBox> = ({ name, label, disabled }) => {
             }
             label={label}
             disabled={disabled}
-            sx={{ color: "#424242" }}
+            sx={{
+              color: (theme) =>
+                theme.palette.mode === AppThemeMode.DARK ? "#fff" : "#222",
+            }}
           />
         )}
       </Field>
