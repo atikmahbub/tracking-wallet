@@ -12,13 +12,20 @@ import ExpenseList from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseL
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { MonthlyLimitModel } from "@shared/models";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const ExpenseTabPanel = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [limitLoading, setLimitLoading] = useState<boolean>(false);
   const [expenses, setExpenses] = useState<ExpenseModel[]>([]);
   const { apiGateway, user } = useStoreContext();
-  const [filterMonth, setFilterMonth] = useState<Dayjs>(dayjs(new Date()));
+  const [filterMonth, setFilterMonth] = useState<Dayjs>(
+    dayjs().tz("Asia/Dhaka")
+  );
   const [monthLimit, setMonthLimit] = useState<MonthlyLimitModel>(
     {} as MonthlyLimitModel
   );
