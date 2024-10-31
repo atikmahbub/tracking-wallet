@@ -5,6 +5,9 @@ import { ExpenseId, UserId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
+import { toZonedTime } from "date-fns-tz";
+
+const timeZone = "Asia/Dhaka";
 
 class ExpenseController {
   private expenseService: ExpenseService;
@@ -55,7 +58,10 @@ class ExpenseController {
         throw new MissingFieldError("Date are required");
       }
 
-      const extractedDate = new Date(parseInt(date.toString()) * 1000);
+      const extractedDate = toZonedTime(
+        new Date(parseInt(date.toString()) * 1000),
+        timeZone
+      );
       const startDate = startOfMonth(extractedDate);
       const endDate = endOfMonth(extractedDate);
 
