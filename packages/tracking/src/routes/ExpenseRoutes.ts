@@ -33,6 +33,12 @@ class ExpenseRouter {
       this.expenseController.deleteExpense.bind(this.expenseController)
     );
 
+    router.get(
+      "/expense/notifications/:userId/exceed-limit",
+      this.expenseController.exceedExpenseNotification.bind(
+        this.expenseController
+      )
+    );
     return router;
   }
 }

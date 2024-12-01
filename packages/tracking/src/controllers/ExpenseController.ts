@@ -1,19 +1,23 @@
 import { Request, Response, NextFunction } from "express";
 import ExpenseService from "@tracking/services/ExpenseServices";
 import { IAddExpenseParams } from "@shared/params";
-import { ExpenseId, UserId } from "@shared/primitives";
+import { ExpenseId, Month, UserId, Year } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
 import { toZonedTime } from "date-fns-tz";
+import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
+import { PrismaClient } from "@prisma/client";
 
 const timeZone = "Asia/Dhaka";
-
+const prisma = new PrismaClient();
 class ExpenseController {
   private expenseService: ExpenseService;
+  private monthlyLimitService: MonthlyLimitService;
 
   constructor(expenseService: ExpenseService) {
     this.expenseService = expenseService;
+    this.monthlyLimitService = new MonthlyLimitService(prisma);
   }
 
   async addExpense(
@@ -116,6 +120,49 @@ class ExpenseController {
 
       await this.expenseService.deleteExpense(ExpenseId(id));
       res.status(200).json();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async exceedExpenseNotification(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { userId } = req.params;
+      if (!userId) {
+        throw new MissingFieldError("User id is required");
+      }
+      const extractedDate = toZonedTime(new Date(), timeZone);
+      const startDate = startOfMonth(extractedDate);
+      const endDate = endOfMonth(extractedDate);
+
+      const expenses = await this.expenseService.getExpenseByUserIdAndMonth(
+        UserId(userId),
+        startDate,
+        endDate
+      );
+
+      const totalExpense = expenses.reduce((acc, crr) => {
+        acc += crr.amount;
+        return acc;
+      }, 0);
+
+      const monthlyLimit =
+        await this.monthlyLimitService.getMonthlyLimitByUserId({
+          userId: UserId(userId),
+          month: (new Date().getMonth() + 1) as Month,
+          year: new Date().getFullYear() as Year,
+        });
+
+      const isExceeded = monthlyLimit
+        ? totalExpense > monthlyLimit.limit
+        : false;
+
+      res.json(isExceeded);
     } catch (error) {
       next(error);
     }
