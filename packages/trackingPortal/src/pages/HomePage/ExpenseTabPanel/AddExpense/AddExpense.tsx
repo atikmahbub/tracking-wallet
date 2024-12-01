@@ -3,14 +3,7 @@ import {
   PlusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import {
-  Grid2 as Grid,
-  Button,
-  Box,
-  Stack,
-  IconButton,
-  Divider,
-} from "@mui/material";
+import { Grid2 as Grid, Button, Box, IconButton, Divider } from "@mui/material";
 import { Formik, Form, FieldArray } from "formik";
 import React, { Fragment, useState } from "react";
 import {
@@ -30,11 +23,19 @@ import { toast } from "react-hot-toast";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
 import dayjs, { Dayjs } from "dayjs";
 import Loader from "@trackingPortal/components/Loader";
+import ShortcutIcon from "@mui/icons-material/Shortcut";
+import ShortcutMenu from "@trackingPortal/components/ShortcutMenu";
 
 interface IAddExpenseProps {
   getUserExpenses: () => void;
   filterMonth: Dayjs;
 }
+
+const SExpenseOptions = [
+  { id: "2", name: "Bari Vara" },
+  { id: "23", name: "Net Bill" },
+  { id: "2231", name: "Electricity Bill" },
+];
 
 const AddExpense: React.FC<IAddExpenseProps> = ({
   getUserExpenses,
@@ -98,7 +99,12 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
                   name={EAddExpenseFields.EXPENSE_LIST}
                   render={({ push, remove }) => (
                     <Fragment>
-                      <Box display="flex" justifyContent="flex-end">
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <ShortcutMenu options={SExpenseOptions} />
                         <Button
                           startIcon={<PlusOutlined />}
                           variant="text"
