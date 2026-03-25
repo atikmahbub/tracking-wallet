@@ -41,16 +41,14 @@ model Expense {
 }
 
 model Category {
-  id        Bytes        @id   @db.Binary(16)
-  name      String              @db.VarChar(128)
-  icon      String              @db.VarChar(128)
-  color     String              @db.VarChar(32)
-  created   DateTime            @default(now())
-  updated   DateTime            @updatedAt
+  id        Bytes        @id      @db.Binary(16)
+  name      String       @unique  @db.VarChar(128)
+  icon      String                @db.VarChar(128)
+  color     String                @db.VarChar(32)
+  created   DateTime              @default(now())
+  updated   DateTime              @updatedAt
 
   expenses  Expense[]
-
-  @@unique([name], name: "category_name_unique")
 }
 
 model MonthlyLimit{
