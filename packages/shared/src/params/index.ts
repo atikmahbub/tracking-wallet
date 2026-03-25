@@ -12,3 +12,7 @@ export * from "@shared/params/IUpdateLoanParams";
 export * from "@shared/params/IAddInvestParams";
 export * from "@shared/params/IUpdateInvestParams";
 export * from "@shared/params/IGetInvestParams";
+export * from "@shared/params/ICreateCategoryParams";
+export * from "@shared/params/IGetCategoriesParams";
+export * from "@shared/params/IGetCategoryByIdParams";
+export * from "@shared/params/IGetExpenseAnalyticsParams";

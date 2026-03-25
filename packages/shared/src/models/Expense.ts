@@ -1,4 +1,10 @@
-import { UnixTimeStampString, ExpenseId, UserId } from "@shared/primitives";
+import {
+  UnixTimeStampString,
+  ExpenseId,
+  UserId,
+  CategoryId,
+} from "@shared/primitives";
+import { CategoryModel } from "@shared/models/Category";
 
 export class NewExpense {
   constructor(
@@ -16,7 +22,9 @@ export class ExpenseModel extends NewExpense {
     description: string | null,
     date: UnixTimeStampString,
     public updated: UnixTimeStampString,
-    public created: UnixTimeStampString
+    public created: UnixTimeStampString,
+    public categoryId: CategoryId | null = null,
+    public category: CategoryModel | null = null
   ) {
     super(date, amount, description);
   }

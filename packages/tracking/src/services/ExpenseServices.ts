@@ -1,15 +1,23 @@
 import { PrismaClient } from "@prisma/client";
-import { ExpenseModel } from "@shared/models";
+import {
+  ExpenseAnalyticsModel,
+  ExpenseCategoryBreakdownModel,
+  ExpenseModel,
+} from "@shared/models";
 import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
-import { IAddExpenseParams, IUpdateExpenseParams } from "@shared/params";
 import {
+  IAddExpenseParams,
+  IUpdateExpenseParams,
+} from "@shared/params";
+import {
+  CategoryId,
   ExpenseId,
   makeUnixTimestampToISOString,
   UserId,
 } from "@shared/primitives";
-import { DatabaseError } from "@tracking/errors";
+import { DatabaseError, NotFoundError } from "@tracking/errors";
 
 class ExpenseService {
   private prisma: PrismaClient;
@@ -22,7 +30,11 @@ class ExpenseService {
 
   async addExpense(params: IAddExpenseParams): Promise<ExpenseModel> {
     try {
-      const { userId, description, date, amount } = params;
+      const { userId, description, date, amount, categoryId } = params;
+
+      if (categoryId) {
+        await this.assertCategoryOwnership(categoryId, userId);
+      }
 
       const newExpense = await this.prisma.expense.create({
         data: {
@@ -31,6 +43,12 @@ class ExpenseService {
           amount: amount,
           date: makeUnixTimestampToISOString(Number(date)),
           description: description,
+          categoryId: categoryId
+            ? uuidBuffer.toBuffer(categoryId)
+            : undefined,
+        },
+        include: {
+          category: true,
         },
       });
       return this.presentationService.toExpenseModel(newExpense);
@@ -56,6 +74,9 @@ class ExpenseService {
         orderBy: {
           created: "desc",
         },
+        include: {
+          category: true,
+        },
       });
 
       return expenses.map((expense) =>
@@ -68,7 +89,24 @@ class ExpenseService {
 
   async updateExpense(params: IUpdateExpenseParams): Promise<ExpenseModel> {
     try {
-      const { id, amount, date, description } = params;
+      const { id, amount, date, description, categoryId } = params;
+
+      const existingExpense = await this.prisma.expense.findUnique({
+        where: {
+          id: uuidBuffer.toBuffer(id),
+        },
+      });
+
+      if (!existingExpense) {
+        throw new NotFoundError("Expense not found");
+      }
+
+      if (categoryId) {
+        await this.assertCategoryOwnership(
+          categoryId,
+          UserId(existingExpense.userId)
+        );
+      }
 
       const updatedExpense = await this.prisma.expense.update({
         where: {
@@ -78,11 +116,23 @@ class ExpenseService {
           amount: amount,
           date: date ? makeUnixTimestampToISOString(Number(date)) : undefined,
           description: description,
+          categoryId:
+            categoryId !== undefined
+              ? categoryId
+                ? uuidBuffer.toBuffer(categoryId)
+                : null
+              : undefined,
+        },
+        include: {
+          category: true,
         },
       });
 
       return this.presentationService.toExpenseModel(updatedExpense);
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new DatabaseError("error in updating the expense");
     }
   }
@@ -96,6 +146,101 @@ class ExpenseService {
       });
     } catch (error) {
       throw new DatabaseError("error in deleting the expense");
+    }
+  }
+
+  async getExpenseAnalytics(
+    userId: UserId,
+    startDate: Date,
+    endDate: Date
+  ): Promise<ExpenseAnalyticsModel> {
+    try {
+      const expenses = await this.prisma.expense.findMany({
+        where: {
+          userId,
+          date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        include: {
+          category: true,
+        },
+      });
+
+      const totalExpense = expenses.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      );
+
+      const breakdownMap = new Map<
+        string,
+        { categoryId: CategoryId | null; categoryName: string | null; total: number }
+      >();
+
+      expenses.forEach((expense) => {
+        const key = expense.categoryId
+          ? uuidBuffer.toString(expense.categoryId)
+          : "uncategorized";
+
+        const existing = breakdownMap.get(key);
+        const categoryIdValue = expense.categoryId
+          ? CategoryId(key)
+          : null;
+        const categoryNameValue =
+          expense.category?.name ?? "Uncategorized";
+
+        if (existing) {
+          existing.total += expense.amount;
+        } else {
+          breakdownMap.set(key, {
+            categoryId: categoryIdValue,
+            categoryName: categoryNameValue,
+            total: expense.amount,
+          });
+        }
+      });
+
+      const categoryBreakdown = Array.from(breakdownMap.values())
+        .map(
+          (item) =>
+            new ExpenseCategoryBreakdownModel(
+              item.categoryId,
+              item.categoryName,
+              Number(item.total.toFixed(2)),
+              totalExpense
+                ? Number(((item.total / totalExpense) * 100).toFixed(2))
+                : 0
+            )
+        )
+        .sort((a, b) => b.totalAmount - a.totalAmount);
+
+      const topCategory =
+        categoryBreakdown.length > 0 ? categoryBreakdown[0] : null;
+
+      return new ExpenseAnalyticsModel(
+        Number(totalExpense.toFixed(2)),
+        categoryBreakdown,
+        topCategory
+      );
+    } catch (error) {
+      throw new DatabaseError("error generating expense analytics");
+    }
+  }
+
+  private async assertCategoryOwnership(
+    categoryId: CategoryId,
+    userId: UserId
+  ): Promise<void> {
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id: uuidBuffer.toBuffer(categoryId),
+        OR: [{ userId }, { userId: null }],
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundError("Category not found");
     }
   }
 }

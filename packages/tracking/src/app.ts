@@ -21,6 +21,9 @@ import { authenticateToken } from "@tracking/middlewares/authenticateToken";
 import { LoanService } from "@tracking/services/LoanService";
 import { LoanController } from "@tracking/controllers/LoanController";
 import LoanRoutes from "@tracking/routes/LoanRoutes";
+import CategoryService from "@tracking/services/CategoryService";
+import CategoryController from "@tracking/controllers/CategoryController";
+import CategoryRoutes from "@tracking/routes/CategoryRoutes";
 
 const app: Application = express();
 const prisma = new PrismaClient();
@@ -50,11 +53,16 @@ const investService = new InvestService(prisma);
 const investController = new InvestController(investService);
 const investRoutes = new InvestRoutes(investController);
 
+const categoryService = new CategoryService(prisma);
+const categoryController = new CategoryController(categoryService);
+const categoryRoutes = new CategoryRoutes(categoryController);
+
 app.use("/api/v0", expenseRoutes.registerExpenseRoutes());
 app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
 app.use("/api/v0", userRoutes.registerUserRouter());
 app.use("/api/v0", loanRoutes.registerLoanRoutes());
 app.use("/api/v0", investRoutes.registerInvestRoutes());
+app.use("/api/v0", categoryRoutes.registerCategoryRoutes());
 
 app.use(errorHandler);
 

@@ -17,6 +17,10 @@ class ExpenseRouter {
     );
 
     router.get(
+      "/expenses/analytics",
+      this.expenseController.getExpenseAnalytics.bind(this.expenseController)
+    );
+    router.get(
       "/expenses/:userId",
       this.expenseController.getExpenseByUserIdAndMonth.bind(
         this.expenseController

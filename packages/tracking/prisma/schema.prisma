@@ -16,25 +16,46 @@ model User {
   created DateTime  @default(now())
   updated DateTime  @updatedAt
 
-  expenses          Expense[]       
+  expenses          Expense[]
   monthlyLimits     MonthlyLimit[]
   loan              Loan[]
   Invest            Invest[]
+  categories        Category[]
 
   @@index([email], name: "user_email_index")
 }
 
 model Expense {
-  id          Bytes       @id   @db.Binary(16)
+  id          Bytes        @id   @db.Binary(16)
   amount      Float
-  description String?     @db.VarChar(128)
-  date        DateTime 
-  created     DateTime    @default(now())
-  updated     DateTime    @updatedAt
+  description String?      @db.VarChar(128)
+  date        DateTime
+  created     DateTime     @default(now())
+  updated     DateTime     @updatedAt
   userId      String
-  user        User        @relation(fields: [userId], references: [userId])
+  user        User         @relation(fields: [userId], references: [userId])
+  categoryId  Bytes?       @db.Binary(16)
+  category    Category?    @relation(fields: [categoryId], references: [id])
 
   @@index([userId, date], name:"expense_user_id_date_index")
+  @@index([categoryId], name: "expense_category_id_index")
+}
+
+model Category {
+  id        Bytes        @id   @db.Binary(16)
+  name      String              @db.VarChar(128)
+  icon      String              @db.VarChar(128)
+  color     String              @db.VarChar(32)
+  type      CategoryType
+  created   DateTime            @default(now())
+  updated   DateTime            @updatedAt
+  userId    String?
+  user      User?               @relation(fields: [userId], references: [userId])
+
+  expenses  Expense[]
+
+  @@index([type], name: "category_type_index")
+  @@index([userId], name: "category_user_id_index")
 }
 
 model MonthlyLimit{
@@ -54,6 +75,11 @@ model MonthlyLimit{
 enum LoanType {
   GIVEN
   TAKEN
+}
+
+enum CategoryType {
+  EXPENSE
+  INCOME
 }
 
 model Loan{

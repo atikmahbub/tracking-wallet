@@ -1,9 +1,10 @@
 import { IAxiosAjaxUtils } from "@trackingPortal/api/utils/IAxiosAjaxUtils";
 import { IExpenseService } from "@trackingPortal/api/interfaces";
 import { TrackingWalletConfig } from "../TrackingWalletConfig";
-import { ExpenseModel } from "@shared/models/Expense";
+import { ExpenseAnalyticsModel, ExpenseModel } from "@shared/models";
 import {
   IAddExpenseParams,
+  IGetExpenseAnalyticsParams,
   IGetUserExpenses,
   IUpdateExpenseParams,
 } from "@shared/params";
@@ -47,6 +48,20 @@ export class ExpenseService implements IExpenseService {
 
     if (response.isOk()) {
       return response.value as ExpenseModel[];
+    }
+    throw extractApiError(response.error);
+  }
+
+  async getExpenseAnalytics(
+    params: IGetExpenseAnalyticsParams
+  ): Promise<ExpenseAnalyticsModel> {
+    const url = new URL(
+      urlJoin(this.config.baseUrl, "v0", "expenses", "analytics")
+    );
+    const response = await this.ajaxUtils.get(url, { ...params });
+
+    if (response.isOk()) {
+      return response.value as ExpenseAnalyticsModel;
     }
     throw extractApiError(response.error);
   }

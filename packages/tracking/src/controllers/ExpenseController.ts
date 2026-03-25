@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import ExpenseService from "@tracking/services/ExpenseServices";
 import { IAddExpenseParams } from "@shared/params";
-import { ExpenseId, Month, UserId, Year } from "@shared/primitives";
+import { CategoryId, ExpenseId, Month, UserId, Year } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
@@ -27,7 +27,7 @@ class ExpenseController {
   ): Promise<void> {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
-      const { userId, amount, description, date } = req.body;
+      const { userId, amount, description, date, categoryId } = req.body;
 
       if (!amount || !date) {
         throw new MissingFieldError("Amount, Date are required");
@@ -36,8 +36,9 @@ class ExpenseController {
       const params: IAddExpenseParams = {
         userId: UserId(userId),
         amount: Number(amount),
-        description: description,
+        description: description ?? null,
         date: date,
+        categoryId: categoryId ? CategoryId(categoryId) : undefined,
       };
 
       const newExpense = await this.expenseService.addExpense(params);
@@ -80,6 +81,38 @@ class ExpenseController {
     }
   }
 
+  async getExpenseAnalytics(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { userId, date } = req.query;
+
+      if (!date) {
+        throw new MissingFieldError("Date are required");
+      }
+
+      const extractedDate = toZonedTime(
+        new Date(parseInt(date.toString()) * 1000),
+        timeZone
+      );
+      const startDate = startOfMonth(extractedDate);
+      const endDate = endOfMonth(extractedDate);
+
+      const analytics = await this.expenseService.getExpenseAnalytics(
+        this.extractUserId(userId),
+        startDate,
+        endDate
+      );
+
+      res.status(200).json(analytics);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async updateExpense(
     req: Request,
     res: Response,
@@ -87,17 +120,25 @@ class ExpenseController {
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const { amount, date, description } = req.body;
+      const { amount, date, description, categoryId } = req.body;
 
       if (!id) {
         throw new MissingFieldError("Id is required!");
       }
 
+      const parsedCategoryId =
+        categoryId === undefined
+          ? undefined
+          : categoryId === null
+          ? null
+          : CategoryId(categoryId);
+
       const updatedExpense = await this.expenseService.updateExpense({
         id: ExpenseId(id),
-        amount: Number(amount),
+        amount: amount !== undefined ? Number(amount) : undefined,
         date: date,
         description: description,
+        categoryId: parsedCategoryId,
       });
 
       res.status(200).json(updatedExpense);
@@ -166,6 +207,14 @@ class ExpenseController {
     } catch (error) {
       next(error);
     }
+  }
+
+  private extractUserId(userId: unknown): UserId {
+    const parsed = userId?.toString();
+    if (!parsed) {
+      throw new MissingFieldError("User id is required");
+    }
+    return UserId(parsed);
   }
 }
 

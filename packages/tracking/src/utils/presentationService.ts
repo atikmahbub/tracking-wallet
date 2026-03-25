@@ -4,6 +4,7 @@ import {
   MonthlyLimitModel,
   LoanModel,
   InvestModel,
+  CategoryModel,
 } from "@shared/models";
 import {
   EInvestStatus,
@@ -13,6 +14,8 @@ import {
   LoanType,
   MonthlyLimit,
   User,
+  Category,
+  CategoryType,
 } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
@@ -25,14 +28,23 @@ import {
   URLString,
   LoanId,
   InvestId,
+  CategoryId,
 } from "@shared/primitives";
 import {
   LoanType as LoanTypeEnum,
   EInvestStatus as EInvestStatusEnum,
+  ECategoryType,
 } from "@shared/enums";
 
 export class PresentationService {
-  public toExpenseModel(expense: Expense): ExpenseModel {
+  public toExpenseModel(
+    expense: Expense & { category?: Category | null }
+  ): ExpenseModel {
+    const categoryModel =
+      expense.category && expense.categoryId
+        ? this.toCategoryModel(expense.category)
+        : null;
+
     return new ExpenseModel(
       ExpenseId(uuidBuffer.toString(expense.id)),
       UserId(expense.userId),
@@ -40,7 +52,11 @@ export class PresentationService {
       expense.description,
       makeUnixTimestampString(expense.date.getTime()),
       makeUnixTimestampString(expense.updated.getTime()),
-      makeUnixTimestampString(expense.created.getTime())
+      makeUnixTimestampString(expense.created.getTime()),
+      expense.categoryId
+        ? CategoryId(uuidBuffer.toString(expense.categoryId))
+        : null,
+      categoryModel
     );
   }
 
@@ -98,5 +114,24 @@ export class PresentationService {
       makeUnixTimestampString(invest.created.getTime()),
       makeUnixTimestampString(invest.updated.getTime())
     );
+  }
+
+  public toCategoryModel(category: Category): CategoryModel {
+    return new CategoryModel(
+      CategoryId(uuidBuffer.toString(category.id)),
+      category.name,
+      category.icon,
+      category.color,
+      this.mapCategoryType(category.type),
+      category.userId ? UserId(category.userId) : null,
+      makeUnixTimestampString(category.created.getTime()),
+      makeUnixTimestampString(category.updated.getTime())
+    );
+  }
+
+  private mapCategoryType(type: CategoryType): ECategoryType {
+    return type === CategoryType.EXPENSE
+      ? ECategoryType.Expense
+      : ECategoryType.Income;
   }
 }
