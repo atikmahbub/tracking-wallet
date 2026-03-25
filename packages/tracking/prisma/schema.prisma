@@ -4,8 +4,9 @@ datasource db {
 }
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  engineType      = "binary"
 }
 
 model User {
@@ -20,8 +21,6 @@ model User {
   monthlyLimits     MonthlyLimit[]
   loan              Loan[]
   Invest            Invest[]
-  categories        Category[]
-
   @@index([email], name: "user_email_index")
 }
 
@@ -46,16 +45,12 @@ model Category {
   name      String              @db.VarChar(128)
   icon      String              @db.VarChar(128)
   color     String              @db.VarChar(32)
-  type      CategoryType
   created   DateTime            @default(now())
   updated   DateTime            @updatedAt
-  userId    String?
-  user      User?               @relation(fields: [userId], references: [userId])
 
   expenses  Expense[]
 
-  @@index([type], name: "category_type_index")
-  @@index([userId], name: "category_user_id_index")
+  @@unique([name], name: "category_name_unique")
 }
 
 model MonthlyLimit{
@@ -75,11 +70,6 @@ model MonthlyLimit{
 enum LoanType {
   GIVEN
   TAKEN
-}
-
-enum CategoryType {
-  EXPENSE
-  INCOME
 }
 
 model Loan{

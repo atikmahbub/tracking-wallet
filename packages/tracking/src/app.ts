@@ -3,6 +3,7 @@ dotenv.config({ path: "../../.env" });
 
 import express, { Application } from "express";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
 import ExpenseController from "@tracking/controllers/ExpenseController";
 import ExpenseServices from "@tracking/services/ExpenseServices";
 import ExpenseRoutes from "@tracking/routes/ExpenseRoutes";
@@ -24,12 +25,21 @@ import LoanRoutes from "@tracking/routes/LoanRoutes";
 import CategoryService from "@tracking/services/CategoryService";
 import CategoryController from "@tracking/controllers/CategoryController";
 import CategoryRoutes from "@tracking/routes/CategoryRoutes";
+import openApiDocument from "@tracking/docs/openapi";
 
 const app: Application = express();
 const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(openApiDocument, {
+    explorer: true,
+  })
+);
 
 app.use(authenticateToken);
 

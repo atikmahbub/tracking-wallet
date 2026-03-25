@@ -15,7 +15,6 @@ import {
   MonthlyLimit,
   User,
   Category,
-  CategoryType,
 } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
@@ -33,7 +32,6 @@ import {
 import {
   LoanType as LoanTypeEnum,
   EInvestStatus as EInvestStatusEnum,
-  ECategoryType,
 } from "@shared/enums";
 
 export class PresentationService {
@@ -122,16 +120,8 @@ export class PresentationService {
       category.name,
       category.icon,
       category.color,
-      this.mapCategoryType(category.type),
-      category.userId ? UserId(category.userId) : null,
       makeUnixTimestampString(category.created.getTime()),
       makeUnixTimestampString(category.updated.getTime())
     );
-  }
-
-  private mapCategoryType(type: CategoryType): ECategoryType {
-    return type === CategoryType.EXPENSE
-      ? ECategoryType.Expense
-      : ECategoryType.Income;
   }
 }

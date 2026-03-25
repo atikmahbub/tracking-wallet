@@ -9,10 +9,18 @@ export class ExpenseCategoryBreakdownModel {
   ) {}
 }
 
+export class ExpenseTopCategoryModel {
+  constructor(
+    public categoryId: CategoryId | null,
+    public categoryName: string | null,
+    public totalAmount: number
+  ) {}
+}
+
 export class ExpenseAnalyticsModel {
   constructor(
     public totalExpense: number,
     public categoryBreakdown: ExpenseCategoryBreakdownModel[],
-    public topCategory: ExpenseCategoryBreakdownModel | null
+    public topCategory: ExpenseTopCategoryModel | null
   ) {}
 }

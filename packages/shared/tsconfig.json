@@ -11,7 +11,8 @@
     "paths": {
       "@shared/*": ["./*"] // Maps '@shared' to shared src
     },
-    "composite": true // Allow this project to be referenced
+    "composite": true, // Allow this project to be referenced
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

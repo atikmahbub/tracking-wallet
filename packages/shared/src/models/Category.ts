@@ -1,13 +1,10 @@
-import { ECategoryType } from "@shared/enums";
-import { CategoryId, UnixTimeStampString, UserId } from "@shared/primitives";
+import { CategoryId, UnixTimeStampString } from "@shared/primitives";
 
 export class NewCategoryModel {
   constructor(
     public name: string,
     public icon: string,
-    public color: string,
-    public type: ECategoryType,
-    public userId: UserId | null
+    public color: string
   ) {}
 }
 
@@ -17,11 +14,9 @@ export class CategoryModel extends NewCategoryModel {
     name: string,
     icon: string,
     color: string,
-    type: ECategoryType,
-    userId: UserId | null,
     public created: UnixTimeStampString,
     public updated: UnixTimeStampString
   ) {
-    super(name, icon, color, type, userId);
+    super(name, icon, color);
   }
 }

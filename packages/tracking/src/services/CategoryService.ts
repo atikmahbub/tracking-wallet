@@ -1,14 +1,11 @@
-import { PrismaClient, CategoryType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { CategoryModel } from "@shared/models";
 import {
   ICreateCategoryParams,
-  IGetCategoriesParams,
   IGetCategoryByIdParams,
 } from "@shared/params";
-import { CategoryId, UserId } from "@shared/primitives";
 import { PresentationService } from "@tracking/utils/presentationService";
 import { DatabaseError, NotFoundError } from "@tracking/errors";
-import { ECategoryType } from "@shared/enums";
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 
@@ -25,7 +22,7 @@ export class CategoryService {
     params: ICreateCategoryParams
   ): Promise<CategoryModel> {
     try {
-      const { name, icon, color, type, userId } = params;
+      const { name, icon, color } = params;
 
       const category = await this.prisma.category.create({
         data: {
@@ -33,8 +30,6 @@ export class CategoryService {
           name,
           icon,
           color,
-          type: this.toPrismaType(type),
-          userId,
         },
       });
 
@@ -44,20 +39,9 @@ export class CategoryService {
     }
   }
 
-  async getCategories(
-    params: IGetCategoriesParams
-  ): Promise<CategoryModel[]> {
+  async getCategories(): Promise<CategoryModel[]> {
     try {
-      const { userId, type } = params;
       const categories = await this.prisma.category.findMany({
-        where: {
-          AND: [
-            type ? { type: this.toPrismaType(type) } : {},
-            {
-              OR: [{ userId }, { userId: null }],
-            },
-          ],
-        },
         orderBy: {
           created: "asc",
         },
@@ -75,12 +59,11 @@ export class CategoryService {
     params: IGetCategoryByIdParams
   ): Promise<CategoryModel> {
     try {
-      const { categoryId, userId } = params;
+      const { categoryId } = params;
 
-      const category = await this.prisma.category.findFirst({
+      const category = await this.prisma.category.findUnique({
         where: {
           id: uuidBuffer.toBuffer(categoryId),
-          OR: [{ userId }, { userId: null }],
         },
       });
 
@@ -95,12 +78,6 @@ export class CategoryService {
       }
       throw new DatabaseError("Error fetching category");
     }
-  }
-
-  private toPrismaType(type: ECategoryType): CategoryType {
-    return type === ECategoryType.Expense
-      ? CategoryType.EXPENSE
-      : CategoryType.INCOME;
   }
 }
 

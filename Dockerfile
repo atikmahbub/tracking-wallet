@@ -30,4 +30,4 @@ WORKDIR /app/packages/tracking
 EXPOSE 3000
 
 # Start the backend (tracking), and run migrations before starting the server
-CMD ["sh", "-c", "yarn prisma migrate deploy && yarn start"]
+CMD ["sh", "-c", "yarn prisma generate && yarn prisma db push && yarn seed:categories && yarn start"]

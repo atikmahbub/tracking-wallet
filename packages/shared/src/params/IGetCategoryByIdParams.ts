@@ -1,6 +1,5 @@
-import { CategoryId, UserId } from "@shared/primitives";
+import { CategoryId } from "@shared/primitives";
 
 export interface IGetCategoryByIdParams {
   categoryId: CategoryId;
-  userId: UserId;
 }

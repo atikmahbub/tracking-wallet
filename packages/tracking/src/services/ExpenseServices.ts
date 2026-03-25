@@ -3,6 +3,7 @@ import {
   ExpenseAnalyticsModel,
   ExpenseCategoryBreakdownModel,
   ExpenseModel,
+  ExpenseTopCategoryModel,
 } from "@shared/models";
 import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
@@ -33,7 +34,7 @@ class ExpenseService {
       const { userId, description, date, amount, categoryId } = params;
 
       if (categoryId) {
-        await this.assertCategoryOwnership(categoryId, userId);
+        await this.assertCategoryExists(categoryId);
       }
 
       const newExpense = await this.prisma.expense.create({
@@ -53,6 +54,9 @@ class ExpenseService {
       });
       return this.presentationService.toExpenseModel(newExpense);
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new DatabaseError("Error creating expense");
     }
   }
@@ -102,10 +106,7 @@ class ExpenseService {
       }
 
       if (categoryId) {
-        await this.assertCategoryOwnership(
-          categoryId,
-          UserId(existingExpense.userId)
-        );
+        await this.assertCategoryExists(categoryId);
       }
 
       const updatedExpense = await this.prisma.expense.update({
@@ -184,11 +185,8 @@ class ExpenseService {
           : "uncategorized";
 
         const existing = breakdownMap.get(key);
-        const categoryIdValue = expense.categoryId
-          ? CategoryId(key)
-          : null;
-        const categoryNameValue =
-          expense.category?.name ?? "Uncategorized";
+        const categoryIdValue = expense.categoryId ? CategoryId(key) : null;
+        const categoryNameValue = expense.category?.name ?? "Uncategorized";
 
         if (existing) {
           existing.total += expense.amount;
@@ -216,7 +214,13 @@ class ExpenseService {
         .sort((a, b) => b.totalAmount - a.totalAmount);
 
       const topCategory =
-        categoryBreakdown.length > 0 ? categoryBreakdown[0] : null;
+        categoryBreakdown.length > 0
+          ? new ExpenseTopCategoryModel(
+              categoryBreakdown[0].categoryId,
+              categoryBreakdown[0].categoryName,
+              categoryBreakdown[0].totalAmount
+            )
+          : null;
 
       return new ExpenseAnalyticsModel(
         Number(totalExpense.toFixed(2)),
@@ -228,14 +232,10 @@ class ExpenseService {
     }
   }
 
-  private async assertCategoryOwnership(
-    categoryId: CategoryId,
-    userId: UserId
-  ): Promise<void> {
-    const category = await this.prisma.category.findFirst({
+  private async assertCategoryExists(categoryId: CategoryId): Promise<void> {
+    const category = await this.prisma.category.findUnique({
       where: {
         id: uuidBuffer.toBuffer(categoryId),
-        OR: [{ userId }, { userId: null }],
       },
     });
 
