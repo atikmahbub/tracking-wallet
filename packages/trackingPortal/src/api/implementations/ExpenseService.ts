@@ -15,7 +15,7 @@ import { ExpenseId } from "@shared/primitives";
 export class ExpenseService implements IExpenseService {
   constructor(
     protected config: TrackingWalletConfig,
-    protected ajaxUtils: IAxiosAjaxUtils
+    protected ajaxUtils: IAxiosAjaxUtils,
   ) {}
 
   async addExpense(params: IAddExpenseParams): Promise<ExpenseModel> {
@@ -30,7 +30,7 @@ export class ExpenseService implements IExpenseService {
 
   async updateExpense(params: IUpdateExpenseParams): Promise<ExpenseModel> {
     const url = new URL(
-      urlJoin(this.config.baseUrl, "v0", "expense", params.id)
+      urlJoin(this.config.baseUrl, "v0", "expense", params.id),
     );
     const response = await this.ajaxUtils.put(url, { ...params });
 
@@ -42,7 +42,7 @@ export class ExpenseService implements IExpenseService {
 
   async getExpenseByUser(params: IGetUserExpenses): Promise<ExpenseModel[]> {
     const url = new URL(
-      urlJoin(this.config.baseUrl, "v0", "expenses", params.userId)
+      urlJoin(this.config.baseUrl, "v0", "expenses", params.userId),
     );
     const response = await this.ajaxUtils.get(url, { ...params });
 
@@ -53,10 +53,10 @@ export class ExpenseService implements IExpenseService {
   }
 
   async getExpenseAnalytics(
-    params: IGetExpenseAnalyticsParams
+    params: IGetExpenseAnalyticsParams,
   ): Promise<ExpenseAnalyticsModel> {
     const url = new URL(
-      urlJoin(this.config.baseUrl, "v0", "expenses", "analytics")
+      urlJoin(this.config.baseUrl, "v0", "expenses", "analytics"),
     );
     const response = await this.ajaxUtils.get(url, { ...params });
 
@@ -72,6 +72,20 @@ export class ExpenseService implements IExpenseService {
 
     if (response.isOk()) {
       return response.value as void;
+    }
+    throw extractApiError(response.error);
+  }
+
+  async getExpenseAnalyticsByCategory(
+    params: IGetExpenseAnalyticsParams,
+  ): Promise<ExpenseAnalyticsModel> {
+    const url = new URL(
+      urlJoin(this.config.baseUrl, "v0", "expenses", "analytics", "category"),
+    );
+    const response = await this.ajaxUtils.get(url, { ...params });
+
+    if (response.isOk()) {
+      return response.value as ExpenseAnalyticsModel;
     }
     throw extractApiError(response.error);
   }

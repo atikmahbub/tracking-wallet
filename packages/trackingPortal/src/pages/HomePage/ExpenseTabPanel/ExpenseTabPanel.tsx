@@ -1,10 +1,11 @@
-import { Box, Grid2 as Grid, Typography } from "@mui/material";
+import { Box, Grid2 as Grid, Stack, Typography } from "@mui/material";
 import MainCard from "@trackingPortal/components/MainCard";
 import { useEffect, useState } from "react";
 import Loader from "@trackingPortal/components/Loader";
 import Summary from "@trackingPortal/pages/HomePage/ExpenseTabPanel/Summary";
 import { useStoreContext } from "@trackingPortal/contexts/StoreProvider";
 import { ExpenseModel } from "@shared/models/Expense";
+import { ExpenseAnalyticsModel } from "@shared/models";
 import { Month, UnixTimeStampString, Year } from "@shared/primitives";
 import AddExpense from "@trackingPortal/pages/HomePage/ExpenseTabPanel/AddExpense";
 
@@ -12,21 +13,26 @@ import ExpenseList from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseL
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { MonthlyLimitModel } from "@shared/models";
+import ExpenseAnalytics from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseAnalytics";
 
 const ExpenseTabPanel = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [limitLoading, setLimitLoading] = useState<boolean>(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(false);
   const [expenses, setExpenses] = useState<ExpenseModel[]>([]);
   const { apiGateway, user } = useStoreContext();
   const [filterMonth, setFilterMonth] = useState<Dayjs>(dayjs());
   const [monthLimit, setMonthLimit] = useState<MonthlyLimitModel>(
     {} as MonthlyLimitModel
   );
+  const [expenseAnalytics, setExpenseAnalytics] =
+    useState<ExpenseAnalyticsModel | null>(null);
 
   useEffect(() => {
     if (user.userId && !user.default) {
       getMonthlyLimit();
       getUserExpenses();
+      getExpenseAnalytics();
     }
   }, [user, filterMonth]);
 
@@ -44,6 +50,21 @@ const ExpenseTabPanel = () => {
       console.log(error);
     } finally {
       setLimitLoading(false);
+    }
+  };
+
+  const getExpenseAnalytics = async () => {
+    try {
+      setAnalyticsLoading(true);
+      const analytics = await apiGateway.expenseService.getExpenseAnalytics({
+        userId: user.userId,
+        date: dayjs(filterMonth).unix() as unknown as UnixTimeStampString,
+      });
+      setExpenseAnalytics(analytics);
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      setAnalyticsLoading(false);
     }
   };
 
@@ -74,12 +95,18 @@ const ExpenseTabPanel = () => {
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Summary
-          totalExpense={totalExpense}
-          filterMonth={filterMonth}
-          monthLimit={monthLimit}
-          getMonthlyLimit={getMonthlyLimit}
-        />
+        <Stack spacing={3}>
+          <Summary
+            totalExpense={totalExpense}
+            filterMonth={filterMonth}
+            monthLimit={monthLimit}
+            getMonthlyLimit={getMonthlyLimit}
+          />
+          <ExpenseAnalytics
+            analytics={expenseAnalytics}
+            loading={analyticsLoading}
+          />
+        </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
         <MainCard

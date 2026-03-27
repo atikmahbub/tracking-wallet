@@ -12,7 +12,10 @@ export interface IExpenseService {
   updateExpense: (params: IUpdateExpenseParams) => Promise<ExpenseModel>;
   getExpenseByUser: (params: IGetUserExpenses) => Promise<ExpenseModel[]>;
   getExpenseAnalytics: (
-    params: IGetExpenseAnalyticsParams
+    params: IGetExpenseAnalyticsParams,
   ) => Promise<ExpenseAnalyticsModel>;
   deleteExpense(id: ExpenseId): Promise<void>;
+  getExpenseAnalyticsByCategory: (
+    params: IGetExpenseAnalyticsParams,
+  ) => Promise<ExpenseAnalyticsModel>;
 }
