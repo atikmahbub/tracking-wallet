@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 
 const defaultCategories = [
   { name: "Food", icon: "utensils", color: "#FF6B6B" },
+  { name: "Groceries", icon: "shopping-cart", color: "#4ECDC4" },
   { name: "Transport", icon: "car", color: "#1DD3B0" },
   { name: "Bills", icon: "file-invoice", color: "#FFA500" },
   { name: "Shopping", icon: "shopping-bag", color: "#9B5DE5" },
@@ -16,6 +17,7 @@ const defaultCategories = [
   { name: "Housing", icon: "home", color: "#2A9D8F" },
   { name: "Education", icon: "book", color: "#264653" },
   { name: "Personal", icon: "user", color: "#F4A261" },
+  { name: "Kids", icon: "baby", color: "#FF99C8" },
   { name: "Other", icon: "dots-horizontal", color: "#ADB5BD" },
 ];
 
