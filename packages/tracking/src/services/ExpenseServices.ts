@@ -8,10 +8,7 @@ import {
 import { v4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
 import { PresentationService } from "@tracking/utils/presentationService";
-import {
-  IAddExpenseParams,
-  IUpdateExpenseParams,
-} from "@shared/params";
+import { IAddExpenseParams, IUpdateExpenseParams } from "@shared/params";
 import {
   CategoryId,
   ExpenseId,
@@ -42,11 +39,9 @@ class ExpenseService {
           id: uuidBuffer.toBuffer(v4()),
           userId: userId,
           amount: amount,
-          date: makeUnixTimestampToISOString(Number(date)),
+          date: new Date(Number(date) * 1000),
           description: description,
-          categoryId: categoryId
-            ? uuidBuffer.toBuffer(categoryId)
-            : undefined,
+          categoryId: categoryId ? uuidBuffer.toBuffer(categoryId) : undefined,
         },
         include: {
           category: true,
@@ -64,7 +59,7 @@ class ExpenseService {
   async getExpenseByUserIdAndMonth(
     userId: UserId,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<ExpenseModel[]> {
     try {
       const expenses = await this.prisma.expense.findMany({
@@ -84,7 +79,7 @@ class ExpenseService {
       });
 
       return expenses.map((expense) =>
-        this.presentationService.toExpenseModel(expense)
+        this.presentationService.toExpenseModel(expense),
       );
     } catch (error) {
       throw new DatabaseError("Error in getting expenses");
@@ -115,7 +110,7 @@ class ExpenseService {
         },
         data: {
           amount: amount,
-          date: date ? makeUnixTimestampToISOString(Number(date)) : undefined,
+          date: date ? new Date(Number(date) * 1000) : undefined,
           description: description,
           categoryId:
             categoryId !== undefined
@@ -153,7 +148,7 @@ class ExpenseService {
   async getExpenseAnalytics(
     userId: UserId,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<ExpenseAnalyticsModel> {
     try {
       const expenses = await this.prisma.expense.findMany({
@@ -171,12 +166,16 @@ class ExpenseService {
 
       const totalExpense = expenses.reduce(
         (sum, expense) => sum + expense.amount,
-        0
+        0,
       );
 
       const breakdownMap = new Map<
         string,
-        { categoryId: CategoryId | null; categoryName: string | null; total: number }
+        {
+          categoryId: CategoryId | null;
+          categoryName: string | null;
+          total: number;
+        }
       >();
 
       expenses.forEach((expense) => {
@@ -208,8 +207,8 @@ class ExpenseService {
               Number(item.total.toFixed(2)),
               totalExpense
                 ? Number(((item.total / totalExpense) * 100).toFixed(2))
-                : 0
-            )
+                : 0,
+            ),
         )
         .sort((a, b) => b.totalAmount - a.totalAmount);
 
@@ -218,14 +217,14 @@ class ExpenseService {
           ? new ExpenseTopCategoryModel(
               categoryBreakdown[0].categoryId,
               categoryBreakdown[0].categoryName,
-              categoryBreakdown[0].totalAmount
+              categoryBreakdown[0].totalAmount,
             )
           : null;
 
       return new ExpenseAnalyticsModel(
         Number(totalExpense.toFixed(2)),
         categoryBreakdown,
-        topCategory
+        topCategory,
       );
     } catch (error) {
       throw new DatabaseError("error generating expense analytics");
