@@ -47,19 +47,25 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
     if (user.default) return;
     try {
       setLoading(true);
+
       const addExpensePromiseList: Promise<ExpenseModel>[] = [];
       values.expense_list.map((expense) => {
+        const safeDate = dayjs(expense.date)
+          .hour(12)
+          .minute(0)
+          .second(0)
+          .millisecond(0)
+          .toDate();
+
         const params: IAddExpenseParams = {
           userId: user.userId,
           amount: convertKiloToNumber(expense.amount),
-          date: makeUnixTimestampString(
-            Number(new Date(expense.date.toDate()))
-          ),
+          date: makeUnixTimestampString(Number(safeDate)),
           description: expense.description,
         };
 
         addExpensePromiseList.push(
-          apiGateway.expenseService.addExpense(params)
+          apiGateway.expenseService.addExpense(params),
         );
       });
 
@@ -190,7 +196,7 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
                               </Grid>
                             )}
                           </Grid>
-                        )
+                        ),
                       )}
                       {!!values[EAddExpenseFields.EXPENSE_LIST].length && (
                         <Box
