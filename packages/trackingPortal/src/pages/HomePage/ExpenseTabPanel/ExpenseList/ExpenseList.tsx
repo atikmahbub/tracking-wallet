@@ -29,6 +29,9 @@ import dayjs from "dayjs";
 import Loader from "@trackingPortal/components/Loader";
 import { useTheme } from "@mui/material";
 import AlertDialog from "@trackingPortal/components/AlertModal";
+import SelectFieldWithTitle from "@trackingPortal/components/SelectFieldWithTitle/SelectFieldWithTitle";
+import { CategoryModel } from "@shared/models/Category";
+import { CategoryId } from "@shared/primitives";
 
 interface IExpenseList {
   expenses: ExpenseModel[];
@@ -44,6 +47,28 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
   const isMobileDevice = useMediaQuery(theme.breakpoints.down("sm"));
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const selectedRowIdRef = useRef<ExpenseId>("" as ExpenseId);
+
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState<boolean>(true);
+  const [categoriesError, setCategoriesError] = useState<boolean>(false);
+
+  const fetchCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      setCategoriesError(false);
+      const data = await apiGateway.categoryService.getCategories();
+      setCategories(data);
+    } catch (err) {
+      setCategoriesError(true);
+      toast.error("Failed to load categories");
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleActionClick = (row, action) => {
     if (action === "edit") {
@@ -95,6 +120,7 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
           Number(new Date(updatedExpenseValues.date))
         ),
         description: updatedExpenseValues.description,
+        categoryId: updatedExpenseValues.categoryId ? (updatedExpenseValues.categoryId as CategoryId) : null,
       };
       await apiGateway.expenseService.updateExpense(params);
       await getUserExpenses();
@@ -129,6 +155,7 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
               makeUnixTimestampToISOString(Number(item.date))
             ).format("YYYY-MM-DD"),
             [EAddExpenseFields.DESCRIPTION]: item.description,
+            [EAddExpenseFields.CATEGORY_ID]: item.categoryId || "",
           })),
         }}
         validationSchema={CreateExpenseSchema}
@@ -166,20 +193,27 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
                       return (
                         <Box pt={4} pb={4}>
                           <Grid container key={row.id} spacing={2}>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                               <DatePickerFieldWithTitle
                                 name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DATE}`}
                                 title="Date"
                               />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 3 }}>
+                              <SelectFieldWithTitle
+                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.CATEGORY_ID}`}
+                                title="Category"
+                                options={categories.map(c => ({ value: c.id, text: c.name }))}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 3 }}>
                               <TextFieldWithTitle
                                 name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DESCRIPTION}`}
                                 title="Purpose"
                                 noWordLimit
                               />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                               <TextFieldWithTitle
                                 name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.AMOUNT}`}
                                 title="Amount"
