@@ -23,6 +23,10 @@ class UserRoutes {
       "/user/:userId",
       this.userController.updateUser.bind(this.userController)
     );
+    router.delete(
+      "/user/:userId",
+      this.userController.deleteAccount.bind(this.userController)
+    );
 
     return router;
   }

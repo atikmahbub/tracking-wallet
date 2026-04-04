@@ -1,5 +1,5 @@
 import { UserId } from "@shared/primitives";
-import { MissingFieldError } from "@tracking/errors";
+import { MissingFieldError, UnAuthorizedError } from "@tracking/errors";
 import UserService from "@tracking/services/UserService";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { Request, Response, NextFunction } from "express";
@@ -72,6 +72,31 @@ class UserController {
       });
 
       res.status(200).json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteAccount(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { userId } = req.params;
+
+      const success = await this.userService.deleteAccount(userId);
+
+      if (!success) {
+        res.status(404).json({ success: false, message: "User not found" });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Account and all associated data deleted successfully",
+      });
     } catch (error) {
       next(error);
     }

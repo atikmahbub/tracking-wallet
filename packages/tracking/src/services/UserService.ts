@@ -77,6 +77,45 @@ class UserService {
       throw new DatabaseError("error in updating the user");
     }
   }
+
+  async deleteAccount(userId: string): Promise<boolean> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { userId },
+      });
+
+      if (!user) {
+        return false;
+      }
+
+      /**
+       * BONUS: Prisma Schema Improvement
+       * ---------------------------------
+       * You could configure onDelete: Cascade directly in `schema.prisma` for the relations
+       * e.g., user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+       * 
+       * Why manual deletion (with a Prisma transaction) is sometimes safer:
+       * 1. Application-level logging: You can trigger events, send emails, or log exactly what is removed.
+       * 2. Soft-deletes: If you ever change requirements to just set `isDeleted = true`, it's easier to refactor.
+       * 3. Prevents accidental mass unrecoverable cascading drops directly at the DB engine layer.
+       * 4. Safe partial handling if some data must be retained (like anonymous analytics).
+       */
+      await this.prisma.$transaction(async (tx) => {
+        await tx.expense.deleteMany({ where: { userId } });
+        await tx.monthlyLimit.deleteMany({ where: { userId } });
+        await tx.loan.deleteMany({ where: { userId } });
+        await tx.invest.deleteMany({ where: { userId } });
+        
+        await tx.user.delete({ where: { userId } });
+      });
+
+      console.log(`Successfully deleted account and all associated data for user: ${userId}`);
+      return true;
+    } catch (error) {
+      console.error(`Error deleting account for user ${userId}:`, error);
+      throw new DatabaseError("error in deleting the user account");
+    }
+  }
 }
 
 export default UserService;

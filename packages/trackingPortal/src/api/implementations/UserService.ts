@@ -26,7 +26,7 @@ export class UserService implements IUserService {
   }
 
   async getUser(userId: UserId): Promise<UserModel> {
-    const url = new URL(urlJoin(this.config.baseUrl, "v0", "user", userId));
+    const url = new URL(urlJoin(this.config.baseUrl, "v0", "user", encodeURIComponent(userId)));
     const response = await this.ajaxUtils.get(url);
     if (response.isOk()) {
       return response.value as UserModel;
@@ -36,11 +36,20 @@ export class UserService implements IUserService {
 
   async updateUser(params: IUpdateUserParams): Promise<UserModel> {
     const url = new URL(
-      urlJoin(this.config.baseUrl, "v0", "user", params.userId)
+      urlJoin(this.config.baseUrl, "v0", "user", encodeURIComponent(params.userId))
     );
     const response = await this.ajaxUtils.put(url, { ...params });
     if (response.isOk()) {
       return response.value as UserModel;
+    }
+    throw extractApiError(response.error);
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    const url = new URL(urlJoin(this.config.baseUrl, "v0", "user", encodeURIComponent(userId)));
+    const response = await this.ajaxUtils.delete(url);
+    if (response.isOk()) {
+      return;
     }
     throw extractApiError(response.error);
   }

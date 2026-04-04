@@ -30,6 +30,9 @@ import { toast } from "react-hot-toast";
 import DatePickerFieldWithTitle from "@trackingPortal/components/DatePickerWithTitle/DatePickerWithTitle";
 import dayjs, { Dayjs } from "dayjs";
 import Loader from "@trackingPortal/components/Loader";
+import SelectFieldWithTitle from "@trackingPortal/components/SelectFieldWithTitle/SelectFieldWithTitle";
+import { CategoryModel } from "@shared/models/Category";
+import { CategoryId } from "@shared/primitives";
 
 interface IAddExpenseProps {
   getUserExpenses: () => void;
@@ -42,6 +45,28 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
 }) => {
   const { apiGateway, user } = useStoreContext();
   const [loading, setLoading] = useState<boolean>(false);
+  
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState<boolean>(true);
+  const [categoriesError, setCategoriesError] = useState<boolean>(false);
+
+  const fetchCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      setCategoriesError(false);
+      const data = await apiGateway.categoryService.getCategories();
+      setCategories(data);
+    } catch (err) {
+      setCategoriesError(true);
+      toast.error("Failed to load categories");
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleAddExpense = async (values: IAddExpense, { resetForm }) => {
     if (user.default) return;
@@ -62,6 +87,7 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
           amount: convertKiloToNumber(expense.amount),
           date: makeUnixTimestampString(Number(safeDate)),
           description: expense.description,
+          categoryId: expense.categoryId ? (expense.categoryId as CategoryId) : null,
         };
 
         addExpensePromiseList.push(
@@ -88,9 +114,9 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
 
   return (
     <Formik
-      enableReinitialize
+      enableReinitialize={false}
       initialValues={{
-        [EAddExpenseFields.EXPENSE_LIST]: [],
+        [EAddExpenseFields.EXPENSE_LIST]: categories.length > 0 ? [{ ...defaultQuestion, categoryId: categories[0].id }] : [],
       }}
       onSubmit={handleAddExpense}
       validationSchema={CreateExpenseSchema}
@@ -99,6 +125,19 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
         return (
           <Form>
             <Grid container spacing={3}>
+              {categoriesError && (
+                <Grid size={12}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor="error.light" p={2} borderRadius={1}>
+                    <Box color="error.main">Failed to load categories</Box>
+                    <Button onClick={fetchCategories} size="small" variant="contained" color="error">Retry</Button>
+                  </Box>
+                </Grid>
+              )}
+              {categoriesLoading && !categoriesError && (
+                <Grid size={12}>
+                  <Box p={2}>Loading categories...</Box>
+                </Grid>
+              )}
               <Grid size={12}>
                 <FieldArray
                   name={EAddExpenseFields.EXPENSE_LIST}
@@ -115,12 +154,22 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
                                 ? theme.palette.primary.darker
                                 : theme.palette.primary.main,
                           }}
-                          onClick={() =>
+                          onClick={() => {
+                            const lastUsedCategory =
+                              values[EAddExpenseFields.EXPENSE_LIST].length > 0
+                                ? values[EAddExpenseFields.EXPENSE_LIST][
+                                    values[EAddExpenseFields.EXPENSE_LIST].length - 1
+                                  ][EAddExpenseFields.CATEGORY_ID]
+                                : categories.length > 0
+                                ? categories[0].id
+                                : "";
+
                             push({
                               ...defaultQuestion,
                               date: dayjs(filterMonth, "yyyy-MM-dd"),
-                            })
-                          }
+                              categoryId: lastUsedCategory,
+                            });
+                          }}
                         >
                           Add Expense
                         </Button>
@@ -134,20 +183,27 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
                             spacing={2}
                             mt={3}
                           >
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                               <DatePickerFieldWithTitle
                                 name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DATE}`}
                                 title="Date"
                               />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 3 }}>
+                              <SelectFieldWithTitle
+                                name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.CATEGORY_ID}`}
+                                title="Category"
+                                options={categories.map(c => ({ value: c.id, text: c.name }))}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 3 }}>
                               <TextFieldWithTitle
                                 name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.DESCRIPTION}`}
                                 title="Purpose"
                                 noWordLimit
                               />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                               <TextFieldWithTitle
                                 name={`${EAddExpenseFields.EXPENSE_LIST}.${index}.${EAddExpenseFields.AMOUNT}`}
                                 title="Amount"
@@ -171,12 +227,17 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
                               }}
                             >
                               <IconButton
-                                onClick={() =>
+                                onClick={() => {
+                                  const lastUsedCategory =
+                                    values[EAddExpenseFields.EXPENSE_LIST][index][EAddExpenseFields.CATEGORY_ID] ||
+                                    (categories.length > 0 ? categories[0].id : "");
+
                                   push({
                                     ...defaultQuestion,
                                     date: dayjs(filterMonth, "yyyy-MM-dd"),
-                                  })
-                                }
+                                    categoryId: lastUsedCategory,
+                                  });
+                                }}
                                 size="small"
                               >
                                 <PlusCircleOutlined />

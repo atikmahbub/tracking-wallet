@@ -5,6 +5,7 @@ export interface INewExpense {
   [EAddExpenseFields.AMOUNT]: string;
   [EAddExpenseFields.DESCRIPTION]: string;
   [EAddExpenseFields.DATE]: Dayjs;
+  [EAddExpenseFields.CATEGORY_ID]?: string;
 }
 
 export interface IAddExpense {

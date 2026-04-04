@@ -10,6 +10,7 @@ export enum EAddExpenseFields {
   AMOUNT = "amount",
   DESCRIPTION = "description",
   DATE = "date",
+  CATEGORY_ID = "categoryId",
   EXPENSE_LIST = "expense_list",
 }
 
@@ -17,6 +18,7 @@ export const defaultQuestion: INewExpense = {
   [EAddExpenseFields.AMOUNT]: "",
   [EAddExpenseFields.DESCRIPTION]: "",
   [EAddExpenseFields.DATE]: dayjs(new Date(), "yyyy-MM-dd"),
+  [EAddExpenseFields.CATEGORY_ID]: "",
 };
 
 export const CreateExpenseSchema = Yup.object({
@@ -46,6 +48,7 @@ export const CreateExpenseSchema = Yup.object({
         128,
         "Max 256 character allowed"
       ),
+      [EAddExpenseFields.CATEGORY_ID]: Yup.string().nullable(),
     })
   ),
 });
