@@ -34,6 +34,9 @@ import IncomeCategoryRoutes from "@tracking/routes/IncomeCategoryRoutes";
 import TransactionService from "@tracking/services/TransactionService";
 import TransactionController from "@tracking/controllers/TransactionController";
 import TransactionRoutes from "@tracking/routes/TransactionRoutes";
+import TransactionSummaryService from "@tracking/services/TransactionSummaryService";
+import TransactionSummaryController from "@tracking/controllers/TransactionSummaryController";
+import TransactionSummaryRoutes from "@tracking/routes/TransactionSummaryRoutes";
 import openApiDocument from "@tracking/docs/openapi";
 
 const app: Application = express();
@@ -88,6 +91,10 @@ const transactionService = new TransactionService(prisma);
 const transactionController = new TransactionController(transactionService);
 const transactionRoutes = new TransactionRoutes(transactionController);
 
+const transactionSummaryService = new TransactionSummaryService(prisma);
+const transactionSummaryController = new TransactionSummaryController(transactionSummaryService);
+const transactionSummaryRoutes = new TransactionSummaryRoutes(transactionSummaryController);
+
 app.use("/api/v0", expenseRoutes.registerExpenseRoutes());
 app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
 app.use("/api/v0", userRoutes.registerUserRouter());
@@ -97,6 +104,7 @@ app.use("/api/v0", categoryRoutes.registerCategoryRoutes());
 app.use("/api/v0", incomeRoutes.registerIncomeRoutes());
 app.use("/api/v0", incomeCategoryRoutes.registerIncomeCategoryRoutes());
 app.use("/api/v0", transactionRoutes.registerTransactionRoutes());
+app.use("/api/v0", transactionSummaryRoutes.registerRoutes());
 
 app.use(errorHandler);
 

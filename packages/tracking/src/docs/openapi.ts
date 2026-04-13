@@ -225,6 +225,21 @@ const openApiDocument = {
           categoryId: { type: "string", nullable: true },
         },
       },
+      TransactionSummary: {
+        type: "object",
+        properties: {
+          totalExpense: { type: "number" },
+          totalIncome: { type: "number" },
+          expenseChangePercentage: { type: "number" },
+          incomeChangePercentage: { type: "number" },
+        },
+        required: [
+          "totalExpense",
+          "totalIncome",
+          "expenseChangePercentage",
+          "incomeChangePercentage",
+        ],
+      },
     },
   },
   paths: {
@@ -731,6 +746,32 @@ const openApiDocument = {
               },
             },
           },
+        },
+      },
+    },
+    "/api/v0/transactions/summary/{userId}": {
+      get: {
+        tags: ["Analytics", "Transactions"],
+        summary: "Get monthly transaction summary and percentage changes",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "userId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Monthly transaction summary",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/TransactionSummary" },
+              },
+            },
+          },
+          "401": { description: "Unauthorized" },
         },
       },
     },
