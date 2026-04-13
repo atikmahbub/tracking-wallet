@@ -16,3 +16,7 @@ export * from "@shared/params/ICreateCategoryParams";
 export * from "@shared/params/IGetCategoriesParams";
 export * from "@shared/params/IGetCategoryByIdParams";
 export * from "@shared/params/IGetExpenseAnalyticsParams";
+export * from "@shared/params/IAddIncomeParams";
+export * from "@shared/params/IUpdateIncomeParams";
+export * from "@shared/params/ICreateIncomeCategoryParams";
+export * from "@shared/params/IGetIncomeCategoriesParams";

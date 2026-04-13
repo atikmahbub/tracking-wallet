@@ -25,6 +25,15 @@ import LoanRoutes from "@tracking/routes/LoanRoutes";
 import CategoryService from "@tracking/services/CategoryService";
 import CategoryController from "@tracking/controllers/CategoryController";
 import CategoryRoutes from "@tracking/routes/CategoryRoutes";
+import IncomeService from "@tracking/services/IncomeService";
+import IncomeController from "@tracking/controllers/IncomeController";
+import IncomeRoutes from "@tracking/routes/IncomeRoutes";
+import IncomeCategoryService from "@tracking/services/IncomeCategoryService";
+import IncomeCategoryController from "@tracking/controllers/IncomeCategoryController";
+import IncomeCategoryRoutes from "@tracking/routes/IncomeCategoryRoutes";
+import TransactionService from "@tracking/services/TransactionService";
+import TransactionController from "@tracking/controllers/TransactionController";
+import TransactionRoutes from "@tracking/routes/TransactionRoutes";
 import openApiDocument from "@tracking/docs/openapi";
 
 const app: Application = express();
@@ -67,12 +76,27 @@ const categoryService = new CategoryService(prisma);
 const categoryController = new CategoryController(categoryService);
 const categoryRoutes = new CategoryRoutes(categoryController);
 
+const incomeService = new IncomeService(prisma);
+const incomeController = new IncomeController(incomeService);
+const incomeRoutes = new IncomeRoutes(incomeController);
+
+const incomeCategoryService = new IncomeCategoryService(prisma);
+const incomeCategoryController = new IncomeCategoryController(incomeCategoryService);
+const incomeCategoryRoutes = new IncomeCategoryRoutes(incomeCategoryController);
+
+const transactionService = new TransactionService(prisma);
+const transactionController = new TransactionController(transactionService);
+const transactionRoutes = new TransactionRoutes(transactionController);
+
 app.use("/api/v0", expenseRoutes.registerExpenseRoutes());
 app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
 app.use("/api/v0", userRoutes.registerUserRouter());
 app.use("/api/v0", loanRoutes.registerLoanRoutes());
 app.use("/api/v0", investRoutes.registerInvestRoutes());
 app.use("/api/v0", categoryRoutes.registerCategoryRoutes());
+app.use("/api/v0", incomeRoutes.registerIncomeRoutes());
+app.use("/api/v0", incomeCategoryRoutes.registerIncomeCategoryRoutes());
+app.use("/api/v0", transactionRoutes.registerTransactionRoutes());
 
 app.use(errorHandler);
 

@@ -14,8 +14,11 @@ const openApiDocument = {
   ],
   tags: [
     { name: "Expenses", description: "Expense management" },
-    { name: "Categories", description: "Category management" },
-    { name: "Analytics", description: "Expense insights & breakdowns" },
+    { name: "Incomes", description: "Income management" },
+    { name: "Categories", description: "Expense category management" },
+    { name: "Income Categories", description: "Income category management" },
+    { name: "Transactions", description: "Unified transaction history" },
+    { name: "Analytics", description: "Insights & breakdowns" },
   ],
   components: {
     securitySchemes: {
@@ -118,6 +121,71 @@ const openApiDocument = {
           categoryId: { type: "string", nullable: true },
         },
       },
+      IncomeCategory: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          name: { type: "string" },
+          icon: { type: "string" },
+          color: { type: "string" },
+          userId: { type: "string", nullable: true },
+          created: { type: "string", format: "date-time" },
+          updated: { type: "string", format: "date-time" },
+        },
+        required: ["id", "name", "icon", "color", "created", "updated"],
+      },
+      Income: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          userId: { type: "string" },
+          amount: { type: "number" },
+          description: { type: "string", nullable: true },
+          date: { type: "string" },
+          created: { type: "string" },
+          updated: { type: "string" },
+          categoryId: { type: "string", nullable: true },
+          category: { $ref: "#/components/schemas/IncomeCategory" },
+        },
+        required: ["id", "userId", "amount", "date", "created", "updated"],
+      },
+      IncomeAnalytics: {
+        type: "object",
+        properties: {
+          totalIncome: { type: "number" },
+          categoryBreakdown: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                categoryId: { type: "string", nullable: true },
+                categoryName: { type: "string", nullable: true },
+                totalAmount: { type: "number" },
+                percentage: { type: "number" },
+              },
+            },
+          },
+        },
+      },
+      Transaction: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          type: { type: "string", enum: ["expense", "income"] },
+          amount: { type: "number" },
+          description: { type: "string", nullable: true },
+          date: { type: "string" },
+          category: {
+            type: "object",
+            nullable: true,
+            properties: {
+              name: { type: "string", nullable: true },
+              icon: { type: "string", nullable: true },
+              color: { type: "string", nullable: true },
+            },
+          },
+        },
+      },
       CategoryCreateRequest: {
         type: "object",
         properties: {
@@ -126,6 +194,36 @@ const openApiDocument = {
           color: { type: "string" },
         },
         required: ["name", "icon", "color"],
+      },
+      IncomeCategoryCreateRequest: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          icon: { type: "string" },
+          color: { type: "string" },
+          userId: { type: "string", nullable: true },
+        },
+        required: ["name", "icon", "color"],
+      },
+      IncomeCreateRequest: {
+        type: "object",
+        properties: {
+          userId: { type: "string" },
+          amount: { type: "number" },
+          description: { type: "string", nullable: true },
+          date: { type: "string" },
+          categoryId: { type: "string", nullable: true },
+        },
+        required: ["userId", "amount", "date"],
+      },
+      IncomeUpdateRequest: {
+        type: "object",
+        properties: {
+          amount: { type: "number", nullable: true },
+          description: { type: "string", nullable: true },
+          date: { type: "string", nullable: true },
+          categoryId: { type: "string", nullable: true },
+        },
       },
     },
   },
@@ -382,6 +480,257 @@ const openApiDocument = {
           },
           "401": { description: "Unauthorized" },
           "404": { description: "Category not found" },
+        },
+      },
+    },
+    "/api/v0/income/add": {
+      post: {
+        tags: ["Incomes"],
+        summary: "Create a new income",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/IncomeCreateRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Income created",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Income" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/v0/income/{id}": {
+      put: {
+        tags: ["Incomes"],
+        summary: "Update an existing income",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/IncomeUpdateRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Updated income",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Income" },
+              },
+            },
+          },
+        },
+      },
+      delete: {
+        tags: ["Incomes"],
+        summary: "Delete an income",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": { description: "Income deleted" },
+        },
+      },
+    },
+    "/api/v0/income/{userId}": {
+      get: {
+        tags: ["Incomes"],
+        summary: "List incomes for a user within a month",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "userId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+          {
+            name: "date",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "List of incomes",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: { $ref: "#/components/schemas/Income" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/v0/income/analytics": {
+      get: {
+        tags: ["Analytics"],
+        summary: "Get income analytics for a month",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "userId",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+          },
+          {
+            name: "date",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Income analytics payload",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/IncomeAnalytics" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/v0/income-categories/{userId}": {
+      get: {
+        tags: ["Income Categories"],
+        summary: "List income categories for a user",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "userId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Income categories",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: { $ref: "#/components/schemas/IncomeCategory" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/v0/income-categories": {
+      post: {
+        tags: ["Income Categories"],
+        summary: "Create a new income category",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/IncomeCategoryCreateRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Income category created",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/IncomeCategory" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/v0/income-category/{id}": {
+      get: {
+        tags: ["Income Categories"],
+        summary: "Get an income category by id",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Income category details",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/IncomeCategory" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/v0/transactions": {
+      get: {
+        tags: ["Transactions"],
+        summary: "Get unified transaction history",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "userId",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+          },
+          {
+            name: "date",
+            in: "query",
+            required: false,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Unified transactions",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: { $ref: "#/components/schemas/Transaction" },
+                },
+              },
+            },
+          },
         },
       },
     },

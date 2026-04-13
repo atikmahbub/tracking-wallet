@@ -18,6 +18,8 @@ model User {
   updated DateTime  @updatedAt
 
   expenses          Expense[]
+  incomes           Income[]
+  incomeCategories  IncomeCategory[]
   monthlyLimits     MonthlyLimit[]
   loan              Loan[]
   Invest            Invest[]
@@ -49,6 +51,37 @@ model Category {
   updated   DateTime              @updatedAt
 
   expenses  Expense[]
+}
+
+model Income {
+  id          Bytes           @id   @db.Binary(16)
+  amount      Float
+  description String?         @db.VarChar(128)
+  date        DateTime
+  created     DateTime        @default(now())
+  updated     DateTime        @updatedAt
+  userId      String
+  user        User            @relation(fields: [userId], references: [userId])
+  categoryId  Bytes?          @db.Binary(16)
+  category    IncomeCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([userId, date], name:"income_user_id_date_index")
+  @@index([categoryId], name: "income_category_id_index")
+}
+
+model IncomeCategory {
+  id        Bytes        @id      @db.Binary(16)
+  name      String       @db.VarChar(128)
+  icon      String                @db.VarChar(128)
+  color     String                @db.VarChar(32)
+  created   DateTime              @default(now())
+  updated   DateTime              @updatedAt
+  userId    String?
+  user      User?                 @relation(fields: [userId], references: [userId])
+
+  incomes   Income[]
+
+  @@unique([name, userId], name: "income_category_name_user_unique")
 }
 
 model MonthlyLimit{

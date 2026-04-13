@@ -8,3 +8,5 @@ export * from "@shared/primitives/MonthlyLimitId";
 export * from "@shared/primitives/LoanId";
 export * from "@shared/primitives/InvestId";
 export * from "@shared/primitives/CategoryId";
+export * from "@shared/primitives/IncomeId";
+export * from "@shared/primitives/IncomeCategoryId";

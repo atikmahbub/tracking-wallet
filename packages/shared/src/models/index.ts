@@ -5,3 +5,7 @@ export * from "@shared/models/LoanModel";
 export * from "@shared/models/Invest";
 export * from "@shared/models/Category";
 export * from "@shared/models/ExpenseAnalytics";
+export * from "@shared/models/Income";
+export * from "@shared/models/IncomeCategory";
+export * from "@shared/models/IncomeAnalytics";
+export * from "@shared/models/Transaction";
