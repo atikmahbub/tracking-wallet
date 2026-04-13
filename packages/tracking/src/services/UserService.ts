@@ -4,14 +4,17 @@ import { UserId } from "@shared/primitives";
 import { DatabaseError } from "@tracking/errors";
 import { UserModel } from "@shared/models";
 import { PresentationService } from "@tracking/utils/presentationService";
+import { IncomeCategoryService } from "./IncomeCategoryService";
 
 class UserService {
   private prisma: PrismaClient;
   private presentationService: PresentationService;
+  private incomeCategoryService: IncomeCategoryService;
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
     this.presentationService = new PresentationService();
+    this.incomeCategoryService = new IncomeCategoryService(prisma);
   }
 
   async addUser(params: IAddUserParams): Promise<UserModel> {
@@ -33,6 +36,11 @@ class UserService {
             profilePicture: profilePicture,
           },
         });
+
+        // Automatically create default income categories for new user
+        // We catch errors inside the service to not block user creation
+        await this.incomeCategoryService.createDefaultIncomeCategories(userId);
+
         return this.presentationService.toUserModel(newUser);
       }
       return this.presentationService.toUserModel(existingUser);

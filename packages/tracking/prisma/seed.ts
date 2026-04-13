@@ -1,8 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import * as uuidBuffer from "uuid-buffer";
+import { IncomeCategoryService } from "../src/services/IncomeCategoryService";
 
 const prisma = new PrismaClient();
+const incomeCategoryService = new IncomeCategoryService(prisma);
 
 const defaultCategories = [
   { name: "Food", icon: "utensils", color: "#FF6B6B" },
@@ -41,10 +43,14 @@ async function seedCategories(): Promise<void> {
 
 async function main(): Promise<void> {
   try {
+    // Phase 1: Seed global expense categories
     await seedCategories();
     console.log(`Seeded ${defaultCategories.length} global categories.`);
+
+    // Phase 2: Seed default income categories for all existing users
+    await incomeCategoryService.seedIncomeCategoriesForAllUsers();
   } catch (error) {
-    console.error("Failed to seed categories", error);
+    console.error("Failed to seed database", error);
     process.exitCode = 1;
   } finally {
     await prisma.$disconnect();
