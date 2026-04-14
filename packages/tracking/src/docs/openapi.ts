@@ -170,7 +170,7 @@ const openApiDocument = {
       Transaction: {
         type: "object",
         properties: {
-          id: { type: "string" },
+          id: { type: "string", format: "uuid" },
           type: { type: "string", enum: ["expense", "income"] },
           amount: { type: "number" },
           description: { type: "string", nullable: true },
