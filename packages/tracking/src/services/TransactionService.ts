@@ -30,7 +30,7 @@ export class TransactionService {
       ]);
 
       const transactionExpenses: TransactionModel[] = expenses.map(exp => ({
-        id: `exp_${uuidBuffer.toString(exp.id)}`,
+        id: uuidBuffer.toString(exp.id),
         type: "expense",
         amount: exp.amount,
         description: exp.description,
@@ -43,7 +43,7 @@ export class TransactionService {
       }));
 
       const transactionIncomes: TransactionModel[] = incomes.map(inc => ({
-        id: `inc_${uuidBuffer.toString(inc.id)}`,
+        id: uuidBuffer.toString(inc.id),
         type: "income",
         amount: inc.amount,
         description: inc.description,
