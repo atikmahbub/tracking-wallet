@@ -29,7 +29,7 @@ export class TransactionSummaryController {
       }
 
       const dateParam = req.query.date as string;
-      const baseDate = dateParam ? new Date(parseInt(dateParam, 10)) : new Date();
+      const baseDate = dateParam ? new Date(parseInt(dateParam, 10) * 1000) : new Date();
       const zonedBaseDate = toZonedTime(baseDate, timeZone);
       
       const currentMonthStart = startOfMonth(zonedBaseDate);
