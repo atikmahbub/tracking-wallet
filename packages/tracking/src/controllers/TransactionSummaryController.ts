@@ -28,12 +28,14 @@ export class TransactionSummaryController {
         throw new MissingFieldError("User ID is required");
       }
 
-      const now = toZonedTime(new Date(), timeZone);
+      const dateParam = req.query.date as string;
+      const baseDate = dateParam ? new Date(parseInt(dateParam, 10)) : new Date();
+      const zonedBaseDate = toZonedTime(baseDate, timeZone);
       
-      const currentMonthStart = startOfMonth(now);
-      const currentMonthEnd = endOfMonth(now);
+      const currentMonthStart = startOfMonth(zonedBaseDate);
+      const currentMonthEnd = endOfMonth(zonedBaseDate);
       
-      const previousMonthDate = subMonths(now, 1);
+      const previousMonthDate = subMonths(zonedBaseDate, 1);
       const previousMonthStart = startOfMonth(previousMonthDate);
       const previousMonthEnd = endOfMonth(previousMonthDate);
 
