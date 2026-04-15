@@ -22,13 +22,6 @@ async getMonthlySummary(
   previousRange: { start: Date; end: Date }
 ): Promise<ITransactionSummary> {
   try {
-    // ✅ Convert Date → UNIX seconds string
-    const currentStart = Math.floor(currentRange.start.getTime() / 1000);
-    const currentEnd = Math.floor(currentRange.end.getTime() / 1000);
-
-    const previousStart = Math.floor(previousRange.start.getTime() / 1000);
-    const previousEnd = Math.floor(previousRange.end.getTime() / 1000);
-
     const [
       currentExpense,
       currentIncome,
@@ -39,8 +32,8 @@ async getMonthlySummary(
         where: {
           userId,
           date: {
-            gte: String(currentStart),
-            lte: String(currentEnd),
+            gte: currentRange.start,
+            lte: currentRange.end,
           },
         },
         _sum: { amount: true },
@@ -49,8 +42,8 @@ async getMonthlySummary(
         where: {
           userId,
           date: {
-            gte: String(currentStart),
-            lte: String(currentEnd),
+            gte: currentRange.start,
+            lte: currentRange.end,
           },
         },
         _sum: { amount: true },
@@ -59,8 +52,8 @@ async getMonthlySummary(
         where: {
           userId,
           date: {
-            gte: String(previousStart),
-            lte: String(previousEnd),
+            gte: previousRange.start,
+            lte: previousRange.end,
           },
         },
         _sum: { amount: true },
@@ -69,8 +62,8 @@ async getMonthlySummary(
         where: {
           userId,
           date: {
-            gte: String(previousStart),
-            lte: String(previousEnd),
+            gte: previousRange.start,
+            lte: previousRange.end,
           },
         },
         _sum: { amount: true },

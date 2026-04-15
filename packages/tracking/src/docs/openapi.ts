@@ -761,6 +761,12 @@ const openApiDocument = {
             required: true,
             schema: { type: "string" },
           },
+          {
+            name: "date",
+            in: "query",
+            required: false,
+            schema: { type: "string" },
+          },
         ],
         responses: {
           "200": {
