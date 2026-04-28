@@ -122,12 +122,21 @@ export class IncomeCategoryService {
             { userId: null },
           ],
         },
-        orderBy: {
-          created: "asc",
-        },
+        orderBy: [
+          { userId: "desc" }, // User-specific categories first
+          { created: "asc" },
+        ],
       });
 
-      return categories.map((category) =>
+      // Deduplicate by name, keeping user-specific over global
+      const deduplicatedMap = new Map<string, any>();
+      categories.forEach(cat => {
+        if (!deduplicatedMap.has(cat.name)) {
+          deduplicatedMap.set(cat.name, cat);
+        }
+      });
+
+      return Array.from(deduplicatedMap.values()).map((category) =>
         this.presentationService.toIncomeCategoryModel(category)
       );
     } catch (error) {

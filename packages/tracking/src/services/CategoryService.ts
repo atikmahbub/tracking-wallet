@@ -144,12 +144,20 @@ export class CategoryService {
           ],
         },
         orderBy: [
-          { userId: "desc" },
+          { userId: "desc" }, // User-specific categories first (non-null > null)
           { created: "asc" },
         ],
       });
 
-      return categories.map((category) =>
+      // Deduplicate by name, keeping the first one encountered (which will be user-specific if it exists)
+      const deduplicatedMap = new Map<string, any>();
+      categories.forEach(cat => {
+        if (!deduplicatedMap.has(cat.name)) {
+          deduplicatedMap.set(cat.name, cat);
+        }
+      });
+
+      return Array.from(deduplicatedMap.values()).map((category) =>
         this.presentationService.toCategoryModel(category)
       );
     } catch (error) {

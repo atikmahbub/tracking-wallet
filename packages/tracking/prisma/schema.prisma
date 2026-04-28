@@ -1,107 +1,137 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  engineType    = "binary"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider        = "prisma-client-js"
-  binaryTargets   = ["native", "debian-openssl-3.0.x"]
-  engineType      = "binary"
-}
-
 model User {
-  userId            String   @id @map("id")
-  name              String   @db.VarChar(256) @map("full_name")
-  email             String   @unique @db.VarChar(256)
-  profilePicture    String   @map("profile_picture")
-  created DateTime  @default(now())
-  updated DateTime  @updatedAt
+  userId           String           @id @map("id")
+  email            String           @unique @db.VarChar(256)
+  created          DateTime         @default(now())
+  name             String           @map("full_name") @db.VarChar(256)
+  profilePicture   String           @map("profile_picture")
+  updated          DateTime         @updatedAt
+  expenses         Expense[]
+  incomes          Income[]
+  incomeCategories IncomeCategory[]
+  Invest           Invest[]
+  loan             Loan[]
+  monthlyLimits    MonthlyLimit[]
 
-  expenses          Expense[]
-  incomes           Income[]
-  categories        Category[]
-  incomeCategories  IncomeCategory[]
-  monthlyLimits     MonthlyLimit[]
-  loan              Loan[]
-  Invest            Invest[]
-  @@index([email], name: "user_email_index")
+  @@index([email], map: "user_email_index")
 }
 
 model Expense {
-  id          Bytes        @id   @db.Binary(16)
+  id          Bytes     @id @db.Binary(16)
   amount      Float
-  description String?      @db.VarChar(128)
+  description String?   @db.VarChar(128)
   date        DateTime
-  created     DateTime     @default(now())
-  updated     DateTime     @updatedAt
+  created     DateTime  @default(now())
+  updated     DateTime  @updatedAt
   userId      String
-  user        User         @relation(fields: [userId], references: [userId])
-  categoryId  Bytes?       @db.Binary(16)
-  category    Category?    @relation(fields: [categoryId], references: [id])
+  categoryId  Bytes?    @db.Binary(16)
+  category    Category? @relation(fields: [categoryId], references: [id])
+  user        User      @relation(fields: [userId], references: [userId])
 
-  @@index([userId, date], name:"expense_user_id_date_index")
-  @@index([categoryId], name: "expense_category_id_index")
+  @@index([userId, date], map: "expense_user_id_date_index")
+  @@index([categoryId], map: "expense_category_id_index")
 }
 
 model Category {
-  id        Bytes        @id      @db.Binary(16)
-  name      String       @db.VarChar(128)
-  icon      String                @db.VarChar(128)
-  color     String                @db.VarChar(32)
-  created   DateTime              @default(now())
-  updated   DateTime              @updatedAt
-  userId    String?
-  user      User?                 @relation(fields: [userId], references: [userId])
-
-  expenses  Expense[]
+  id       Bytes     @id @db.Binary(16)
+  name     String    @db.VarChar(128)
+  icon     String    @db.VarChar(128)
+  color    String    @db.VarChar(32)
+  created  DateTime  @default(now())
+  updated  DateTime  @updatedAt
+  userId   String?
+  expenses Expense[]
 
   @@unique([name, userId], name: "category_name_user_unique")
   @@index([userId])
 }
 
 model Income {
-  id          Bytes           @id   @db.Binary(16)
+  id          Bytes           @id @db.Binary(16)
   amount      Float
   description String?         @db.VarChar(128)
   date        DateTime
   created     DateTime        @default(now())
   updated     DateTime        @updatedAt
   userId      String
-  user        User            @relation(fields: [userId], references: [userId])
   categoryId  Bytes?          @db.Binary(16)
   category    IncomeCategory? @relation(fields: [categoryId], references: [id])
+  user        User            @relation(fields: [userId], references: [userId])
 
-  @@index([userId, date], name:"income_user_id_date_index")
-  @@index([categoryId], name: "income_category_id_index")
+  @@index([userId, date], map: "income_user_id_date_index")
+  @@index([categoryId], map: "income_category_id_index")
 }
 
 model IncomeCategory {
-  id        Bytes        @id      @db.Binary(16)
-  name      String       @db.VarChar(128)
-  icon      String                @db.VarChar(128)
-  color     String                @db.VarChar(32)
-  created   DateTime              @default(now())
-  updated   DateTime              @updatedAt
-  userId    String?
-  user      User?                 @relation(fields: [userId], references: [userId])
-
-  incomes   Income[]
+  id      Bytes    @id @db.Binary(16)
+  name    String   @db.VarChar(128)
+  icon    String   @db.VarChar(128)
+  color   String   @db.VarChar(32)
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+  userId  String?
+  incomes Income[]
+  user    User?    @relation(fields: [userId], references: [userId])
 
   @@unique([name, userId], name: "income_category_name_user_unique")
+  @@index([userId], map: "IncomeCategory_userId_fkey")
 }
 
-model MonthlyLimit{
-  id          Bytes       @id   @db.Binary(16)
-  month       Int
-  year        Int
-  limit       Float
-  created     DateTime          @default(now())
-  updated     DateTime          @updatedAt
-  userId      String
-  user        User              @relation(fields: [userId], references:[userId])
+model MonthlyLimit {
+  id      Bytes    @id @db.Binary(16)
+  month   Int
+  year    Int
+  limit   Float
+  userId  String
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+  user    User     @relation(fields: [userId], references: [userId])
 
-  @@index([userId], name: "monthly_limit_user_id_index")
-  @@unique([userId,month,year], name: "user_month_year_unique")
+  @@unique([userId, month, year], name: "user_month_year_unique")
+  @@index([userId], map: "monthly_limit_user_id_index")
+}
+
+model Loan {
+  id       Bytes     @id @db.Binary(16)
+  loanType LoanType
+  name     String    @db.VarChar(128)
+  amount   Float
+  deadLine DateTime?
+  created  DateTime  @default(now())
+  updated  DateTime  @updatedAt
+  userId   String
+  note     String?   @db.VarChar(512)
+  user     User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId], map: "loan_user_id_index")
+}
+
+model Invest {
+  id        Bytes         @id @db.Binary(16)
+  name      String        @db.VarChar(128)
+  note      String        @db.VarChar(512)
+  status    EInvestStatus @default(ACTIVE)
+  amount    Float
+  startDate DateTime
+  endDate   DateTime?
+  userId    String
+  created   DateTime      @default(now())
+  updated   DateTime      @updatedAt
+  earned    Float?
+  user      User          @relation(fields: [userId], references: [userId])
+
+  @@index([status, userId], map: "invest_status_userId_index")
+  @@index([userId], map: "Invest_userId_fkey")
 }
 
 enum LoanType {
@@ -109,42 +139,7 @@ enum LoanType {
   TAKEN
 }
 
-model Loan{
-  id        Bytes       @id     @db.Binary(16)
-  loanType  LoanType
-  name      String              @db.VarChar(128)
-  amount    Float
-  deadLine  DateTime?
-  note      String?             @db.VarChar(512)
-  userId    String
-  user      User                @relation(fields: [userId], references:[userId])  
-  created   DateTime            @default(now())
-  updated   DateTime            @updatedAt
-
-  @@index([userId], name: "loan_user_id_index")
-}
-
-
 enum EInvestStatus {
   ACTIVE
   COMPLETED
-}
-
-
-model Invest {
-  id        Bytes          @id    @db.Binary(16)
-  name      String                @db.VarChar(128)
-  note      String                @db.VarChar(512)
-  status    EInvestStatus         @default(ACTIVE)
-  amount    Float
-  earned    Float?
-  startDate DateTime 
-  endDate   DateTime?
-  userId    String
-  user      User                  @relation(fields : [userId], references:[userId])
-  created   DateTime              @default(now())
-  updated   DateTime              @updatedAt
-
-
-   @@index([status, userId], name: "invest_status_userId_index")
 }
