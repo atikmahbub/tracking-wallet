@@ -3,9 +3,10 @@ import { IncomeCategoryModel } from "@shared/models";
 import {
   ICreateIncomeCategoryParams,
   IGetIncomeCategoriesParams,
+  IUpdateIncomeCategoryParams,
 } from "@shared/params";
 import { PresentationService } from "@tracking/utils/presentationService";
-import { DatabaseError, NotFoundError } from "@tracking/errors";
+import { DatabaseError, NotFoundError, UnAuthorizedError } from "@tracking/errors";
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { IncomeCategoryId } from "@shared/primitives";
@@ -125,6 +126,88 @@ export class IncomeCategoryService {
         throw error;
       }
       throw new DatabaseError("Error fetching income category");
+    }
+  }
+
+  async updateCategory(
+    params: IUpdateIncomeCategoryParams
+  ): Promise<IncomeCategoryModel> {
+    try {
+      const { incomeCategoryId, name, icon, color, userId } = params;
+
+      const categoryIdBuffer = uuidBuffer.toBuffer(incomeCategoryId);
+
+      const existingCategory = await this.prisma.incomeCategory.findUnique({
+        where: { id: categoryIdBuffer },
+      });
+
+      if (!existingCategory) {
+        throw new NotFoundError("Income Category not found");
+      }
+
+      if (existingCategory.userId !== userId) {
+        throw new UnAuthorizedError(
+          "Not authorized to update this income category"
+        );
+      }
+
+      const updated = await this.prisma.incomeCategory.update({
+        where: {
+          id: categoryIdBuffer,
+        },
+        data: {
+          name,
+          icon,
+          color,
+        },
+      });
+
+      return this.presentationService.toIncomeCategoryModel(updated);
+    } catch (error) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof UnAuthorizedError
+      ) {
+        throw error;
+      }
+      throw new DatabaseError("Error updating income category");
+    }
+  }
+
+  async deleteCategory(
+    incomeCategoryId: IncomeCategoryId,
+    userId: string
+  ): Promise<void> {
+    try {
+      const categoryIdBuffer = uuidBuffer.toBuffer(incomeCategoryId);
+
+      const existingCategory = await this.prisma.incomeCategory.findUnique({
+        where: { id: categoryIdBuffer },
+      });
+
+      if (!existingCategory) {
+        throw new NotFoundError("Income Category not found");
+      }
+
+      if (existingCategory.userId !== userId) {
+        throw new UnAuthorizedError(
+          "Not authorized to delete this income category"
+        );
+      }
+
+      await this.prisma.incomeCategory.delete({
+        where: {
+          id: categoryIdBuffer,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof UnAuthorizedError
+      ) {
+        throw error;
+      }
+      throw new DatabaseError("Error deleting income category");
     }
   }
 }

@@ -36,6 +36,7 @@ const openApiDocument = {
           name: { type: "string" },
           icon: { type: "string", description: "Optional icon identifier" },
           color: { type: "string", description: "Hex color code" },
+          userId: { type: "string", nullable: true, description: "Owner of the category (null for system defaults)" },
           created: { type: "string", format: "date-time" },
           updated: { type: "string", format: "date-time" },
         },
@@ -192,8 +193,19 @@ const openApiDocument = {
           name: { type: "string" },
           icon: { type: "string" },
           color: { type: "string" },
+          userId: { type: "string", description: "The ID of the user creating the category" },
         },
-        required: ["name", "icon", "color"],
+        required: ["name", "icon", "color", "userId"],
+      },
+      CategoryUpdateRequest: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          icon: { type: "string" },
+          color: { type: "string" },
+          userId: { type: "string", description: "The ID of the user updating the category (for ownership validation)" },
+        },
+        required: ["userId"],
       },
       IncomeCategoryCreateRequest: {
         type: "object",
@@ -427,9 +439,17 @@ const openApiDocument = {
     "/api/v0/categories": {
       get: {
         tags: ["Categories"],
-        summary: "List all global categories",
+        summary: "List categories (user-specific + global)",
         security: [{ bearerAuth: [] }],
-        parameters: [],
+        parameters: [
+          {
+            name: "userId",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+            description: "The ID of the user to fetch categories for"
+          }
+        ],
         responses: {
           "200": {
             description: "Categories",
@@ -447,7 +467,7 @@ const openApiDocument = {
       },
       post: {
         tags: ["Categories"],
-        summary: "Create a new category",
+        summary: "Create a new user-specific category",
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -494,6 +514,66 @@ const openApiDocument = {
             },
           },
           "401": { description: "Unauthorized" },
+          "404": { description: "Category not found" },
+        },
+      },
+      put: {
+        tags: ["Categories"],
+        summary: "Update a user-owned category",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CategoryUpdateRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Category updated",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Category" },
+              },
+            },
+          },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden - Not the owner" },
+          "404": { description: "Category not found" },
+        },
+      },
+      delete: {
+        tags: ["Categories"],
+        summary: "Delete a user-owned category",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+          {
+            name: "userId",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+            description: "Owner ID for validation"
+          },
+        ],
+        responses: {
+          "204": { description: "Category deleted" },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden - Not the owner" },
           "404": { description: "Category not found" },
         },
       },

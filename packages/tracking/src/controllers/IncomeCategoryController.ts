@@ -81,6 +81,65 @@ class IncomeCategoryController {
       next(error);
     }
   }
+
+  async updateCategory(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { id } = req.params;
+      const { name, icon, color, userId } = req.body;
+
+      if (!id) {
+        throw new MissingFieldError("Income Category id is required");
+      }
+      if (!userId) {
+        throw new MissingFieldError("User id is required");
+      }
+
+      const category = await this.incomeCategoryService.updateCategory({
+        incomeCategoryId: IncomeCategoryId(id),
+        name,
+        icon,
+        color,
+        userId: UserId(userId),
+      });
+
+      res.status(200).json(category);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteCategory(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { id } = req.params;
+      const userId = req.query.userId || req.body.userId;
+
+      if (!id) {
+        throw new MissingFieldError("Income Category id is required");
+      }
+      if (!userId) {
+        throw new MissingFieldError("User id is required");
+      }
+
+      await this.incomeCategoryService.deleteCategory(
+        IncomeCategoryId(id),
+        UserId(userId as string)
+      );
+
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default IncomeCategoryController;

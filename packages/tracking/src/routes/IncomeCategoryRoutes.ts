@@ -26,6 +26,16 @@ class IncomeCategoryRoutes {
       this.incomeCategoryController.getCategoryById.bind(this.incomeCategoryController)
     );
 
+    router.put(
+      "/income-category/:id",
+      this.incomeCategoryController.updateCategory.bind(this.incomeCategoryController)
+    );
+
+    router.delete(
+      "/income-category/:id",
+      this.incomeCategoryController.deleteCategory.bind(this.incomeCategoryController)
+    );
+
     return router;
   }
 }
