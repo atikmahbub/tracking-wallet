@@ -51,61 +51,6 @@ export class CategoryService {
     }
   }
 
-  async seedCategoriesForAllUsers(): Promise<void> {
-    try {
-      const users = await this.prisma.user.findMany({
-        select: { userId: true },
-      });
-
-      const globalCategories = await this.prisma.category.findMany({
-        where: { userId: null },
-      });
-
-      console.log(`Seeding user-specific expense categories for ${users.length} users based on ${globalCategories.length} global templates...`);
-
-      for (const user of users) {
-        const userCategories = await this.prisma.category.findMany({
-          where: { userId: user.userId },
-          select: { name: true, id: true },
-        });
-
-        const userCategoryMap = new Map(userCategories.map(c => [c.name, c.id]));
-
-        for (const globalCat of globalCategories) {
-          let userCatId = userCategoryMap.get(globalCat.name);
-
-          if (!userCatId) {
-            const newCat = await this.prisma.category.create({
-              data: {
-                id: uuidBuffer.toBuffer(v4()),
-                name: globalCat.name,
-                icon: globalCat.icon,
-                color: globalCat.color,
-                userId: user.userId,
-              },
-            });
-            userCatId = newCat.id;
-          }
-
-          // Re-link expenses that were using this global category to the new user-specific one
-          await this.prisma.expense.updateMany({
-            where: {
-              userId: user.userId,
-              categoryId: globalCat.id,
-            },
-            data: {
-              categoryId: userCatId,
-            },
-          });
-        }
-      }
-
-      console.log("Successfully seeded user-specific categories and migrated expenses.");
-    } catch (error) {
-      console.error("Error seeding user-specific categories:", error);
-      throw new DatabaseError("Failed to seed default expense categories");
-    }
-  }
 
   async createCategory(
     params: ICreateCategoryParams

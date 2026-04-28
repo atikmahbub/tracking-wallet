@@ -50,45 +50,6 @@ export class IncomeCategoryService {
     }
   }
 
-  async seedIncomeCategoriesForAllUsers(): Promise<void> {
-    try {
-      const users = await this.prisma.user.findMany({
-        select: { userId: true },
-      });
-
-      console.log(`Seeding default income categories for ${users.length} users...`);
-
-      for (const user of users) {
-        // Fetch existing category names for this user to avoid unnecessary insert attempts
-        const existingCategories = await this.prisma.incomeCategory.findMany({
-          where: { userId: user.userId },
-          select: { name: true },
-        });
-
-        const existingNames = new Set(existingCategories.map((c) => c.name));
-        const categoriesToCreate = DEFAULT_INCOME_CATEGORIES.filter(
-          (c) => !existingNames.has(c.name)
-        ).map((c) => ({
-          id: uuidBuffer.toBuffer(v4()),
-          name: c.name,
-          icon: c.icon,
-          color: c.color,
-          userId: user.userId,
-        }));
-
-        if (categoriesToCreate.length > 0) {
-          await this.prisma.incomeCategory.createMany({
-            data: categoriesToCreate,
-          });
-        }
-      }
-
-      console.log("Successfully seeded default income categories for all users.");
-    } catch (error) {
-      console.error("Error seeding default income categories for all users:", error);
-      throw new DatabaseError("Failed to seed default income categories");
-    }
-  }
 
   async createCategory(
     params: ICreateIncomeCategoryParams

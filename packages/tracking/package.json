@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register -r module-alias/register src/server.ts",
     "build": "tsc --project ./tsconfig.json",
-    "start": "TS_NODE_BASEURL=./dist node -r  tsconfig-paths/register -r module-alias/register dist/server.js",
-    "seed:categories": "ts-node --project ./tsconfig.seed.json prisma/seed.ts"
+    "start": "TS_NODE_BASEURL=./dist node -r  tsconfig-paths/register -r module-alias/register dist/server.js"
   },
   "_moduleAliases": {
     "@tracking": "dist",
