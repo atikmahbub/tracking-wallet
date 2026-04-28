@@ -26,6 +26,16 @@ class CategoryRoutes {
       this.categoryController.getCategoryById.bind(this.categoryController)
     );
 
+    router.put(
+      "/categories/:id",
+      this.categoryController.updateCategory.bind(this.categoryController)
+    );
+
+    router.delete(
+      "/categories/:id",
+      this.categoryController.deleteCategory.bind(this.categoryController)
+    );
+
     return router;
   }
 }

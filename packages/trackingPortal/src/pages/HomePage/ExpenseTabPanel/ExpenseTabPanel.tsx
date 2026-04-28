@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Stack, Typography } from "@mui/material";
+import { Box, Grid2 as Grid, Stack, Typography, IconButton } from "@mui/material";
 import MainCard from "@trackingPortal/components/MainCard";
 import { useEffect, useState } from "react";
 import Loader from "@trackingPortal/components/Loader";
@@ -14,6 +14,8 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { MonthlyLimitModel } from "@shared/models";
 import ExpenseAnalytics from "@trackingPortal/pages/HomePage/ExpenseTabPanel/ExpenseAnalytics";
+import { SettingOutlined } from "@ant-design/icons";
+import CategoryManager from "@trackingPortal/pages/HomePage/ExpenseTabPanel/CategoryManager/CategoryManager";
 
 const ExpenseTabPanel = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -27,6 +29,9 @@ const ExpenseTabPanel = () => {
   );
   const [expenseAnalytics, setExpenseAnalytics] =
     useState<ExpenseAnalyticsModel | null>(null);
+  
+  const [categoriesRefreshKey, setCategoriesRefreshKey] = useState<number>(0);
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (user.userId && !user.default) {
@@ -116,9 +121,18 @@ const ExpenseTabPanel = () => {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography variant="h6" fontWeight={600}>
-                Expense's
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="h6" fontWeight={600}>
+                  Expense's
+                </Typography>
+                <IconButton 
+                  size="small" 
+                  title="Manage Categories"
+                  onClick={() => setIsCategoryManagerOpen(true)}
+                >
+                  <SettingOutlined style={{ fontSize: '16px' }} />
+                </IconButton>
+              </Box>
               <DatePicker
                 views={["year", "month"]}
                 value={filterMonth}
@@ -132,17 +146,27 @@ const ExpenseTabPanel = () => {
           <AddExpense
             getUserExpenses={getUserExpenses}
             filterMonth={filterMonth}
+            categoriesRefreshKey={categoriesRefreshKey}
           />
           {!!expenses.length && !loading ? (
             <ExpenseList
               expenses={expenses}
               getUserExpenses={getUserExpenses}
+              categoriesRefreshKey={categoriesRefreshKey}
             />
           ) : (
             <Typography variant="h6">No Data Found!</Typography>
           )}
         </MainCard>
       </Grid>
+
+      <CategoryManager 
+        open={isCategoryManagerOpen} 
+        onClose={() => setIsCategoryManagerOpen(false)}
+        onCategoriesChange={() => {
+          setCategoriesRefreshKey(prev => prev + 1);
+        }}
+      />
     </Grid>
   );
 };

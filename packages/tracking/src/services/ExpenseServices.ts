@@ -31,7 +31,7 @@ class ExpenseService {
       const { userId, description, date, amount, categoryId } = params;
 
       if (categoryId) {
-        await this.assertCategoryExists(categoryId);
+        await this.assertCategoryExists(categoryId as CategoryId, userId as UserId);
       }
 
       const newExpense = await this.prisma.expense.create({
@@ -101,7 +101,7 @@ class ExpenseService {
       }
 
       if (categoryId) {
-        await this.assertCategoryExists(categoryId);
+        await this.assertCategoryExists(categoryId as CategoryId, existingExpense.userId as UserId);
       }
 
       const updatedExpense = await this.prisma.expense.update({
@@ -231,7 +231,7 @@ class ExpenseService {
     }
   }
 
-  private async assertCategoryExists(categoryId: CategoryId): Promise<void> {
+  private async assertCategoryExists(categoryId: CategoryId, userId: UserId): Promise<void> {
     const category = await this.prisma.category.findUnique({
       where: {
         id: uuidBuffer.toBuffer(categoryId),
@@ -240,6 +240,10 @@ class ExpenseService {
 
     if (!category) {
       throw new NotFoundError("Category not found");
+    }
+
+    if (category.userId !== null && category.userId !== userId) {
+      throw new NotFoundError("Category not found for this user");
     }
   }
 }

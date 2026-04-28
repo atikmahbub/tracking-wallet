@@ -19,6 +19,7 @@ model User {
 
   expenses          Expense[]
   incomes           Income[]
+  categories        Category[]
   incomeCategories  IncomeCategory[]
   monthlyLimits     MonthlyLimit[]
   loan              Loan[]
@@ -44,13 +45,18 @@ model Expense {
 
 model Category {
   id        Bytes        @id      @db.Binary(16)
-  name      String       @unique  @db.VarChar(128)
+  name      String       @db.VarChar(128)
   icon      String                @db.VarChar(128)
   color     String                @db.VarChar(32)
   created   DateTime              @default(now())
   updated   DateTime              @updatedAt
+  userId    String?
+  user      User?                 @relation(fields: [userId], references: [userId])
 
   expenses  Expense[]
+
+  @@unique([name, userId], name: "category_name_user_unique")
+  @@index([userId])
 }
 
 model Income {

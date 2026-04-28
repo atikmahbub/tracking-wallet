@@ -20,3 +20,4 @@ export * from "@shared/params/IAddIncomeParams";
 export * from "@shared/params/IUpdateIncomeParams";
 export * from "@shared/params/ICreateIncomeCategoryParams";
 export * from "@shared/params/IGetIncomeCategoriesParams";
+export * from "@shared/params/IUpdateCategoryParams";

@@ -37,11 +37,13 @@ import { CategoryId } from "@shared/primitives";
 interface IAddExpenseProps {
   getUserExpenses: () => void;
   filterMonth: Dayjs;
+  categoriesRefreshKey: number;
 }
 
 const AddExpense: React.FC<IAddExpenseProps> = ({
   getUserExpenses,
   filterMonth,
+  categoriesRefreshKey,
 }) => {
   const { apiGateway, user } = useStoreContext();
   const [loading, setLoading] = useState<boolean>(false);
@@ -54,7 +56,7 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
     try {
       setCategoriesLoading(true);
       setCategoriesError(false);
-      const data = await apiGateway.categoryService.getCategories();
+      const data = await apiGateway.categoryService.getCategories({ userId: user.userId });
       setCategories(data);
     } catch (err) {
       setCategoriesError(true);
@@ -66,7 +68,7 @@ const AddExpense: React.FC<IAddExpenseProps> = ({
 
   React.useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [categoriesRefreshKey]);
 
   const handleAddExpense = async (values: IAddExpense, { resetForm }) => {
     if (user.default) return;

@@ -36,9 +36,10 @@ import { CategoryId } from "@shared/primitives";
 interface IExpenseList {
   expenses: ExpenseModel[];
   getUserExpenses: () => void;
+  categoriesRefreshKey: number;
 }
 
-const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
+const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses, categoriesRefreshKey }) => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
   const [editingRowId, setEditingRowId] = useState<ExpenseId | null>(null);
   const { apiGateway, user } = useStoreContext();
@@ -56,7 +57,7 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
     try {
       setCategoriesLoading(true);
       setCategoriesError(false);
-      const data = await apiGateway.categoryService.getCategories();
+      const data = await apiGateway.categoryService.getCategories({ userId: user.userId });
       setCategories(data);
     } catch (err) {
       setCategoriesError(true);
@@ -68,7 +69,7 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses }) => {
 
   React.useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [categoriesRefreshKey]);
 
   const handleActionClick = (row, action) => {
     if (action === "edit") {

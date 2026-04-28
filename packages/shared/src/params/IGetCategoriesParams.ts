@@ -1,1 +1,3 @@
-export interface IGetCategoriesParams {}
+export interface IGetCategoriesParams {
+  userId?: string;
+}

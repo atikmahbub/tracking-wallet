@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import CategoryService from "@tracking/services/CategoryService";
 import { MissingFieldError } from "@tracking/errors";
-import { CategoryId } from "@shared/primitives";
+import { CategoryId, UserId } from "@shared/primitives";
+import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 
 class CategoryController {
   private categoryService: CategoryService;
@@ -16,7 +17,8 @@ class CategoryController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { name, icon, color } = req.body;
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { name, icon, color, userId } = req.body;
 
       if (!name || !icon || !color) {
         throw new MissingFieldError("Name, icon and color are required");
@@ -26,6 +28,7 @@ class CategoryController {
         name,
         icon,
         color,
+        userId: userId ? UserId(userId) : undefined,
       });
 
       res.status(201).json(category);
@@ -40,7 +43,12 @@ class CategoryController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const categories = await this.categoryService.getCategories();
+      AuthenticationUtils.assureUserHasUserId(req);
+      const userId = req.query.userId as string | undefined;
+
+      const categories = await this.categoryService.getCategories({
+        userId: userId ? UserId(userId) : undefined,
+      });
 
       res.status(200).json(categories);
     } catch (error) {
@@ -70,6 +78,64 @@ class CategoryController {
     }
   }
 
+  async updateCategory(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { id } = req.params;
+      const { name, icon, color, userId } = req.body;
+
+      if (!id) {
+        throw new MissingFieldError("Category id is required");
+      }
+      if (!userId) {
+        throw new MissingFieldError("User id is required");
+      }
+
+      const category = await this.categoryService.updateCategory({
+        categoryId: id,
+        name,
+        icon,
+        color,
+        userId: UserId(userId),
+      });
+
+      res.status(200).json(category);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteCategory(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      AuthenticationUtils.assureUserHasUserId(req);
+      const { id } = req.params;
+      const userId = req.query.userId || req.body.userId;
+
+      if (!id) {
+        throw new MissingFieldError("Category id is required");
+      }
+      if (!userId) {
+        throw new MissingFieldError("User id is required");
+      }
+
+      await this.categoryService.deleteCategory(
+        CategoryId(id),
+        UserId(userId as string)
+      );
+
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default CategoryController;
