@@ -213,9 +213,19 @@ const openApiDocument = {
           name: { type: "string" },
           icon: { type: "string" },
           color: { type: "string" },
-          userId: { type: "string", nullable: true },
+          userId: { type: "string", description: "The ID of the user creating the income category" },
         },
-        required: ["name", "icon", "color"],
+        required: ["name", "icon", "color", "userId"],
+      },
+      IncomeCategoryUpdateRequest: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          icon: { type: "string" },
+          color: { type: "string" },
+          userId: { type: "string", description: "The ID of the user updating the income category" },
+        },
+        required: ["userId"],
       },
       IncomeCreateRequest: {
         type: "object",
@@ -792,6 +802,66 @@ const openApiDocument = {
               },
             },
           },
+        },
+      },
+      put: {
+        tags: ["Income Categories"],
+        summary: "Update a user-owned income category",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/IncomeCategoryUpdateRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Income category updated",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/IncomeCategory" },
+              },
+            },
+          },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden - Not the owner" },
+          "404": { description: "Income category not found" },
+        },
+      },
+      delete: {
+        tags: ["Income Categories"],
+        summary: "Delete a user-owned income category",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+          {
+            name: "userId",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+            description: "Owner ID for validation"
+          },
+        ],
+        responses: {
+          "204": { description: "Income category deleted" },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden - Not the owner" },
+          "404": { description: "Income category not found" },
         },
       },
     },
