@@ -26,7 +26,12 @@ const defaultCategories = [
 async function seedCategories(): Promise<void> {
   for (const category of defaultCategories) {
     await prisma.category.upsert({
-      where: { name: category.name },
+      where: {
+        category_name_user_unique: {
+          name: category.name,
+          userId: null,
+        },
+      },
       update: {
         icon: category.icon,
         color: category.color,
