@@ -5,7 +5,7 @@ import { CategoryId, ExpenseId, Month, UserId, Year } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
-import { toZonedTime } from "date-fns-tz";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
 import { PrismaClient } from "@prisma/client";
 
@@ -67,8 +67,8 @@ class ExpenseController {
         new Date(parseInt(date.toString()) * 1000),
         timeZone
       );
-      const startDate = startOfMonth(extractedDate);
-      const endDate = endOfMonth(extractedDate);
+      const startDate = fromZonedTime(startOfMonth(extractedDate), timeZone);
+      const endDate = fromZonedTime(endOfMonth(extractedDate), timeZone);
 
       const expenses = await this.expenseService.getExpenseByUserIdAndMonth(
         UserId(userId),
@@ -98,8 +98,8 @@ class ExpenseController {
         new Date(parseInt(date.toString()) * 1000),
         timeZone
       );
-      const startDate = startOfMonth(extractedDate);
-      const endDate = endOfMonth(extractedDate);
+      const startDate = fromZonedTime(startOfMonth(extractedDate), timeZone);
+      const endDate = fromZonedTime(endOfMonth(extractedDate), timeZone);
 
       const analytics = await this.expenseService.getExpenseAnalytics(
         this.extractUserId(userId),
@@ -178,8 +178,8 @@ class ExpenseController {
         throw new MissingFieldError("User id is required");
       }
       const extractedDate = toZonedTime(new Date(), timeZone);
-      const startDate = startOfMonth(extractedDate);
-      const endDate = endOfMonth(extractedDate);
+      const startDate = fromZonedTime(startOfMonth(extractedDate), timeZone);
+      const endDate = fromZonedTime(endOfMonth(extractedDate), timeZone);
 
       const expenses = await this.expenseService.getExpenseByUserIdAndMonth(
         UserId(userId),
@@ -195,8 +195,8 @@ class ExpenseController {
       const monthlyLimit =
         await this.monthlyLimitService.getMonthlyLimitByUserId({
           userId: UserId(userId),
-          month: (new Date().getMonth() + 1) as Month,
-          year: new Date().getFullYear() as Year,
+          month: (extractedDate.getMonth() + 1) as Month,
+          year: extractedDate.getFullYear() as Year,
         });
 
       const isExceeded = monthlyLimit

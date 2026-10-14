@@ -118,7 +118,7 @@ const ExpenseList: React.FC<IExpenseList> = ({ expenses, getUserExpenses, catego
         id: updatedExpenseValues.id as ExpenseId,
         amount: updatedExpenseValues.amount,
         date: makeUnixTimestampString(
-          Number(new Date(updatedExpenseValues.date))
+          Number(dayjs(updatedExpenseValues.date).hour(12).startOf("hour").toDate())
         ),
         description: updatedExpenseValues.description,
         categoryId: updatedExpenseValues.categoryId ? (updatedExpenseValues.categoryId as CategoryId) : null,

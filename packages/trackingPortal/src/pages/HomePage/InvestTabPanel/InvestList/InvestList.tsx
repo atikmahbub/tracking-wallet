@@ -107,10 +107,10 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
         endDate:
           updatedInvestValues.end_date &&
           makeUnixTimestampString(
-            Number(new Date(updatedInvestValues.end_date))
+            Number(dayjs(updatedInvestValues.end_date).hour(12).startOf("hour").toDate())
           ),
         startDate: makeUnixTimestampString(
-          Number(new Date(updatedInvestValues.start_date))
+          Number(dayjs(updatedInvestValues.start_date).hour(12).startOf("hour").toDate())
         ),
         note: updatedInvestValues.note,
         name: updatedInvestValues.name,
@@ -193,7 +193,7 @@ const InvestList: React.FC<IInvestList> = ({ investList, getUserInvest }) => {
                         item.endDate
                           ? dayjs(
                               makeUnixTimestampToISOString(
-                                Number(item.startDate)
+                                Number(item.endDate)
                               )
                             ).format("MMMM D, YYYY")
                           : "Now"

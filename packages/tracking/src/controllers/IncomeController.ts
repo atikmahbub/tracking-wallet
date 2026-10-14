@@ -5,7 +5,7 @@ import { IncomeCategoryId, IncomeId, UserId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
-import { toZonedTime } from "date-fns-tz";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 const timeZone = "Asia/Dhaka";
 
@@ -63,8 +63,8 @@ class IncomeController {
         new Date(parseInt(date.toString()) * 1000),
         timeZone
       );
-      const startDate = startOfMonth(extractedDate);
-      const endDate = endOfMonth(extractedDate);
+      const startDate = fromZonedTime(startOfMonth(extractedDate), timeZone);
+      const endDate = fromZonedTime(endOfMonth(extractedDate), timeZone);
 
       const incomes = await this.incomeService.getIncomeByUserIdAndMonth(
         UserId(userId),
@@ -94,8 +94,8 @@ class IncomeController {
         new Date(parseInt(date.toString()) * 1000),
         timeZone
       );
-      const startDate = startOfMonth(extractedDate);
-      const endDate = endOfMonth(extractedDate);
+      const startDate = fromZonedTime(startOfMonth(extractedDate), timeZone);
+      const endDate = fromZonedTime(endOfMonth(extractedDate), timeZone);
 
       const analytics = await this.incomeService.getIncomeAnalytics(
         this.extractUserId(userId),

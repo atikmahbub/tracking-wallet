@@ -104,7 +104,7 @@ const LoanList: React.FC<ILoanList> = ({ loans, getUserLoans }) => {
         id: updatedLoanValues.id as LoanId,
         amount: updatedLoanValues.amount,
         deadLine: makeUnixTimestampString(
-          Number(new Date(updatedLoanValues.deadLine))
+          Number(dayjs(updatedLoanValues.deadLine).hour(12).startOf("hour").toDate())
         ),
         note: updatedLoanValues.note,
         name: updatedLoanValues.name,

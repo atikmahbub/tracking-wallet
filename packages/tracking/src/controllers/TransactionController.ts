@@ -3,7 +3,7 @@ import TransactionService from "@tracking/services/TransactionService";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { UserId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { MissingFieldError } from "@tracking/errors";
 
 const timeZone = "Asia/Dhaka";
@@ -33,8 +33,8 @@ class TransactionController {
           new Date(parseInt(date.toString()) * 1000),
           timeZone
         );
-        startDate = startOfMonth(extractedDate);
-        endDate = endOfMonth(extractedDate);
+        startDate = fromZonedTime(startOfMonth(extractedDate), timeZone);
+        endDate = fromZonedTime(endOfMonth(extractedDate), timeZone);
       }
 
       const transactions = await this.transactionService.getTransactions(

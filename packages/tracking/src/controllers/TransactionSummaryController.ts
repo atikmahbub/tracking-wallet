@@ -4,7 +4,7 @@ import { UserId } from "@shared/primitives";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
 import { startOfMonth, endOfMonth, subMonths } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 const timeZone = "Asia/Dhaka";
 
@@ -32,12 +32,12 @@ export class TransactionSummaryController {
       const baseDate = dateParam ? new Date(parseInt(dateParam, 10) * 1000) : new Date();
       const zonedBaseDate = toZonedTime(baseDate, timeZone);
       
-      const currentMonthStart = startOfMonth(zonedBaseDate);
-      const currentMonthEnd = endOfMonth(zonedBaseDate);
+      const currentMonthStart = fromZonedTime(startOfMonth(zonedBaseDate), timeZone);
+      const currentMonthEnd = fromZonedTime(endOfMonth(zonedBaseDate), timeZone);
       
       const previousMonthDate = subMonths(zonedBaseDate, 1);
-      const previousMonthStart = startOfMonth(previousMonthDate);
-      const previousMonthEnd = endOfMonth(previousMonthDate);
+      const previousMonthStart = fromZonedTime(startOfMonth(previousMonthDate), timeZone);
+      const previousMonthEnd = fromZonedTime(endOfMonth(previousMonthDate), timeZone);
 
       const summary = await this.summaryService.getMonthlySummary(
         UserId(userId),
