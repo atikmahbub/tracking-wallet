@@ -5,8 +5,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -27,14 +28,14 @@ model User {
 }
 
 model Expense {
-  id          Bytes     @id @db.Binary(16)
+  id          Bytes     @id
   amount      Float
   description String?   @db.VarChar(128)
   date        DateTime
   created     DateTime  @default(now())
   updated     DateTime  @updatedAt
   userId      String
-  categoryId  Bytes?    @db.Binary(16)
+  categoryId  Bytes?
   category    Category? @relation(fields: [categoryId], references: [id])
   user        User      @relation(fields: [userId], references: [userId])
 
@@ -43,7 +44,7 @@ model Expense {
 }
 
 model Category {
-  id       Bytes     @id @db.Binary(16)
+  id       Bytes     @id
   name     String    @db.VarChar(128)
   icon     String    @db.VarChar(128)
   color    String    @db.VarChar(32)
@@ -57,14 +58,14 @@ model Category {
 }
 
 model Income {
-  id          Bytes           @id @db.Binary(16)
+  id          Bytes           @id
   amount      Float
   description String?         @db.VarChar(128)
   date        DateTime
   created     DateTime        @default(now())
   updated     DateTime        @updatedAt
   userId      String
-  categoryId  Bytes?          @db.Binary(16)
+  categoryId  Bytes?
   category    IncomeCategory? @relation(fields: [categoryId], references: [id])
   user        User            @relation(fields: [userId], references: [userId])
 
@@ -73,7 +74,7 @@ model Income {
 }
 
 model IncomeCategory {
-  id      Bytes    @id @db.Binary(16)
+  id      Bytes    @id
   name    String   @db.VarChar(128)
   icon    String   @db.VarChar(128)
   color   String   @db.VarChar(32)
@@ -84,11 +85,11 @@ model IncomeCategory {
   user    User?    @relation(fields: [userId], references: [userId])
 
   @@unique([name, userId], name: "income_category_name_user_unique")
-  @@index([userId], map: "IncomeCategory_userId_fkey")
+  @@index([userId], map: "income_category_user_id_index")
 }
 
 model MonthlyLimit {
-  id      Bytes    @id @db.Binary(16)
+  id      Bytes    @id
   month   Int
   year    Int
   limit   Float
@@ -102,7 +103,7 @@ model MonthlyLimit {
 }
 
 model Loan {
-  id       Bytes     @id @db.Binary(16)
+  id       Bytes     @id
   loanType LoanType
   name     String    @db.VarChar(128)
   amount   Float
@@ -117,7 +118,7 @@ model Loan {
 }
 
 model Invest {
-  id        Bytes         @id @db.Binary(16)
+  id        Bytes         @id
   name      String        @db.VarChar(128)
   note      String        @db.VarChar(512)
   status    EInvestStatus @default(ACTIVE)
@@ -131,7 +132,7 @@ model Invest {
   user      User          @relation(fields: [userId], references: [userId])
 
   @@index([status, userId], map: "invest_status_userId_index")
-  @@index([userId], map: "Invest_userId_fkey")
+  @@index([userId], map: "invest_user_id_index")
 }
 
 enum LoanType {
