@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register -r module-alias/register src/server.ts",
     "build": "tsc --project ./tsconfig.json",
-    "start": "TS_NODE_BASEURL=./dist node -r  tsconfig-paths/register -r module-alias/register dist/server.js"
+    "start": "TS_NODE_BASEURL=./dist node -r  tsconfig-paths/register -r module-alias/register dist/server.js",
+    "test": "jest --forceExit"
   },
   "_moduleAliases": {
     "@tracking": "dist",
@@ -30,8 +31,13 @@
     "uuid-buffer": "^1.0.3"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",
+    "jest": "^29.7.0",
     "prisma": "^5.19.1",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"
   }

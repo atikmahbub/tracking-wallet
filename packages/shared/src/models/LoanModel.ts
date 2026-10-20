@@ -21,7 +21,8 @@ export class LoanModel extends NewLoan {
     deadLine: UnixTimeStampString | null,
     loanType: LoanType,
     public created: UnixTimeStampString,
-    public updated: UnixTimeStampString
+    public updated: UnixTimeStampString,
+    public settledAt: UnixTimeStampString | null = null
   ) {
     super(name, amount, note, deadLine, loanType);
   }

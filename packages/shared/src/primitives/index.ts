@@ -10,3 +10,4 @@ export * from "@shared/primitives/InvestId";
 export * from "@shared/primitives/CategoryId";
 export * from "@shared/primitives/IncomeId";
 export * from "@shared/primitives/IncomeCategoryId";
+export * from "@shared/primitives/LoanPaymentId";

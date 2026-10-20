@@ -111,10 +111,28 @@ model Loan {
   created  DateTime  @default(now())
   updated  DateTime  @updatedAt
   userId   String
-  note     String?   @db.VarChar(512)
-  user     User      @relation(fields: [userId], references: [userId])
+  note      String?       @db.VarChar(512)
+  settledAt DateTime?
+  user      User          @relation(fields: [userId], references: [userId])
+  payments  LoanPayment[]
 
   @@index([userId], map: "loan_user_id_index")
+}
+
+model LoanPayment {
+  id      Bytes    @id
+  loanId  Bytes
+  userId  String
+  amount  Float
+  date    DateTime
+  note    String?  @db.VarChar(512)
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+  loan    Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId], map: "loan_payment_loan_id_index")
+  @@index([userId], map: "loan_payment_user_id_index")
+  @@map("loan_payments")
 }
 
 model Invest {

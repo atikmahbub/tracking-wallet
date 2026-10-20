@@ -3,6 +3,7 @@ import { LoanId, UserId } from "@shared/primitives";
 import { MissingFieldError } from "@tracking/errors";
 import { LoanService } from "@tracking/services/LoanService";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
+import { assertOptionalTimestamp } from "@tracking/utils/ValidationUtils";
 import { NextFunction, Request, Response } from "express";
 
 export class LoanController {
@@ -19,11 +20,13 @@ export class LoanController {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
 
-      const { userId, name, amount, deadLine, loanType, note } = req.body;
+      const { userId, name, amount, deadLine, loanType, note, settledAt } =
+        req.body;
 
       if (!name || !amount || !deadLine || !loanType) {
         throw new MissingFieldError("Fields are missing!");
       }
+      assertOptionalTimestamp(settledAt, "settledAt");
 
       const newLoan = await this.loanService.addLoan({
         userId: userId,
@@ -32,6 +35,7 @@ export class LoanController {
         deadLine: deadLine,
         loanType: loanType,
         note: note,
+        settledAt: settledAt,
       });
 
       res.status(201).json(newLoan);
@@ -62,7 +66,8 @@ export class LoanController {
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, amount, deadLine, note } = req.body;
+      const { name, amount, deadLine, note, settledAt } = req.body;
+      assertOptionalTimestamp(settledAt, "settledAt");
 
       const updateLoan = await this.loanService.updateLoan({
         id: LoanId(id),
@@ -70,6 +75,8 @@ export class LoanController {
         amount: Number(amount),
         deadLine: deadLine,
         note: note,
+        // absent key stays undefined -> unchanged; explicit null -> reopen
+        settledAt: settledAt,
       });
       res.status(200).json(updateLoan);
     } catch (error) {

@@ -23,7 +23,8 @@ export class LoanService {
 
   async addLoan(params: IAddLoanParams): Promise<LoanModel> {
     try {
-      const { deadLine, amount, name, userId, loanType, note } = params;
+      const { deadLine, amount, name, userId, loanType, note, settledAt } =
+        params;
       const newLoan = await this.prisma.loan.create({
         data: {
           id: uuiBuffer.toBuffer(v4()),
@@ -34,6 +35,9 @@ export class LoanService {
             loanType === LoanTypeEnum.GIVEN ? LoanType.GIVEN : LoanType.TAKEN,
           deadLine: makeUnixTimestampToISOString(Number(deadLine)),
           note: note,
+          settledAt: settledAt
+            ? makeUnixTimestampToISOString(Number(settledAt))
+            : null,
         },
       });
       return this.presentationService.toLoanModel(newLoan);
@@ -63,7 +67,7 @@ export class LoanService {
 
   async updateLoan(params: IUpdateLoanParams): Promise<LoanModel> {
     try {
-      const { id, amount, name, deadLine, note } = params;
+      const { id, amount, name, deadLine, note, settledAt } = params;
       const updateLoan = await this.prisma.loan.update({
         where: {
           id: uuiBuffer.toBuffer(id),
@@ -73,6 +77,13 @@ export class LoanService {
           amount: amount,
           deadLine: makeUnixTimestampToISOString(Number(deadLine)),
           note: note,
+          // undefined leaves the column untouched (old clients never send it)
+          settledAt:
+            settledAt === undefined
+              ? undefined
+              : settledAt === null
+              ? null
+              : makeUnixTimestampToISOString(Number(settledAt)),
         },
       });
 

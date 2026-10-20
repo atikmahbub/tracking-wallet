@@ -7,4 +7,6 @@ export interface IUpdateLoanParams {
   name?: string;
   deadLine?: UnixTimeStampString;
   note?: string | null;
+  // undefined = leave unchanged, null = reopen
+  settledAt?: UnixTimeStampString | null;
 }

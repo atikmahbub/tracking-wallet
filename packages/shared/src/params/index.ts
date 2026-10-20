@@ -22,3 +22,5 @@ export * from "@shared/params/ICreateIncomeCategoryParams";
 export * from "@shared/params/IGetIncomeCategoriesParams";
 export * from "@shared/params/IUpdateCategoryParams";
 export * from "@shared/params/IUpdateIncomeCategoryParams";
+export * from "@shared/params/IAddLoanPaymentParams";
+export * from "@shared/params/IUpdateLoanPaymentParams";

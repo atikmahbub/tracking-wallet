@@ -9,3 +9,4 @@ export * from "@shared/models/Income";
 export * from "@shared/models/IncomeCategory";
 export * from "@shared/models/IncomeAnalytics";
 export * from "@shared/models/Transaction";
+export * from "@shared/models/LoanPayment";

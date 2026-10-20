@@ -7,6 +7,7 @@ import {
   CategoryModel,
   IncomeModel,
   IncomeCategoryModel,
+  LoanPaymentModel,
 } from "@shared/models";
 import {
   EInvestStatus,
@@ -19,6 +20,7 @@ import {
   Category,
   Income,
   IncomeCategory,
+  LoanPayment,
 } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
@@ -34,6 +36,7 @@ import {
   CategoryId,
   IncomeId,
   IncomeCategoryId,
+  LoanPaymentId,
 } from "@shared/primitives";
 import {
   LoanType as LoanTypeEnum,
@@ -99,7 +102,21 @@ export class PresentationService {
         ? LoanTypeEnum.GIVEN
         : LoanTypeEnum.TAKEN,
       makeUnixTimestampString(loan.updated.getTime()),
-      makeUnixTimestampString(loan.created.getTime())
+      makeUnixTimestampString(loan.created.getTime()),
+      loan.settledAt ? makeUnixTimestampString(loan.settledAt.getTime()) : null
+    );
+  }
+
+  public toLoanPaymentModel(payment: LoanPayment): LoanPaymentModel {
+    return new LoanPaymentModel(
+      LoanPaymentId(uuidBuffer.toString(payment.id)),
+      LoanId(uuidBuffer.toString(payment.loanId)),
+      UserId(payment.userId),
+      payment.amount,
+      makeUnixTimestampString(payment.date.getTime()),
+      payment.note,
+      makeUnixTimestampString(payment.created.getTime()),
+      makeUnixTimestampString(payment.updated.getTime())
     );
   }
 
