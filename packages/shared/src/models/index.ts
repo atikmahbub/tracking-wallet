@@ -10,3 +10,4 @@ export * from "@shared/models/IncomeCategory";
 export * from "@shared/models/IncomeAnalytics";
 export * from "@shared/models/Transaction";
 export * from "@shared/models/LoanPayment";
+export * from "@shared/models/RecurringRule";

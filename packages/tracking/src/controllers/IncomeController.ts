@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import IncomeService from "@tracking/services/IncomeService";
 import { IAddIncomeParams } from "@shared/params";
-import { IncomeCategoryId, IncomeId, UserId } from "@shared/primitives";
+import { IncomeCategoryId, IncomeId, UserId, RecurringRuleId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { assertRecurringOccurrence } from "@tracking/utils/ValidationUtils";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
@@ -23,11 +24,20 @@ class IncomeController {
   ): Promise<void> {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
-      const { userId, amount, description, date, categoryId } = req.body;
+      const {
+        userId,
+        amount,
+        description,
+        date,
+        categoryId,
+        recurringRuleId,
+        occurrenceDate,
+      } = req.body;
 
       if (!amount || !date) {
         throw new MissingFieldError("Amount, Date are required");
       }
+      assertRecurringOccurrence(recurringRuleId, occurrenceDate);
 
       const params: IAddIncomeParams = {
         userId: UserId(userId),
@@ -35,6 +45,8 @@ class IncomeController {
         description: description ?? null,
         date: date,
         categoryId: categoryId ? IncomeCategoryId(categoryId) : undefined,
+        recurringRuleId: recurringRuleId ? RecurringRuleId(recurringRuleId) : null,
+        occurrenceDate: occurrenceDate ?? null,
       };
 
       const newIncome = await this.incomeService.addIncome(params);

@@ -28,17 +28,22 @@ model User {
 }
 
 model Expense {
-  id          Bytes     @id
-  amount      Float
-  description String?   @db.VarChar(128)
-  date        DateTime
-  created     DateTime  @default(now())
-  updated     DateTime  @updatedAt
-  userId      String
-  categoryId  Bytes?
-  category    Category? @relation(fields: [categoryId], references: [id])
-  user        User      @relation(fields: [userId], references: [userId])
+  id              Bytes     @id
+  amount          Float
+  description     String?   @db.VarChar(128)
+  date            DateTime
+  created         DateTime  @default(now())
+  updated         DateTime  @updatedAt
+  userId          String
+  categoryId      Bytes?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  user            User      @relation(fields: [userId], references: [userId])
+  // Set when a recurring rule generated this entry. Not a foreign key:
+  // deleting a rule leaves its past entries untouched.
+  recurringRuleId Bytes?
+  occurrenceDate  DateTime?
 
+  @@unique([recurringRuleId, occurrenceDate], map: "expense_recurring_occurrence_unique")
   @@index([userId, date], map: "expense_user_id_date_index")
   @@index([categoryId], map: "expense_category_id_index")
 }
@@ -58,17 +63,22 @@ model Category {
 }
 
 model Income {
-  id          Bytes           @id
-  amount      Float
-  description String?         @db.VarChar(128)
-  date        DateTime
-  created     DateTime        @default(now())
-  updated     DateTime        @updatedAt
-  userId      String
-  categoryId  Bytes?
-  category    IncomeCategory? @relation(fields: [categoryId], references: [id])
-  user        User            @relation(fields: [userId], references: [userId])
+  id              Bytes           @id
+  amount          Float
+  description     String?         @db.VarChar(128)
+  date            DateTime
+  created         DateTime        @default(now())
+  updated         DateTime        @updatedAt
+  userId          String
+  categoryId      Bytes?
+  category        IncomeCategory? @relation(fields: [categoryId], references: [id])
+  user            User            @relation(fields: [userId], references: [userId])
+  // Set when a recurring rule generated this entry. Not a foreign key:
+  // deleting a rule leaves its past entries untouched.
+  recurringRuleId Bytes?
+  occurrenceDate  DateTime?
 
+  @@unique([recurringRuleId, occurrenceDate], map: "income_recurring_occurrence_unique")
   @@index([userId, date], map: "income_user_id_date_index")
   @@index([categoryId], map: "income_category_id_index")
 }
@@ -103,14 +113,14 @@ model MonthlyLimit {
 }
 
 model Loan {
-  id       Bytes     @id
-  loanType LoanType
-  name     String    @db.VarChar(128)
-  amount   Float
-  deadLine DateTime?
-  created  DateTime  @default(now())
-  updated  DateTime  @updatedAt
-  userId   String
+  id        Bytes         @id
+  loanType  LoanType
+  name      String        @db.VarChar(128)
+  amount    Float
+  deadLine  DateTime?
+  created   DateTime      @default(now())
+  updated   DateTime      @updatedAt
+  userId    String
   note      String?       @db.VarChar(512)
   settledAt DateTime?
   user      User          @relation(fields: [userId], references: [userId])
@@ -133,6 +143,26 @@ model LoanPayment {
   @@index([loanId], map: "loan_payment_loan_id_index")
   @@index([userId], map: "loan_payment_user_id_index")
   @@map("loan_payments")
+}
+
+model RecurringRule {
+  id          Bytes     @id
+  userId      String
+  type        String    @db.VarChar(16)
+  amount      Float
+  description String?   @db.VarChar(128)
+  // Expense or income category id, depending on type; not a foreign key.
+  categoryId  Bytes?
+  frequency   String    @db.VarChar(16)
+  startDate   DateTime
+  endDate     DateTime?
+  pausedAt    DateTime?
+  lastRunDate DateTime?
+  created     DateTime  @default(now())
+  updated     DateTime  @updatedAt
+
+  @@index([userId], map: "recurring_rule_user_id_index")
+  @@map("recurring_rules")
 }
 
 model Invest {

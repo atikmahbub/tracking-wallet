@@ -1,4 +1,5 @@
 import {
+  RecurringRuleId,
   UnixTimeStampString,
   IncomeId,
   UserId,
@@ -24,7 +25,10 @@ export class IncomeModel extends NewIncome {
     public updated: UnixTimeStampString,
     public created: UnixTimeStampString,
     public categoryId: IncomeCategoryId | null = null,
-    public category: IncomeCategoryModel | null = null
+    public category: IncomeCategoryModel | null = null,
+    // Set when a recurring rule generated this entry.
+    public recurringRuleId: RecurringRuleId | null = null,
+    public occurrenceDate: UnixTimeStampString | null = null
   ) {
     super(date, amount, description);
   }

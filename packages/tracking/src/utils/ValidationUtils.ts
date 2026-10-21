@@ -37,3 +37,36 @@ export function assertUuid(value: unknown, field: string): void {
     throw new MissingFieldError(`${field} is invalid`);
   }
 }
+
+export function assertOneOf<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+  field: string
+): asserts value is T {
+  if (typeof value !== "string" || !allowed.includes(value as T)) {
+    throw new MissingFieldError(`${field} must be one of ${allowed.join(", ")}`);
+  }
+}
+
+// undefined and null are allowed; anything else must be a uuid
+export function assertOptionalUuid(value: unknown, field: string): void {
+  if (value !== undefined && value !== null) {
+    assertUuid(value, field);
+  }
+}
+
+// A generated entry carries both its rule and the occurrence it was made for.
+export function assertRecurringOccurrence(
+  recurringRuleId: unknown,
+  occurrenceDate: unknown
+): void {
+  const hasRule = recurringRuleId !== undefined && recurringRuleId !== null;
+  const hasDate = occurrenceDate !== undefined && occurrenceDate !== null;
+  if (hasRule !== hasDate) {
+    throw new MissingFieldError(
+      "recurringRuleId and occurrenceDate must be sent together"
+    );
+  }
+  assertOptionalUuid(recurringRuleId, "recurringRuleId");
+  assertOptionalTimestamp(occurrenceDate, "occurrenceDate");
+}

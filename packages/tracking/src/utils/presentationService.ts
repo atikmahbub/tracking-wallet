@@ -8,6 +8,7 @@ import {
   IncomeModel,
   IncomeCategoryModel,
   LoanPaymentModel,
+  RecurringRuleModel,
 } from "@shared/models";
 import {
   EInvestStatus,
@@ -21,6 +22,7 @@ import {
   Income,
   IncomeCategory,
   LoanPayment,
+  RecurringRule,
 } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
 import {
@@ -37,6 +39,7 @@ import {
   IncomeId,
   IncomeCategoryId,
   LoanPaymentId,
+  RecurringRuleId,
 } from "@shared/primitives";
 import {
   LoanType as LoanTypeEnum,
@@ -63,7 +66,13 @@ export class PresentationService {
       expense.categoryId
         ? CategoryId(uuidBuffer.toString(expense.categoryId))
         : null,
-      categoryModel
+      categoryModel,
+      expense.recurringRuleId
+        ? RecurringRuleId(uuidBuffer.toString(expense.recurringRuleId))
+        : null,
+      expense.occurrenceDate
+        ? makeUnixTimestampString(expense.occurrenceDate.getTime())
+        : null
     );
   }
 
@@ -104,6 +113,26 @@ export class PresentationService {
       makeUnixTimestampString(loan.updated.getTime()),
       makeUnixTimestampString(loan.created.getTime()),
       loan.settledAt ? makeUnixTimestampString(loan.settledAt.getTime()) : null
+    );
+  }
+
+  public toRecurringRuleModel(rule: RecurringRule): RecurringRuleModel {
+    const optional = (date: Date | null) =>
+      date ? makeUnixTimestampString(date.getTime()) : null;
+    return new RecurringRuleModel(
+      RecurringRuleId(uuidBuffer.toString(rule.id)),
+      UserId(rule.userId),
+      rule.type as RecurringRuleModel["type"],
+      rule.amount,
+      rule.description,
+      rule.categoryId ? uuidBuffer.toString(rule.categoryId) : null,
+      rule.frequency as RecurringRuleModel["frequency"],
+      makeUnixTimestampString(rule.startDate.getTime()),
+      optional(rule.endDate),
+      optional(rule.pausedAt),
+      optional(rule.lastRunDate),
+      makeUnixTimestampString(rule.created.getTime()),
+      makeUnixTimestampString(rule.updated.getTime())
     );
   }
 
@@ -167,7 +196,13 @@ export class PresentationService {
       income.categoryId
         ? IncomeCategoryId(uuidBuffer.toString(income.categoryId))
         : null,
-      categoryModel
+      categoryModel,
+      income.recurringRuleId
+        ? RecurringRuleId(uuidBuffer.toString(income.recurringRuleId))
+        : null,
+      income.occurrenceDate
+        ? makeUnixTimestampString(income.occurrenceDate.getTime())
+        : null
     );
   }
 

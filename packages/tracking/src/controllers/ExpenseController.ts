@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import ExpenseService from "@tracking/services/ExpenseServices";
 import { IAddExpenseParams } from "@shared/params";
-import { CategoryId, ExpenseId, Month, UserId, Year } from "@shared/primitives";
+import { CategoryId, ExpenseId, Month, UserId, Year, RecurringRuleId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { assertRecurringOccurrence } from "@tracking/utils/ValidationUtils";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
@@ -27,11 +28,20 @@ class ExpenseController {
   ): Promise<void> {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
-      const { userId, amount, description, date, categoryId } = req.body;
+      const {
+        userId,
+        amount,
+        description,
+        date,
+        categoryId,
+        recurringRuleId,
+        occurrenceDate,
+      } = req.body;
 
       if (!amount || !date) {
         throw new MissingFieldError("Amount, Date are required");
       }
+      assertRecurringOccurrence(recurringRuleId, occurrenceDate);
 
       const params: IAddExpenseParams = {
         userId: UserId(userId),
@@ -39,6 +49,8 @@ class ExpenseController {
         description: description ?? null,
         date: date,
         categoryId: categoryId ? CategoryId(categoryId) : undefined,
+        recurringRuleId: recurringRuleId ? RecurringRuleId(recurringRuleId) : null,
+        occurrenceDate: occurrenceDate ?? null,
       };
 
       const newExpense = await this.expenseService.addExpense(params);

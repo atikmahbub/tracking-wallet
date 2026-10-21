@@ -24,3 +24,5 @@ export * from "@shared/params/IUpdateCategoryParams";
 export * from "@shared/params/IUpdateIncomeCategoryParams";
 export * from "@shared/params/IAddLoanPaymentParams";
 export * from "@shared/params/IUpdateLoanPaymentParams";
+export * from "@shared/params/IAddRecurringRuleParams";
+export * from "@shared/params/IUpdateRecurringRuleParams";
