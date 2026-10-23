@@ -16,6 +16,7 @@ model User {
   created          DateTime         @default(now())
   name             String           @map("full_name") @db.VarChar(256)
   profilePicture   String           @map("profile_picture")
+  carryOverEnabled Boolean          @default(true) @map("carry_over_enabled")
   updated          DateTime         @updatedAt
   expenses         Expense[]
   incomes          Income[]

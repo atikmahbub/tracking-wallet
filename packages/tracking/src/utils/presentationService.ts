@@ -95,7 +95,8 @@ export class PresentationService {
       user.email,
       URLString(user.profilePicture),
       makeUnixTimestampString(user.updated.getTime()),
-      makeUnixTimestampString(user.created.getTime())
+      makeUnixTimestampString(user.created.getTime()),
+      user.carryOverEnabled
     );
   }
 

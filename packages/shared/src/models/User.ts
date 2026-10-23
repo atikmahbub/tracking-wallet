@@ -16,7 +16,8 @@ export class UserModel extends NewUser {
     email: string,
     profilePicture: URLString,
     public created: UnixTimeStampString,
-    public updated: UnixTimeStampString
+    public updated: UnixTimeStampString,
+    public carryOverEnabled: boolean = true
   ) {
     super(name, email, userId, profilePicture);
   }

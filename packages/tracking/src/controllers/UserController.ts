@@ -63,12 +63,20 @@ class UserController {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
       const { userId } = req.params;
-      const { name, profilePicture } = req.body;
+      const { name, profilePicture, carryOverEnabled } = req.body;
+
+      if (
+        carryOverEnabled !== undefined &&
+        typeof carryOverEnabled !== "boolean"
+      ) {
+        throw new MissingFieldError("carryOverEnabled must be a boolean");
+      }
 
       const updatedUser = await this.userService.updateUser({
         userId: UserId(userId),
         name: name,
         profilePicture: profilePicture,
+        carryOverEnabled: carryOverEnabled,
       });
 
       res.status(200).json(updatedUser);

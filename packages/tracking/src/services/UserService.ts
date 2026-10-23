@@ -74,7 +74,7 @@ class UserService {
 
   async updateUser(params: IUpdateUserParams): Promise<UserModel> {
     try {
-      const { userId, name, profilePicture } = params;
+      const { userId, name, profilePicture, carryOverEnabled } = params;
 
       const updatedUser = await this.prisma.user.update({
         where: {
@@ -83,6 +83,7 @@ class UserService {
         data: {
           name: name,
           profilePicture: profilePicture,
+          carryOverEnabled: carryOverEnabled,
         },
       });
 
