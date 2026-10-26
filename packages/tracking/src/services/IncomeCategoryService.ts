@@ -10,6 +10,7 @@ import { DatabaseError, NotFoundError, UnAuthorizedError } from "@tracking/error
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { IncomeCategoryId } from "@shared/primitives";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 export const DEFAULT_INCOME_CATEGORIES = [
   { name: "Salary", icon: "wallet", color: "#4ADE80" },
@@ -195,11 +196,21 @@ export class IncomeCategoryService {
         );
       }
 
-      await this.prisma.incomeCategory.delete({
-        where: {
-          id: categoryIdBuffer,
-        },
-      });
+      // See CategoryService.deleteCategory: null references with `updated`
+      // bumped so the delta sync carries the change to other devices.
+      const now = new Date();
+      await this.prisma.$transaction([
+        this.prisma.income.updateMany({
+          where: { categoryId: categoryIdBuffer },
+          data: { categoryId: null, updated: now },
+        }),
+        this.prisma.recurringRule.updateMany({
+          where: { userId, type: "income", categoryId: categoryIdBuffer },
+          data: { categoryId: null, updated: now },
+        }),
+        this.prisma.incomeCategory.delete({ where: { id: categoryIdBuffer } }),
+        recordTombstone(this.prisma, "incomeCategory", categoryIdBuffer, userId),
+      ]);
     } catch (error) {
       if (
         error instanceof NotFoundError ||

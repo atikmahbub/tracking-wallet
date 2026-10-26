@@ -8,9 +8,10 @@ import {
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { InvestId, makeUnixTimestampToISOString } from "@shared/primitives";
-import { DatabaseError } from "@tracking/errors";
+import { DatabaseError, NotFoundError } from "@tracking/errors";
 import { PresentationService } from "@tracking/utils/presentationService";
 import { EInvestStatus as EInvestStatusEnum } from "@shared/enums";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 class InvestService {
   private prisma: PrismaClient;
@@ -102,12 +103,19 @@ class InvestService {
 
   async deleteInvest(id: InvestId): Promise<void> {
     try {
-      await this.prisma.invest.delete({
-        where: {
-          id: uuidBuffer.toBuffer(id),
-        },
-      });
+      const investId = uuidBuffer.toBuffer(id);
+      const row = await this.prisma.invest.findUnique({ where: { id: investId } });
+      if (!row) {
+        throw new NotFoundError("Invest not found");
+      }
+      await this.prisma.$transaction([
+        this.prisma.invest.delete({ where: { id: investId } }),
+        recordTombstone(this.prisma, "invest", investId, row.userId),
+      ]);
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       console.log("error", error);
       throw new DatabaseError("Error deleting invest in database");
     }

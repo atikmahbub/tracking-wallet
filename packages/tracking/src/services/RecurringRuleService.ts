@@ -17,6 +17,7 @@ import {
   UnAuthorizedError,
 } from "@tracking/errors";
 import { PresentationService } from "@tracking/utils/presentationService";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 const toDate = (value: string) => makeUnixTimestampToISOString(Number(value));
 // undefined = leave unchanged, null = clear
@@ -116,9 +117,11 @@ export class RecurringRuleService {
   async deleteRecurringRule(id: RecurringRuleId, userId: UserId): Promise<void> {
     try {
       await this.assertOwnership(id, userId);
-      await this.prisma.recurringRule.delete({
-        where: { id: uuiBuffer.toBuffer(id) },
-      });
+      const ruleId = uuiBuffer.toBuffer(id);
+      await this.prisma.$transaction([
+        this.prisma.recurringRule.delete({ where: { id: ruleId } }),
+        recordTombstone(this.prisma, "recurringRule", ruleId, userId),
+      ]);
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof UnAuthorizedError) {
         throw error;

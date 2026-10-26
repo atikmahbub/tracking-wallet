@@ -17,6 +17,7 @@ import {
   UserId,
 } from "@shared/primitives";
 import { DatabaseError, NotFoundError } from "@tracking/errors";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 class ExpenseService {
   private prisma: PrismaClient;
@@ -175,12 +176,19 @@ class ExpenseService {
 
   async deleteExpense(id: ExpenseId): Promise<void> {
     try {
-      await this.prisma.expense.delete({
-        where: {
-          id: uuidBuffer.toBuffer(id),
-        },
-      });
+      const expenseId = uuidBuffer.toBuffer(id);
+      const row = await this.prisma.expense.findUnique({ where: { id: expenseId } });
+      if (!row) {
+        throw new NotFoundError("Expense not found");
+      }
+      await this.prisma.$transaction([
+        this.prisma.expense.delete({ where: { id: expenseId } }),
+        recordTombstone(this.prisma, "expense", expenseId, row.userId),
+      ]);
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new DatabaseError("error in deleting the expense");
     }
   }

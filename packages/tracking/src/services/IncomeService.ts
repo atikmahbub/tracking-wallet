@@ -16,6 +16,7 @@ import {
   UserId,
 } from "@shared/primitives";
 import { DatabaseError, NotFoundError } from "@tracking/errors";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 class IncomeService {
   private prisma: PrismaClient;
@@ -174,12 +175,19 @@ class IncomeService {
 
   async deleteIncome(id: IncomeId): Promise<void> {
     try {
-      await this.prisma.income.delete({
-        where: {
-          id: uuidBuffer.toBuffer(id),
-        },
-      });
+      const incomeId = uuidBuffer.toBuffer(id);
+      const row = await this.prisma.income.findUnique({ where: { id: incomeId } });
+      if (!row) {
+        throw new NotFoundError("Income not found");
+      }
+      await this.prisma.$transaction([
+        this.prisma.income.delete({ where: { id: incomeId } }),
+        recordTombstone(this.prisma, "income", incomeId, row.userId),
+      ]);
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new DatabaseError("error in deleting the income");
     }
   }

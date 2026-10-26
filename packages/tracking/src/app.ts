@@ -19,6 +19,7 @@ import InvestService from "@tracking/services/InvestService";
 import InvestController from "@tracking/controllers/InvestController";
 import InvestRoutes from "@tracking/routes/InvestRoutes";
 import { authenticateToken } from "@tracking/middlewares/authenticateToken";
+import { idempotency } from "@tracking/middlewares/idempotency";
 import { LoanService } from "@tracking/services/LoanService";
 import { LoanController } from "@tracking/controllers/LoanController";
 import LoanRoutes from "@tracking/routes/LoanRoutes";
@@ -43,6 +44,9 @@ import TransactionRoutes from "@tracking/routes/TransactionRoutes";
 import TransactionSummaryService from "@tracking/services/TransactionSummaryService";
 import TransactionSummaryController from "@tracking/controllers/TransactionSummaryController";
 import TransactionSummaryRoutes from "@tracking/routes/TransactionSummaryRoutes";
+import SyncService from "@tracking/services/SyncService";
+import SyncController from "@tracking/controllers/SyncController";
+import SyncRoutes from "@tracking/routes/SyncRoutes";
 import openApiDocument from "@tracking/docs/openapi";
 
 const app: Application = express();
@@ -60,6 +64,7 @@ app.use(
 );
 
 app.use(authenticateToken);
+app.use(idempotency(prisma));
 
 const expenseService = new ExpenseServices(prisma);
 const expenseController = new ExpenseController(expenseService);
@@ -109,6 +114,10 @@ const transactionSummaryService = new TransactionSummaryService(prisma);
 const transactionSummaryController = new TransactionSummaryController(transactionSummaryService);
 const transactionSummaryRoutes = new TransactionSummaryRoutes(transactionSummaryController);
 
+const syncService = new SyncService(prisma);
+const syncController = new SyncController(syncService);
+const syncRoutes = new SyncRoutes(syncController);
+
 app.use("/api/v0", expenseRoutes.registerExpenseRoutes());
 app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
 app.use("/api/v0", userRoutes.registerUserRouter());
@@ -121,6 +130,7 @@ app.use("/api/v0", incomeRoutes.registerIncomeRoutes());
 app.use("/api/v0", incomeCategoryRoutes.registerIncomeCategoryRoutes());
 app.use("/api/v0", transactionRoutes.registerTransactionRoutes());
 app.use("/api/v0", transactionSummaryRoutes.registerRoutes());
+app.use("/api/v0", syncRoutes.registerSyncRoutes());
 
 app.use(errorHandler);
 

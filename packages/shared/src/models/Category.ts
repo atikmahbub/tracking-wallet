@@ -1,4 +1,4 @@
-import { CategoryId, UnixTimeStampString } from "@shared/primitives";
+import { CategoryId, UnixTimeStampString, UserId } from "@shared/primitives";
 
 export class NewCategoryModel {
   constructor(
@@ -15,7 +15,9 @@ export class CategoryModel extends NewCategoryModel {
     icon: string,
     color: string,
     public created: UnixTimeStampString,
-    public updated: UnixTimeStampString
+    public updated: UnixTimeStampString,
+    /** Owner; null for the built-in default categories. */
+    public userId: UserId | null = null
   ) {
     super(name, icon, color);
   }

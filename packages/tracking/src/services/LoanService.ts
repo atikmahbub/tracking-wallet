@@ -8,9 +8,10 @@ import {
   makeUnixTimestampToISOString,
   UserId,
 } from "@shared/primitives";
-import { DatabaseError } from "@tracking/errors";
+import { DatabaseError, NotFoundError } from "@tracking/errors";
 import { LoanType as LoanTypeEnum } from "@shared/enums";
 import { PresentationService } from "@tracking/utils/presentationService";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 export class LoanService {
   private prisma: PrismaClient;
@@ -95,12 +96,27 @@ export class LoanService {
 
   async deleteLoan(id: LoanId): Promise<void> {
     try {
-      await this.prisma.loan.delete({
-        where: {
-          id: uuiBuffer.toBuffer(id),
-        },
+      const loanId = uuiBuffer.toBuffer(id);
+      const row = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+        include: { payments: { select: { id: true } } },
       });
+      if (!row) {
+        throw new NotFoundError("Loan not found");
+      }
+      // Payments go with the loan (cascade); record them too so other
+      // devices drop them as well.
+      await this.prisma.$transaction([
+        ...row.payments.map((p) =>
+          recordTombstone(this.prisma, "loanPayment", p.id, row.userId)
+        ),
+        this.prisma.loan.delete({ where: { id: loanId } }),
+        recordTombstone(this.prisma, "loan", loanId, row.userId),
+      ]);
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new DatabaseError("error in deleting the loan");
     }
   }

@@ -11,6 +11,7 @@ import { DatabaseError, NotFoundError, UnAuthorizedError } from "@tracking/error
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { CategoryId } from "@shared/primitives";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 export const DEFAULT_EXPENSE_CATEGORIES = [
   { name: "Food & Dining", icon: "food", color: "#F87171" },
@@ -189,11 +190,22 @@ export class CategoryService {
         throw new UnAuthorizedError("Not authorized to delete this category");
       }
 
-      await this.prisma.category.delete({
-        where: {
-          id: categoryIdBuffer,
-        },
-      });
+      // The FK nulls expenses' categoryId, but without touching `updated`;
+      // do it here so the delta sync carries the change to other devices.
+      // Recurring rules hold the id without a FK, so clear those too.
+      const now = new Date();
+      await this.prisma.$transaction([
+        this.prisma.expense.updateMany({
+          where: { categoryId: categoryIdBuffer },
+          data: { categoryId: null, updated: now },
+        }),
+        this.prisma.recurringRule.updateMany({
+          where: { userId, type: "expense", categoryId: categoryIdBuffer },
+          data: { categoryId: null, updated: now },
+        }),
+        this.prisma.category.delete({ where: { id: categoryIdBuffer } }),
+        recordTombstone(this.prisma, "category", categoryIdBuffer, userId),
+      ]);
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof UnAuthorizedError) {
         throw error;

@@ -8,8 +8,9 @@ import { MonthlyLimitModel } from "@shared/models";
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { PresentationService } from "@tracking/utils/presentationService";
-import { DatabaseError } from "@tracking/errors";
+import { DatabaseError, NotFoundError } from "@tracking/errors";
 import { MonthlyLimitId } from "@shared/primitives";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 class MonthlyLimitService {
   private prisma: PrismaClient;
@@ -91,12 +92,19 @@ class MonthlyLimitService {
 
   async deleteMonthlyLimit(id: MonthlyLimitId): Promise<void> {
     try {
-      await this.prisma.monthlyLimit.delete({
-        where: {
-          id: uuidBuffer.toBuffer(id),
-        },
-      });
+      const limitId = uuidBuffer.toBuffer(id);
+      const row = await this.prisma.monthlyLimit.findUnique({ where: { id: limitId } });
+      if (!row) {
+        throw new NotFoundError("Monthly limit not found");
+      }
+      await this.prisma.$transaction([
+        this.prisma.monthlyLimit.delete({ where: { id: limitId } }),
+        recordTombstone(this.prisma, "monthlyLimit", limitId, row.userId),
+      ]);
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new DatabaseError("error in deleting  monthly limit");
     }
   }

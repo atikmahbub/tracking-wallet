@@ -17,6 +17,7 @@ import {
   UnAuthorizedError,
 } from "@tracking/errors";
 import { PresentationService } from "@tracking/utils/presentationService";
+import { recordTombstone } from "@tracking/utils/SyncUtils";
 
 export class LoanPaymentService {
   private prisma: PrismaClient;
@@ -116,11 +117,11 @@ export class LoanPaymentService {
   async deleteLoanPayment(id: LoanPaymentId, userId: UserId): Promise<void> {
     try {
       await this.assertOwnership(id, userId);
-      await this.prisma.loanPayment.delete({
-        where: {
-          id: uuiBuffer.toBuffer(id),
-        },
-      });
+      const paymentId = uuiBuffer.toBuffer(id);
+      await this.prisma.$transaction([
+        this.prisma.loanPayment.delete({ where: { id: paymentId } }),
+        recordTombstone(this.prisma, "loanPayment", paymentId, userId),
+      ]);
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof UnAuthorizedError) {
         throw error;

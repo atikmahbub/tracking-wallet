@@ -47,6 +47,7 @@ model Expense {
   @@unique([recurringRuleId, occurrenceDate], map: "expense_recurring_occurrence_unique")
   @@index([userId, date], map: "expense_user_id_date_index")
   @@index([categoryId], map: "expense_category_id_index")
+  @@index([userId, updated], map: "expense_user_id_updated_index")
 }
 
 model Category {
@@ -61,6 +62,7 @@ model Category {
 
   @@unique([name, userId], name: "category_name_user_unique")
   @@index([userId])
+  @@index([userId, updated], map: "category_user_id_updated_index")
 }
 
 model Income {
@@ -82,6 +84,7 @@ model Income {
   @@unique([recurringRuleId, occurrenceDate], map: "income_recurring_occurrence_unique")
   @@index([userId, date], map: "income_user_id_date_index")
   @@index([categoryId], map: "income_category_id_index")
+  @@index([userId, updated], map: "income_user_id_updated_index")
 }
 
 model IncomeCategory {
@@ -97,6 +100,7 @@ model IncomeCategory {
 
   @@unique([name, userId], name: "income_category_name_user_unique")
   @@index([userId], map: "income_category_user_id_index")
+  @@index([userId, updated], map: "income_category_user_id_updated_index")
 }
 
 model MonthlyLimit {
@@ -111,6 +115,7 @@ model MonthlyLimit {
 
   @@unique([userId, month, year], name: "user_month_year_unique")
   @@index([userId], map: "monthly_limit_user_id_index")
+  @@index([userId, updated], map: "monthly_limit_user_id_updated_index")
 }
 
 model Loan {
@@ -128,6 +133,7 @@ model Loan {
   payments  LoanPayment[]
 
   @@index([userId], map: "loan_user_id_index")
+  @@index([userId, updated], map: "loan_user_id_updated_index")
 }
 
 model LoanPayment {
@@ -144,6 +150,7 @@ model LoanPayment {
   @@index([loanId], map: "loan_payment_loan_id_index")
   @@index([userId], map: "loan_payment_user_id_index")
   @@map("loan_payments")
+  @@index([userId, updated], map: "loan_payment_user_id_updated_index")
 }
 
 model RecurringRule {
@@ -164,6 +171,7 @@ model RecurringRule {
 
   @@index([userId], map: "recurring_rule_user_id_index")
   @@map("recurring_rules")
+  @@index([userId, updated], map: "recurring_rule_user_id_updated_index")
 }
 
 model Invest {
@@ -182,6 +190,30 @@ model Invest {
 
   @@index([status, userId], map: "invest_status_userId_index")
   @@index([userId], map: "invest_user_id_index")
+  @@index([userId, updated], map: "invest_user_id_updated_index")
+}
+
+/// Records a deleted row so the delta sync endpoint can tell other devices.
+model Tombstone {
+  entity  String   @db.VarChar(32)
+  id      Bytes
+  userId  String?
+  deleted DateTime @default(now())
+
+  @@id([entity, id])
+  @@index([userId, deleted], map: "tombstone_user_id_deleted_index")
+  @@map("tombstones")
+}
+
+/// Response of a POST sent with an Idempotency-Key, replayed on retries.
+model IdempotencyKey {
+  key     String   @id @db.VarChar(320)
+  status  Int?
+  body    Json?
+  created DateTime @default(now())
+
+  @@index([created], map: "idempotency_key_created_index")
+  @@map("idempotency_keys")
 }
 
 enum LoanType {

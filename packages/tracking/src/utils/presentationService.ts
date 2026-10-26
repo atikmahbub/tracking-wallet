@@ -174,7 +174,8 @@ export class PresentationService {
       category.icon,
       category.color,
       makeUnixTimestampString(category.created.getTime()),
-      makeUnixTimestampString(category.updated.getTime())
+      makeUnixTimestampString(category.updated.getTime()),
+      category.userId ? UserId(category.userId) : null
     );
   }
 
