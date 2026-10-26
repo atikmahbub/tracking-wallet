@@ -84,7 +84,12 @@ export class SyncService {
         this.prisma.monthlyLimit.findMany({ where: own }),
         since != null
           ? this.prisma.tombstone.findMany({
-              where: { userId, deleted: { gt: new Date(since - OVERLAP_MS) } },
+              where: {
+                // Shared rows (no owner) are deleted only by maintenance,
+                // e.g. removing repeated default categories; everyone gets those.
+                OR: [{ userId }, { userId: null }],
+                deleted: { gt: new Date(since - OVERLAP_MS) },
+              },
             })
           : // A first sync has nothing local to delete.
             Promise.resolve([]),

@@ -6,7 +6,7 @@ import {
   IUpdateIncomeCategoryParams,
 } from "@shared/params";
 import { PresentationService } from "@tracking/utils/presentationService";
-import { DatabaseError, NotFoundError, UnAuthorizedError } from "@tracking/errors";
+import { DatabaseError, MissingFieldError, NotFoundError, UnAuthorizedError } from "@tracking/errors";
 import * as uuidBuffer from "uuid-buffer";
 import { v4 } from "uuid";
 import { IncomeCategoryId } from "@shared/primitives";
@@ -58,6 +58,11 @@ export class IncomeCategoryService {
   ): Promise<IncomeCategoryModel> {
     try {
       const { name, icon, color, userId } = params;
+      // Without an owner the row would be a shared default for every user;
+      // that's how repeated copies of the defaults piled up.
+      if (!userId) {
+        throw new MissingFieldError("userId is required to create an income category");
+      }
 
       const category = await this.prisma.incomeCategory.create({
         data: {
@@ -65,12 +70,15 @@ export class IncomeCategoryService {
           name,
           icon,
           color,
-          userId: userId ?? null,
+          userId,
         },
       });
 
       return this.presentationService.toIncomeCategoryModel(category);
     } catch (error) {
+      if (error instanceof MissingFieldError) {
+        throw error;
+      }
       throw new DatabaseError("Error creating income category");
     }
   }
