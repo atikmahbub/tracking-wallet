@@ -5,6 +5,12 @@ const { expressjwt: jwt } = require("express-jwt");
 
 // Middleware for checking JWT and verifying with Auth0's JWKS
 
+// Tokens minted via the custom domain carry it as `iss`; older app builds still
+// use the tenant domain. Both are signed by the same tenant keys.
+const issuers = [process.env.AUTH0_DOMAIN, process.env.AUTH0_CUSTOM_DOMAIN]
+  .filter(Boolean)
+  .map((domain) => `https://${domain}/`);
+
 export const checkJwt = jwt({
   // Dynamically provide a signing key based on the kid in the header and the signing keys provided by Auth0
   secret: jwksRsa.expressJwtSecret({
@@ -16,7 +22,7 @@ export const checkJwt = jwt({
 
   // Validate the audience and the issuer
   audience: process.env.AUTH0_AUDIENCE, // Your API's audience identifier
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`, // Auth0 domain as the issuer
+  issuer: issuers, // Accept tokens from the tenant domain and the custom domain
   algorithms: ["RS256"], // Use RS256 for token signing
 });
 
