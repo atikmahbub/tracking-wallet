@@ -34,7 +34,7 @@ export class LoanPaymentService {
     params: IAddLoanPaymentParams
   ): Promise<LoanPaymentModel> {
     try {
-      const { userId, loanId, amount, date, note } = params;
+      const { userId, loanId, amount, date, note, kind } = params;
 
       const loan = await this.prisma.loan.findUnique({
         where: { id: uuiBuffer.toBuffer(loanId) },
@@ -54,6 +54,7 @@ export class LoanPaymentService {
           amount: amount,
           date: makeUnixTimestampToISOString(Number(date)),
           note: note ?? null,
+          kind: kind ?? "repayment",
         },
       });
       return this.presentationService.toLoanPaymentModel(newPayment);

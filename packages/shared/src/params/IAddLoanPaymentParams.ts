@@ -6,4 +6,6 @@ export interface IAddLoanPaymentParams {
   amount: number;
   date: UnixTimeStampString;
   note: string | null;
+  // Set once on create; absent = "repayment"
+  kind?: "repayment" | "topup";
 }

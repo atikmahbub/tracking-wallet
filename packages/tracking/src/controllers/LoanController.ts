@@ -20,7 +20,7 @@ export class LoanController {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
 
-      const { userId, name, amount, deadLine, loanType, note, settledAt } =
+      const { userId, name, amount, deadLine, loanType, note, settledAt, countInBalance } =
         req.body;
 
       if (!name || !amount || !deadLine || !loanType) {
@@ -36,6 +36,7 @@ export class LoanController {
         loanType: loanType,
         note: note,
         settledAt: settledAt,
+        countInBalance: countInBalance === true,
       });
 
       res.status(201).json(newLoan);
@@ -66,7 +67,7 @@ export class LoanController {
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, amount, deadLine, note, settledAt } = req.body;
+      const { name, amount, deadLine, note, settledAt, countInBalance } = req.body;
       assertOptionalTimestamp(settledAt, "settledAt");
 
       const updateLoan = await this.loanService.updateLoan({
@@ -77,6 +78,8 @@ export class LoanController {
         note: note,
         // absent key stays undefined -> unchanged; explicit null -> reopen
         settledAt: settledAt,
+        countInBalance:
+          typeof countInBalance === "boolean" ? countInBalance : undefined,
       });
       res.status(200).json(updateLoan);
     } catch (error) {

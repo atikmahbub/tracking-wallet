@@ -5,6 +5,9 @@ import {
   UserId,
 } from "@shared/primitives";
 
+/** "repayment" pays the loan down; "topup" adds to it (borrowed or lent more). */
+export type LoanPaymentKind = "repayment" | "topup";
+
 export class LoanPaymentModel {
   constructor(
     public id: LoanPaymentId,
@@ -14,6 +17,7 @@ export class LoanPaymentModel {
     public date: UnixTimeStampString,
     public note: string | null,
     public created: UnixTimeStampString,
-    public updated: UnixTimeStampString
+    public updated: UnixTimeStampString,
+    public kind: LoanPaymentKind = "repayment"
   ) {}
 }

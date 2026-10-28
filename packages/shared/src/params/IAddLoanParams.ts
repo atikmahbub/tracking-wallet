@@ -9,4 +9,5 @@ export interface IAddLoanParams {
   loanType: LoanType;
   note: string | null;
   settledAt?: UnixTimeStampString | null;
+  countInBalance?: boolean;
 }

@@ -119,18 +119,19 @@ model MonthlyLimit {
 }
 
 model Loan {
-  id        Bytes         @id
-  loanType  LoanType
-  name      String        @db.VarChar(128)
-  amount    Float
-  deadLine  DateTime?
-  created   DateTime      @default(now())
-  updated   DateTime      @updatedAt
-  userId    String
-  note      String?       @db.VarChar(512)
-  settledAt DateTime?
-  user      User          @relation(fields: [userId], references: [userId])
-  payments  LoanPayment[]
+  id             Bytes         @id
+  loanType       LoanType
+  name           String        @db.VarChar(128)
+  amount         Float
+  deadLine       DateTime?
+  created        DateTime      @default(now())
+  updated        DateTime      @updatedAt
+  userId         String
+  note           String?       @db.VarChar(512)
+  settledAt      DateTime?
+  countInBalance Boolean       @default(false)
+  user           User          @relation(fields: [userId], references: [userId])
+  payments       LoanPayment[]
 
   @@index([userId], map: "loan_user_id_index")
   @@index([userId, updated], map: "loan_user_id_updated_index")
@@ -143,14 +144,16 @@ model LoanPayment {
   amount  Float
   date    DateTime
   note    String?  @db.VarChar(512)
+  /// "repayment" pays the loan down; "topup" adds to it (borrowed or lent more).
+  kind    String   @default("repayment") @db.VarChar(16)
   created DateTime @default(now())
   updated DateTime @updatedAt
   loan    Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
 
   @@index([loanId], map: "loan_payment_loan_id_index")
   @@index([userId], map: "loan_payment_user_id_index")
-  @@map("loan_payments")
   @@index([userId, updated], map: "loan_payment_user_id_updated_index")
+  @@map("loan_payments")
 }
 
 model RecurringRule {
@@ -170,8 +173,8 @@ model RecurringRule {
   updated     DateTime  @updatedAt
 
   @@index([userId], map: "recurring_rule_user_id_index")
-  @@map("recurring_rules")
   @@index([userId, updated], map: "recurring_rule_user_id_updated_index")
+  @@map("recurring_rules")
 }
 
 model Invest {

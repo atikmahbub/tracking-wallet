@@ -113,7 +113,8 @@ export class PresentationService {
         : LoanTypeEnum.TAKEN,
       makeUnixTimestampString(loan.updated.getTime()),
       makeUnixTimestampString(loan.created.getTime()),
-      loan.settledAt ? makeUnixTimestampString(loan.settledAt.getTime()) : null
+      loan.settledAt ? makeUnixTimestampString(loan.settledAt.getTime()) : null,
+      loan.countInBalance
     );
   }
 
@@ -146,7 +147,8 @@ export class PresentationService {
       makeUnixTimestampString(payment.date.getTime()),
       payment.note,
       makeUnixTimestampString(payment.created.getTime()),
-      makeUnixTimestampString(payment.updated.getTime())
+      makeUnixTimestampString(payment.updated.getTime()),
+      payment.kind === "topup" ? "topup" : "repayment"
     );
   }
 

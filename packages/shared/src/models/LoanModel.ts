@@ -22,7 +22,9 @@ export class LoanModel extends NewLoan {
     loanType: LoanType,
     public created: UnixTimeStampString,
     public updated: UnixTimeStampString,
-    public settledAt: UnixTimeStampString | null = null
+    public settledAt: UnixTimeStampString | null = null,
+    /** Borrowing counts as income and lending as expense; repayments the reverse. */
+    public countInBalance: boolean = false
   ) {
     super(name, amount, note, deadLine, loanType);
   }

@@ -9,4 +9,6 @@ export interface IUpdateLoanParams {
   note?: string | null;
   // undefined = leave unchanged, null = reopen
   settledAt?: UnixTimeStampString | null;
+  // undefined = leave unchanged
+  countInBalance?: boolean;
 }

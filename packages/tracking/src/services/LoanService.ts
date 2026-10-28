@@ -24,7 +24,7 @@ export class LoanService {
 
   async addLoan(params: IAddLoanParams): Promise<LoanModel> {
     try {
-      const { deadLine, amount, name, userId, loanType, note, settledAt } =
+      const { deadLine, amount, name, userId, loanType, note, settledAt, countInBalance } =
         params;
       const newLoan = await this.prisma.loan.create({
         data: {
@@ -39,6 +39,7 @@ export class LoanService {
           settledAt: settledAt
             ? makeUnixTimestampToISOString(Number(settledAt))
             : null,
+          countInBalance: countInBalance ?? false,
         },
       });
       return this.presentationService.toLoanModel(newLoan);
@@ -68,7 +69,8 @@ export class LoanService {
 
   async updateLoan(params: IUpdateLoanParams): Promise<LoanModel> {
     try {
-      const { id, amount, name, deadLine, note, settledAt } = params;
+      const { id, amount, name, deadLine, note, settledAt, countInBalance } =
+        params;
       const updateLoan = await this.prisma.loan.update({
         where: {
           id: uuiBuffer.toBuffer(id),
@@ -85,6 +87,7 @@ export class LoanService {
               : settledAt === null
               ? null
               : makeUnixTimestampToISOString(Number(settledAt)),
+          countInBalance: countInBalance,
         },
       });
 

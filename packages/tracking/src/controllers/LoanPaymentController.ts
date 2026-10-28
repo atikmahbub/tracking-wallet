@@ -23,7 +23,7 @@ export class LoanPaymentController {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
 
-      const { userId, loanId, amount, date, note } = req.body;
+      const { userId, loanId, amount, date, note, kind } = req.body;
 
       if (!loanId || amount === undefined || date === undefined) {
         throw new MissingFieldError("Fields are missing!");
@@ -31,6 +31,9 @@ export class LoanPaymentController {
       assertUuid(loanId, "loanId");
       assertPositiveAmount(amount);
       assertTimestamp(date, "date");
+      if (kind !== undefined && kind !== "repayment" && kind !== "topup") {
+        throw new MissingFieldError("kind must be repayment or topup");
+      }
 
       const newPayment = await this.loanPaymentService.addLoanPayment({
         userId: UserId(userId),
@@ -38,6 +41,7 @@ export class LoanPaymentController {
         amount: Number(amount),
         date: date,
         note: note ?? null,
+        kind: kind ?? "repayment",
       });
 
       res.status(201).json(newPayment);
