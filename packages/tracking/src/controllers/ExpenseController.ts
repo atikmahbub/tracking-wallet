@@ -8,10 +8,9 @@ import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@tracking/utils/prisma";
 
 const timeZone = "Asia/Dhaka";
-const prisma = new PrismaClient();
 class ExpenseController {
   private expenseService: ExpenseService;
   private monthlyLimitService: MonthlyLimitService;

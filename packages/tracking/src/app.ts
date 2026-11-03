@@ -7,7 +7,7 @@ import swaggerUi from "swagger-ui-express";
 import ExpenseController from "@tracking/controllers/ExpenseController";
 import ExpenseServices from "@tracking/services/ExpenseServices";
 import ExpenseRoutes from "@tracking/routes/ExpenseRoutes";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@tracking/utils/prisma";
 import { errorHandler } from "@tracking/middlewares/errorHandler";
 import MonthlyLimitService from "@tracking/services/MonthlyLimitService";
 import MonthlyLimitController from "@tracking/controllers/MonthlyLimitController";
@@ -50,7 +50,6 @@ import SyncRoutes from "@tracking/routes/SyncRoutes";
 import openApiDocument from "@tracking/docs/openapi";
 
 const app: Application = express();
-const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
