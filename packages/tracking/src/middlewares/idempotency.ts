@@ -16,7 +16,9 @@ const MAX_KEY_LENGTH = 128;
  * row. Keys are scoped to the caller's token subject.
  *
  * A retry that arrives while the first attempt is still running gets 409.
- * 5xx and auth failures aren't stored, so those retries run again.
+ * Only successes are stored. A rejected request made no row, so its retry
+ * runs again: after a server update it may now succeed (a General savings
+ * pot sent to the old server, for one).
  */
 export const idempotency =
   (prisma: PrismaClient) =>
@@ -53,7 +55,7 @@ export const idempotency =
     };
     res.on("finish", () => {
       const status = res.statusCode;
-      const keep = status < 500 && status !== 401 && status !== 409 && status !== 429;
+      const keep = status >= 200 && status < 300;
       const done = keep
         ? prisma.idempotencyKey.update({
             where: { key },
@@ -67,7 +69,8 @@ export const idempotency =
 
 /**
  * Inserts the key as "in progress". False when it already exists — unless
- * that earlier attempt was abandoned, in which case it's taken over.
+ * that earlier attempt was abandoned, or failed (stored by older code), in
+ * which case it's taken over.
  */
 async function claimKey(prisma: PrismaClient, key: string): Promise<boolean> {
   try {
@@ -77,8 +80,10 @@ async function claimKey(prisma: PrismaClient, key: string): Promise<boolean> {
     const taken = await prisma.idempotencyKey.updateMany({
       where: {
         key,
-        status: null,
-        created: { lt: new Date(Date.now() - ABANDONED_AFTER_MS) },
+        OR: [
+          { status: null, created: { lt: new Date(Date.now() - ABANDONED_AFTER_MS) } },
+          { status: { gte: 300 } },
+        ],
       },
       data: { created: new Date() },
     });

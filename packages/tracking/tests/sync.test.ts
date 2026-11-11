@@ -76,6 +76,31 @@ describe("sync support", () => {
     });
   });
 
+  describe("Idempotency-Key after a rejection", () => {
+    it("runs a key that was rejected before again, so it can succeed now", async () => {
+      // What older servers stored for a create they rejected.
+      await prisma.idempotencyKey.create({
+        data: { key: "anonymous:was-400", status: 400, body: { error: "target is invalid" } },
+      });
+      const res = await request(app)
+        .post("/api/v0/loan/add")
+        .set("Idempotency-Key", "was-400")
+        .send(loanBody());
+      expect(res.status).toBe(201);
+      expect(await prisma.loan.count()).toBe(1);
+    });
+
+    it("doesn't store a rejection", async () => {
+      const bad = { ...loanBody(), name: undefined };
+      await request(app).post("/api/v0/loan/add").set("Idempotency-Key", "nope").send(bad);
+      const ok = await request(app)
+        .post("/api/v0/loan/add")
+        .set("Idempotency-Key", "nope")
+        .send(loanBody());
+      expect(ok.status).toBe(201);
+    });
+  });
+
   describe("GET /sync/changes", () => {
     it("returns everything without a cursor, and nothing new after it", async () => {
       await request(app).post("/api/v0/loan/add").send(loanBody());
