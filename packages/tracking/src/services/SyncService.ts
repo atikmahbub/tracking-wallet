@@ -10,6 +10,8 @@ import {
   LoanPaymentModel,
   MonthlyLimitModel,
   RecurringRuleModel,
+  SavingsEntryModel,
+  SavingsGoalModel,
 } from "@shared/models";
 import { UserId } from "@shared/primitives";
 import { DatabaseError } from "@tracking/errors";
@@ -35,6 +37,8 @@ export interface SyncChanges {
   recurringRules: RecurringRuleModel[];
   invests: InvestModel[];
   monthlyLimits: MonthlyLimitModel[];
+  savingsGoals: SavingsGoalModel[];
+  savingsEntries: SavingsEntryModel[];
   deleted: { entity: SyncEntity; id: string }[];
 }
 
@@ -66,6 +70,8 @@ export class SyncService {
         recurringRules,
         invests,
         monthlyLimits,
+        savingsGoals,
+        savingsEntries,
         tombstones,
       ] = await Promise.all([
         this.prisma.expense.findMany({ where: own, include: { category: true } }),
@@ -82,6 +88,8 @@ export class SyncService {
         this.prisma.recurringRule.findMany({ where: own }),
         this.prisma.invest.findMany({ where: own }),
         this.prisma.monthlyLimit.findMany({ where: own }),
+        this.prisma.savingsGoal.findMany({ where: own }),
+        this.prisma.savingsEntry.findMany({ where: own }),
         since != null
           ? this.prisma.tombstone.findMany({
               where: {
@@ -107,6 +115,8 @@ export class SyncService {
         recurringRules: recurringRules.map((r) => p.toRecurringRuleModel(r)),
         invests: invests.map((i) => p.toInvestModel(i)),
         monthlyLimits: monthlyLimits.map((m) => p.toMonthLimitModel(m)),
+        savingsGoals: savingsGoals.map((g) => p.toSavingsGoalModel(g)),
+        savingsEntries: savingsEntries.map((e) => p.toSavingsEntryModel(e)),
         deleted: tombstones.map((t) => ({
           entity: t.entity as SyncEntity,
           id: uuidBuffer.toString(t.id),

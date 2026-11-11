@@ -4,6 +4,7 @@ import {
   ExpenseId,
   UserId,
   CategoryId,
+  SavingsGoalId,
 } from "@shared/primitives";
 import { CategoryModel } from "@shared/models/Category";
 
@@ -28,7 +29,9 @@ export class ExpenseModel extends NewExpense {
     public category: CategoryModel | null = null,
     // Set when a recurring rule generated this entry.
     public recurringRuleId: RecurringRuleId | null = null,
-    public occurrenceDate: UnixTimeStampString | null = null
+    public occurrenceDate: UnixTimeStampString | null = null,
+    // Set when the money came out of a savings goal.
+    public savingsGoalId: SavingsGoalId | null = null
   ) {
     super(date, amount, description);
   }

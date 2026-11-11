@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import ExpenseService from "@tracking/services/ExpenseServices";
 import { IAddExpenseParams } from "@shared/params";
-import { CategoryId, ExpenseId, Month, UserId, Year, RecurringRuleId } from "@shared/primitives";
+import { CategoryId, ExpenseId, Month, UserId, Year, RecurringRuleId, SavingsGoalId } from "@shared/primitives";
 import { startOfMonth, endOfMonth } from "date-fns";
-import { assertRecurringOccurrence } from "@tracking/utils/ValidationUtils";
+import { assertOptionalUuid, assertRecurringOccurrence } from "@tracking/utils/ValidationUtils";
 import { AuthenticationUtils } from "@tracking/utils/AuthenticationUtils";
 import { MissingFieldError } from "@tracking/errors";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
@@ -35,12 +35,14 @@ class ExpenseController {
         categoryId,
         recurringRuleId,
         occurrenceDate,
+        savingsGoalId,
       } = req.body;
 
       if (!amount || !date) {
         throw new MissingFieldError("Amount, Date are required");
       }
       assertRecurringOccurrence(recurringRuleId, occurrenceDate);
+      assertOptionalUuid(savingsGoalId, "savingsGoalId");
 
       const params: IAddExpenseParams = {
         userId: UserId(userId),
@@ -50,6 +52,7 @@ class ExpenseController {
         categoryId: categoryId ? CategoryId(categoryId) : undefined,
         recurringRuleId: recurringRuleId ? RecurringRuleId(recurringRuleId) : null,
         occurrenceDate: occurrenceDate ?? null,
+        savingsGoalId: savingsGoalId ? SavingsGoalId(savingsGoalId) : null,
       };
 
       const newExpense = await this.expenseService.addExpense(params);
@@ -131,11 +134,12 @@ class ExpenseController {
   ): Promise<void> {
     try {
       const { id } = req.params;
-      const { amount, date, description, categoryId } = req.body;
+      const { amount, date, description, categoryId, savingsGoalId } = req.body;
 
       if (!id) {
         throw new MissingFieldError("Id is required!");
       }
+      assertOptionalUuid(savingsGoalId, "savingsGoalId");
 
       const parsedCategoryId =
         categoryId === undefined
@@ -150,6 +154,13 @@ class ExpenseController {
         date: date,
         description: description,
         categoryId: parsedCategoryId,
+        // absent key stays undefined -> unchanged; explicit null -> clear
+        savingsGoalId:
+          savingsGoalId === undefined
+            ? undefined
+            : savingsGoalId === null
+            ? null
+            : SavingsGoalId(savingsGoalId),
       });
 
       res.status(200).json(updatedExpense);

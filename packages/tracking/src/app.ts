@@ -26,6 +26,11 @@ import LoanRoutes from "@tracking/routes/LoanRoutes";
 import { LoanPaymentService } from "@tracking/services/LoanPaymentService";
 import { LoanPaymentController } from "@tracking/controllers/LoanPaymentController";
 import LoanPaymentRoutes from "@tracking/routes/LoanPaymentRoutes";
+import { SavingsGoalService } from "@tracking/services/SavingsGoalService";
+import { SavingsGoalController } from "@tracking/controllers/SavingsGoalController";
+import { SavingsEntryService } from "@tracking/services/SavingsEntryService";
+import { SavingsEntryController } from "@tracking/controllers/SavingsEntryController";
+import SavingsRoutes from "@tracking/routes/SavingsRoutes";
 import { RecurringRuleService } from "@tracking/services/RecurringRuleService";
 import { RecurringRuleController } from "@tracking/controllers/RecurringRuleController";
 import RecurringRuleRoutes from "@tracking/routes/RecurringRuleRoutes";
@@ -85,6 +90,11 @@ const loanPaymentService = new LoanPaymentService(prisma);
 const loanPaymentController = new LoanPaymentController(loanPaymentService);
 const loanPaymentRoutes = new LoanPaymentRoutes(loanPaymentController);
 
+const savingsRoutes = new SavingsRoutes(
+  new SavingsGoalController(new SavingsGoalService(prisma)),
+  new SavingsEntryController(new SavingsEntryService(prisma))
+);
+
 const recurringRuleService = new RecurringRuleService(prisma);
 const recurringRuleController = new RecurringRuleController(recurringRuleService);
 const recurringRuleRoutes = new RecurringRuleRoutes(recurringRuleController);
@@ -122,6 +132,7 @@ app.use("/api/v0", monthlyLimitRoutes.registerMonthlyLimitRoutes());
 app.use("/api/v0", userRoutes.registerUserRouter());
 app.use("/api/v0", loanRoutes.registerLoanRoutes());
 app.use("/api/v0", loanPaymentRoutes.registerLoanPaymentRoutes());
+app.use("/api/v0", savingsRoutes.registerSavingsRoutes());
 app.use("/api/v0", recurringRuleRoutes.registerRecurringRuleRoutes());
 app.use("/api/v0", investRoutes.registerInvestRoutes());
 app.use("/api/v0", categoryRoutes.registerCategoryRoutes());

@@ -24,6 +24,7 @@ model User {
   Invest           Invest[]
   loan             Loan[]
   monthlyLimits    MonthlyLimit[]
+  savingsGoals     SavingsGoal[]
 
   @@index([email], map: "user_email_index")
 }
@@ -43,6 +44,9 @@ model Expense {
   // deleting a rule leaves its past entries untouched.
   recurringRuleId Bytes?
   occurrenceDate  DateTime?
+  // Set when the money was paid out of a savings goal. Not a foreign key:
+  // deleting a goal clears it on the expenses instead of deleting them.
+  savingsGoalId   Bytes?
 
   @@unique([recurringRuleId, occurrenceDate], map: "expense_recurring_occurrence_unique")
   @@index([userId, date], map: "expense_user_id_date_index")
@@ -154,6 +158,45 @@ model LoanPayment {
   @@index([userId], map: "loan_payment_user_id_index")
   @@index([userId, updated], map: "loan_payment_user_id_updated_index")
   @@map("loan_payments")
+}
+
+model SavingsGoal {
+  id         Bytes          @id
+  userId     String
+  name       String         @db.VarChar(128)
+  icon       String         @db.VarChar(32)
+  target     Float
+  targetDate DateTime?
+  /// Keep asking for the target again after the money is used.
+  refill     Boolean        @default(false)
+  /// Set once, when the saved amount first reaches the target.
+  reachedAt  DateTime?
+  created    DateTime       @default(now())
+  updated    DateTime       @updatedAt
+  user       User           @relation(fields: [userId], references: [userId])
+  entries    SavingsEntry[]
+
+  @@index([userId], map: "savings_goal_user_id_index")
+  @@index([userId, updated], map: "savings_goal_user_id_updated_index")
+  @@map("savings_goals")
+}
+
+model SavingsEntry {
+  id      Bytes       @id
+  goalId  Bytes
+  userId  String
+  /// Signed and never zero: positive adds to the goal, negative withdraws.
+  amount  Float
+  date    DateTime
+  note    String?     @db.VarChar(512)
+  created DateTime    @default(now())
+  updated DateTime    @updatedAt
+  goal    SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId], map: "savings_entry_goal_id_index")
+  @@index([userId], map: "savings_entry_user_id_index")
+  @@index([userId, updated], map: "savings_entry_user_id_updated_index")
+  @@map("savings_entries")
 }
 
 model RecurringRule {

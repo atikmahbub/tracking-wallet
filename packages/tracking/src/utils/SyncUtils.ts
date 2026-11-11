@@ -10,7 +10,9 @@ export type SyncEntity =
   | "loanPayment"
   | "recurringRule"
   | "invest"
-  | "monthlyLimit";
+  | "monthlyLimit"
+  | "savingsGoal"
+  | "savingsEntry";
 
 /**
  * Remembers that a row was deleted, so `GET /sync/changes` can tell other

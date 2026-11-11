@@ -44,7 +44,7 @@ describe("loan payment", () => {
         note: "first",
       });
       expect(Object.keys(res.body).sort()).toEqual(
-        ["amount", "created", "date", "id", "loanId", "note", "updated", "userId"]
+        ["amount", "created", "date", "id", "kind", "loanId", "note", "updated", "userId"]
       );
     });
 

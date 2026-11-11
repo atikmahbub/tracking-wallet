@@ -12,3 +12,5 @@ export * from "@shared/primitives/IncomeId";
 export * from "@shared/primitives/IncomeCategoryId";
 export * from "@shared/primitives/LoanPaymentId";
 export * from "@shared/primitives/RecurringRuleId";
+export * from "@shared/primitives/SavingsGoalId";
+export * from "@shared/primitives/SavingsEntryId";

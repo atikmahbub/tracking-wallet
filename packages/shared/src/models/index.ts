@@ -11,3 +11,5 @@ export * from "@shared/models/IncomeAnalytics";
 export * from "@shared/models/Transaction";
 export * from "@shared/models/LoanPayment";
 export * from "@shared/models/RecurringRule";
+export * from "@shared/models/SavingsGoal";
+export * from "@shared/models/SavingsEntry";

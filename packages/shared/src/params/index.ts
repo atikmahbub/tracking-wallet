@@ -26,3 +26,7 @@ export * from "@shared/params/IAddLoanPaymentParams";
 export * from "@shared/params/IUpdateLoanPaymentParams";
 export * from "@shared/params/IAddRecurringRuleParams";
 export * from "@shared/params/IUpdateRecurringRuleParams";
+export * from "@shared/params/IAddSavingsGoalParams";
+export * from "@shared/params/IUpdateSavingsGoalParams";
+export * from "@shared/params/IAddSavingsEntryParams";
+export * from "@shared/params/IUpdateSavingsEntryParams";

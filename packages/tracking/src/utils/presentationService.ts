@@ -8,6 +8,8 @@ import {
   IncomeModel,
   IncomeCategoryModel,
   LoanPaymentModel,
+  SavingsEntryModel,
+  SavingsGoalModel,
   RecurringRuleModel,
 } from "@shared/models";
 import {
@@ -22,6 +24,8 @@ import {
   Income,
   IncomeCategory,
   LoanPayment,
+  SavingsEntry,
+  SavingsGoal,
   RecurringRule,
 } from "@prisma/client";
 import * as uuidBuffer from "uuid-buffer";
@@ -39,6 +43,8 @@ import {
   IncomeId,
   IncomeCategoryId,
   LoanPaymentId,
+  SavingsEntryId,
+  SavingsGoalId,
   RecurringRuleId,
 } from "@shared/primitives";
 import {
@@ -72,6 +78,9 @@ export class PresentationService {
         : null,
       expense.occurrenceDate
         ? makeUnixTimestampString(expense.occurrenceDate.getTime())
+        : null,
+      expense.savingsGoalId
+        ? SavingsGoalId(uuidBuffer.toString(expense.savingsGoalId))
         : null
     );
   }
@@ -149,6 +158,34 @@ export class PresentationService {
       makeUnixTimestampString(payment.created.getTime()),
       makeUnixTimestampString(payment.updated.getTime()),
       payment.kind === "topup" ? "topup" : "repayment"
+    );
+  }
+
+  public toSavingsGoalModel(goal: SavingsGoal): SavingsGoalModel {
+    return new SavingsGoalModel(
+      SavingsGoalId(uuidBuffer.toString(goal.id)),
+      UserId(goal.userId),
+      goal.name,
+      goal.icon,
+      goal.target,
+      goal.targetDate ? makeUnixTimestampString(goal.targetDate.getTime()) : null,
+      goal.refill,
+      goal.reachedAt ? makeUnixTimestampString(goal.reachedAt.getTime()) : null,
+      makeUnixTimestampString(goal.created.getTime()),
+      makeUnixTimestampString(goal.updated.getTime())
+    );
+  }
+
+  public toSavingsEntryModel(entry: SavingsEntry): SavingsEntryModel {
+    return new SavingsEntryModel(
+      SavingsEntryId(uuidBuffer.toString(entry.id)),
+      SavingsGoalId(uuidBuffer.toString(entry.goalId)),
+      UserId(entry.userId),
+      entry.amount,
+      makeUnixTimestampString(entry.date.getTime()),
+      entry.note,
+      makeUnixTimestampString(entry.created.getTime()),
+      makeUnixTimestampString(entry.updated.getTime())
     );
   }
 

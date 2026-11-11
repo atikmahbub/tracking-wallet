@@ -16,6 +16,8 @@ export async function resetDb(): Promise<void> {
   await prisma.recurringRule.deleteMany();
   await prisma.expense.deleteMany();
   await prisma.income.deleteMany();
+  await prisma.savingsEntry.deleteMany();
+  await prisma.savingsGoal.deleteMany();
   await prisma.loanPayment.deleteMany();
   await prisma.loan.deleteMany();
   await prisma.category.deleteMany();

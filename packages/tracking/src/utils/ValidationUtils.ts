@@ -70,3 +70,17 @@ export function assertRecurringOccurrence(
   assertOptionalUuid(recurringRuleId, "recurringRuleId");
   assertOptionalTimestamp(occurrenceDate, "occurrenceDate");
 }
+
+// A signed amount: positive adds, negative takes out, zero means nothing.
+export function assertNonZeroAmount(value: unknown): void {
+  const amount = Number(value);
+  if (
+    value === null ||
+    value === "" ||
+    typeof value === "boolean" ||
+    !Number.isFinite(amount) ||
+    amount === 0
+  ) {
+    throw new MissingFieldError("amount must be a non-zero number");
+  }
+}

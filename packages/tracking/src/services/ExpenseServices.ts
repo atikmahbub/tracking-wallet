@@ -14,6 +14,7 @@ import {
   CategoryId,
   ExpenseId,
   makeUnixTimestampToISOString,
+  SavingsGoalId,
   UserId,
 } from "@shared/primitives";
 import { DatabaseError, NotFoundError } from "@tracking/errors";
@@ -61,6 +62,9 @@ class ExpenseService {
       if (categoryId) {
         await this.assertCategoryExists(categoryId as CategoryId, userId as UserId);
       }
+      if (params.savingsGoalId) {
+        await this.assertSavingsGoalOwned(params.savingsGoalId, userId as UserId);
+      }
 
       const newExpense = await this.prisma.expense.create({
         data: {
@@ -75,6 +79,9 @@ class ExpenseService {
             : null,
           occurrenceDate: params.occurrenceDate
             ? new Date(Number(params.occurrenceDate) * 1000)
+            : null,
+          savingsGoalId: params.savingsGoalId
+            ? uuidBuffer.toBuffer(params.savingsGoalId)
             : null,
         },
         include: {
@@ -129,7 +136,7 @@ class ExpenseService {
 
   async updateExpense(params: IUpdateExpenseParams): Promise<ExpenseModel> {
     try {
-      const { id, amount, date, description, categoryId } = params;
+      const { id, amount, date, description, categoryId, savingsGoalId } = params;
 
       const existingExpense = await this.prisma.expense.findUnique({
         where: {
@@ -143,6 +150,10 @@ class ExpenseService {
 
       if (categoryId) {
         await this.assertCategoryExists(categoryId as CategoryId, existingExpense.userId as UserId);
+      }
+
+      if (savingsGoalId) {
+        await this.assertSavingsGoalOwned(savingsGoalId, existingExpense.userId as UserId);
       }
 
       const updatedExpense = await this.prisma.expense.update({
@@ -159,6 +170,12 @@ class ExpenseService {
                 ? uuidBuffer.toBuffer(categoryId)
                 : null
               : undefined,
+          savingsGoalId:
+            savingsGoalId === undefined
+              ? undefined
+              : savingsGoalId
+              ? uuidBuffer.toBuffer(savingsGoalId)
+              : null,
         },
         include: {
           category: true,
@@ -276,6 +293,15 @@ class ExpenseService {
       );
     } catch (error) {
       throw new DatabaseError("error generating expense analytics");
+    }
+  }
+
+  private async assertSavingsGoalOwned(goalId: SavingsGoalId, userId: UserId): Promise<void> {
+    const goal = await this.prisma.savingsGoal.findUnique({
+      where: { id: uuidBuffer.toBuffer(goalId) },
+    });
+    if (!goal || goal.userId !== userId) {
+      throw new NotFoundError("Savings goal not found");
     }
   }
 
