@@ -168,6 +168,7 @@ export class PresentationService {
       goal.name,
       goal.icon,
       goal.target,
+      goal.kind === "general" ? "general" : "goal",
       goal.targetDate ? makeUnixTimestampString(goal.targetDate.getTime()) : null,
       goal.refill,
       goal.reachedAt ? makeUnixTimestampString(goal.reachedAt.getTime()) : null,

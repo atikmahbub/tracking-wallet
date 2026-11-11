@@ -27,14 +27,25 @@ export class SavingsGoalController {
   async addSavingsGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       AuthenticationUtils.assureUserHasUserId(req);
-      const { userId, name, icon, target, targetDate, refill } = req.body;
+      const { userId, name, icon, target, targetDate, refill, kind } = req.body;
+      if (kind !== undefined && kind !== "goal" && kind !== "general") {
+        throw new MissingFieldError("kind must be goal or general");
+      }
+      const general = kind === "general";
 
-      if (!name || !icon || target === undefined) {
+      // The general savings pot is the only goal without a target.
+      if (!name || !icon || (!general && target === undefined)) {
         throw new MissingFieldError("Fields are missing!");
       }
       assertText(name, "name", 128);
       assertText(icon, "icon", 32);
-      assertPositiveAmount(target);
+      if (general) {
+        if (target != null || targetDate != null) {
+          throw new MissingFieldError("The general savings pot has no target or date");
+        }
+      } else {
+        assertPositiveAmount(target);
+      }
       assertOptionalTimestamp(targetDate, "targetDate");
       assertOptionalBoolean(refill, "refill");
 
@@ -42,7 +53,8 @@ export class SavingsGoalController {
         userId: UserId(userId),
         name,
         icon,
-        target: Number(target),
+        target: general ? null : Number(target),
+        kind: general ? "general" : "goal",
         targetDate: targetDate ?? null,
         refill: refill === true,
       });

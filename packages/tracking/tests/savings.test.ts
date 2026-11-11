@@ -41,10 +41,61 @@ describe("savings", () => {
       });
       expect(Object.keys(res.body).sort()).toEqual(
         [
-          "created", "icon", "id", "name", "reachedAt", "refill",
+          "created", "icon", "id", "kind", "name", "reachedAt", "refill",
           "target", "targetDate", "updated", "userId",
         ]
       );
+    });
+
+    it("creates the general savings pot without a target", async () => {
+      const res = await request(app)
+        .post("/api/v0/savings-goal/add")
+        .send({ userId: USER_A, name: "General savings", icon: "piggy-bank", kind: "general" });
+      expect(res.status).toBe(201);
+      expect(res.body).toMatchObject({ kind: "general", target: null, targetDate: null, refill: false });
+    });
+
+    it("keeps one general pot per user: a second create returns the first", async () => {
+      const body = { userId: USER_A, name: "General savings", icon: "piggy-bank", kind: "general" };
+      const first = await request(app).post("/api/v0/savings-goal/add").send(body);
+      const second = await request(app).post("/api/v0/savings-goal/add").send(body);
+      expect(second.body.id).toBe(first.body.id);
+      expect(await prisma.savingsGoal.count({ where: { userId: USER_A } })).toBe(1);
+      const other = await request(app)
+        .post("/api/v0/savings-goal/add")
+        .send({ ...body, userId: USER_B });
+      expect(other.status).toBe(201);
+    });
+
+    it("rejects a target on the general pot and a bad kind", async () => {
+      const bad = await request(app)
+        .post("/api/v0/savings-goal/add")
+        .send({ userId: USER_A, name: "G", icon: "x", kind: "general", target: 100 });
+      expect(bad.status).toBeGreaterThanOrEqual(400);
+      expect(bad.status).toBeLessThan(500);
+      const kind = await request(app)
+        .post("/api/v0/savings-goal/add")
+        .send(goalBody(USER_A, { kind: "other" }));
+      expect(kind.status).toBeLessThan(500);
+      expect(kind.status).toBeGreaterThanOrEqual(400);
+    });
+
+    it("won't give the general pot a target later", async () => {
+      const pot = (
+        await request(app)
+          .post("/api/v0/savings-goal/add")
+          .send({ userId: USER_A, name: "G", icon: "x", kind: "general" })
+      ).body;
+      const res = await request(app)
+        .put(`/api/v0/savings-goal/${pot.id}`)
+        .send({ userId: USER_A, target: 500 });
+      expect(res.status).toBeGreaterThanOrEqual(400);
+      expect(res.status).toBeLessThan(500);
+      const rename = await request(app)
+        .put(`/api/v0/savings-goal/${pot.id}`)
+        .send({ userId: USER_A, name: "Rainy day" });
+      expect(rename.status).toBe(200);
+      expect(rename.body.name).toBe("Rainy day");
     });
 
     it("keeps the date and refill switch", async () => {

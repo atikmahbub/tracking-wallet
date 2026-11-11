@@ -165,7 +165,10 @@ model SavingsGoal {
   userId     String
   name       String         @db.VarChar(128)
   icon       String         @db.VarChar(32)
-  target     Float
+  /// Null only for the one "general" savings pot, which has no target.
+  target     Float?
+  /// "goal" (the default) or "general": one target-less pot per user.
+  kind       String         @default("goal") @db.VarChar(16)
   targetDate DateTime?
   /// Keep asking for the target again after the money is used.
   refill     Boolean        @default(false)

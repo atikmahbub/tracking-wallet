@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, SavingsGoal } from "@prisma/client";
 import { SavingsGoalModel } from "@shared/models";
 import { IAddSavingsGoalParams, IUpdateSavingsGoalParams } from "@shared/params";
 import * as uuidBuffer from "uuid-buffer";
@@ -10,6 +10,7 @@ import {
 } from "@shared/primitives";
 import {
   DatabaseError,
+  MissingFieldError,
   NotFoundError,
   UnAuthorizedError,
 } from "@tracking/errors";
@@ -33,15 +34,24 @@ export class SavingsGoalService {
   async addSavingsGoal(params: IAddSavingsGoalParams): Promise<SavingsGoalModel> {
     try {
       const { userId, name, icon, target, targetDate, refill } = params;
+      const kind = params.kind ?? "goal";
+      if (kind === "general") {
+        // One pot per user: a second device that made its own gets the first.
+        const existing = await this.prisma.savingsGoal.findFirst({
+          where: { userId, kind: "general" },
+        });
+        if (existing) return this.presentationService.toSavingsGoalModel(existing);
+      }
       const goal = await this.prisma.savingsGoal.create({
         data: {
           id: uuidBuffer.toBuffer(v4()),
           userId,
           name,
           icon,
-          target,
-          targetDate: toDate(targetDate) ?? null,
-          refill: refill ?? false,
+          target: kind === "general" ? null : target,
+          kind,
+          targetDate: kind === "general" ? null : toDate(targetDate) ?? null,
+          refill: kind === "general" ? false : refill ?? false,
         },
       });
       return this.presentationService.toSavingsGoalModel(goal);
@@ -68,7 +78,10 @@ export class SavingsGoalService {
     try {
       const { id, userId, name, icon, target, targetDate, refill, reachedAt } =
         params;
-      await this.assertOwnership(id, userId);
+      const existing = await this.assertOwnership(id, userId);
+      if (existing.kind === "general" && (target !== undefined || targetDate)) {
+        throw new MissingFieldError("The general savings pot has no target or date");
+      }
       const goal = await this.prisma.savingsGoal.update({
         where: { id: uuidBuffer.toBuffer(id) },
         data: {
@@ -82,7 +95,11 @@ export class SavingsGoalService {
       });
       return this.presentationService.toSavingsGoalModel(goal);
     } catch (error) {
-      if (error instanceof NotFoundError || error instanceof UnAuthorizedError) {
+      if (
+        error instanceof NotFoundError ||
+        error instanceof UnAuthorizedError ||
+        error instanceof MissingFieldError
+      ) {
         throw error;
       }
       throw new DatabaseError("error in updating the savings goal");
@@ -118,7 +135,7 @@ export class SavingsGoalService {
     }
   }
 
-  private async assertOwnership(id: SavingsGoalId, userId: UserId): Promise<void> {
+  private async assertOwnership(id: SavingsGoalId, userId: UserId): Promise<SavingsGoal> {
     const goal = await this.prisma.savingsGoal.findUnique({
       where: { id: uuidBuffer.toBuffer(id) },
     });
@@ -128,5 +145,6 @@ export class SavingsGoalService {
     if (goal.userId !== userId) {
       throw new UnAuthorizedError("Not authorized to modify this savings goal");
     }
+    return goal;
   }
 }
